@@ -115,14 +115,20 @@ namespace ASP
             textMap.Apply(false);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);
+
+            Color transparent = new Color(0f, 0f, 0f, 0f);
+            textMap.Fill(transparent);
+            textMap.DrawText(text, font, Color.white, x, y);
+            textMap.Apply();
+
             for (int i = 0; i < normalMap.width; ++i)
             {
                 for (int j = 0; j < normalMap.height; ++j)
                 {
                     Color textColor = textMap.GetPixel(i, j);
-                    Color textNormalColor = textNormalMap.GetPixel(i, j); 
+                    Color textNormalColor = textNormalMap.GetPixel(i, j);
 
-                    if (textColor.r > 0.55f && textColor.g > 0.55f && textColor.b > 0.55f) normalMap.SetPixel(i, j, textNormalColor);
+                    if (textColor.a != 0f) normalMap.SetPixel(i, j, textNormalColor);
                 }
             }
             normalMap.Apply();

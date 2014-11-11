@@ -19,14 +19,39 @@ namespace UnityEngine
             }
         }
 
-        public static Color[] GetPixels(this Texture2D texture, ASP.Rectangle rect)
+        public static Color[] GetPixels(this Texture2D texture, ASP.Rectangle pos)
         {
-            return texture.GetPixels(rect.x, rect.y, rect.w, rect.h);
+            if (pos.x >= 0 && pos.y >= 0 && (pos.x + pos.w) < texture.width && (pos.y + pos.h) < texture.height)
+            {
+                return texture.GetPixels(pos.x, pos.y, pos.w, pos.h);
+            }
+            else
+            {
+                Color[] pixels = new Color[pos.w * pos.h];
+                for (int i = 0; i < pos.w; ++i)
+                {
+                    for (int j = 0; j < pos.h; ++j)
+                    {
+                        int px = pos.x + i;
+                        int py = pos.y + j;
+                        if (px >= 0 && px < texture.width && py >= 0 && py < texture.height)
+                        {
+                            pixels[i + j * pos.w] = texture.GetPixel(i, j);
+                        }
+                        else
+                        {
+                            pixels[i + j * pos.w] = Color.gray;
+                        }
+                    }
+                }
+
+                return pixels;
+            }
         }
 
         public static void SetPixels(this Texture2D texture, ASP.Rectangle pos, Color[] pixels)
         {
-            if (pos.x >= 0 && pos.y > 0 && (pos.x + pos.w) < texture.width && (pos.y + pos.h) < texture.height)
+            if (pos.x >= 0 && pos.y >= 0 && (pos.x + pos.w) < texture.width && (pos.y + pos.h) < texture.height)
             {
                 texture.SetPixels(pos.x, pos.y, pos.w, pos.h, pixels);
             }
@@ -40,8 +65,8 @@ namespace UnityEngine
                         int py = pos.y + j;
                         if (px >= 0 && px < texture.width && py >= 0 && py < texture.height)
                         {
-                            Color col = Color.Lerp(texture.GetPixel(px, py), pixels[i + j * pos.w], pixels[i + j * pos.w].a);
-                            texture.SetPixel(px, py, col);
+                            //Color col = Color.Lerp(texture.GetPixel(px, py), pixels[i + j * pos.w], pixels[i + j * pos.w].a);
+                            texture.SetPixel(px, py, pixels[i + j*pos.w]);
                         }
                     }
                 }
@@ -101,16 +126,20 @@ namespace UnityEngine
                     }
 
                     Color[] texturePixels = texture.GetPixels(cPos);
+                    Color[] texturePixelsOrig = texture.GetPixels(cPos);
                     ASP.Utils.Overlay(ref texturePixels, charPixels, cPos.w, cPos.h);
 
                     if (applyAlpha)
                     {
-                        Debug.Log("text alpha");
                         for (int i = 0; i < charPixels.Length; ++i)
                         {
-                            if (charPixels[i].r == color.r && charPixels[i].g == color.g && charPixels[i].b == color.b)
+                            if (charPixels[i].a > 0.1f)
                             {
                                 texturePixels[i].a = alpha;
+                            }
+                            else
+                            {
+                                texturePixels[i].a = texturePixelsOrig[i].a;
                             }
                         }
                     }

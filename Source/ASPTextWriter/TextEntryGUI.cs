@@ -56,7 +56,6 @@ namespace ASP
             green = textWriter.green.ToString();
             blue = textWriter.blue.ToString();
             alpha = textWriter.alpha.ToString();
-            Debug.Log(String.Format("q1: {0}", alpha));
             normalScale = textWriter.normalScale.ToString();
             locked = false;
 
@@ -377,10 +376,11 @@ namespace ASP
             GUILayout.BeginHorizontal();
 
             drawIntField(ref red, 0, 255, "Red", Color.red);
-            GUILayout.FlexibleSpace();
+            GUILayout.Space(10f);
             drawIntField(ref green, 0, 255, "Green", Color.green);
-            GUILayout.FlexibleSpace();
+            GUILayout.Space(10f);
             drawIntField(ref blue, 0, 255, "Blue", Color.blue);
+            GUILayout.FlexibleSpace();
 
             GUILayout.EndHorizontal();
         }
