@@ -3,5 +3,18 @@
 bin/
 obj/
 
-#Unity3D Generated File On Crash Reports
+#Unity3D
+Unity/**/*.csproj
+Unity/Assets/Fonts
+Unity/Assets/Fonts.meta
+Unity/Assets/PartTools
+Unity/Assets/PartTools.meta
+Unity/Library
+Unity/ProjectSettings
+Unity/PartTools.cfg
+Unity/Unity-csharp.sln
+Unity/Unity.sln
+Unity/Unity.userprefs
 sysinfo.txt
+**/*.blend1
+**/*.blend1.meta
