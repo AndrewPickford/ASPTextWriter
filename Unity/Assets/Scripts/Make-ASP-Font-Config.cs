@@ -33,7 +33,7 @@ public class MakeASPFontConfig :  MonoBehaviour
 		Font font = fontImporter.GenerateEditableFont (assetFilePathImport);
 		Debug.Log ("KSP Font Texture created at: " + texturePath);
 
-		string chars = " `1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";		
+		string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";		
 		font.RequestCharactersInTexture (chars, 0);
 
 		StreamWriter swriter = File.CreateText (configPath);
