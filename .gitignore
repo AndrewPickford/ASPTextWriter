@@ -3,6 +3,8 @@
 bin/
 obj/
 
+GameData/ASP/ASPTextWriter/Plugins/ASPTextWriter.dll
+
 #Unity3D
 Unity/**/*.csproj
 Unity/Assets/Fonts
