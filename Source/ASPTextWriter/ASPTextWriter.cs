@@ -20,7 +20,7 @@ namespace ASP
         public string fontName = "";
 
         [KSPField(isPersistant = true)]
-        public string fontSize = "";
+        public int fontSize = 0;
 
         [KSPField(isPersistant = true)]
         public string transformName = "";
@@ -139,7 +139,13 @@ namespace ASP
 
             string fontID = fontName + "-" + fontSize.ToString();
             MappedFont font = ASPFontCache.Instance.getFontByID(fontID);
-            if (font == null) return;
+            if (font == null)
+            {
+                font = ASPFontCache.Instance.list.First();
+                if (font == null) return;
+                fontName = font.name;
+                fontSize = font.size;
+            }
 
             Material material = Instantiate(transform.gameObject.renderer.material) as Material;
 

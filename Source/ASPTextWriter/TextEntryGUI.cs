@@ -268,7 +268,7 @@ namespace ASP
                 textWriter.offsetX = offsetX;
                 textWriter.offsetY = offsetY;
                 textWriter.fontName = ASPFontCache.Instance.list[selectedFont].name;
-                textWriter.fontSize = ASPFontCache.Instance.list[selectedFont].size.ToString();
+                textWriter.fontSize = ASPFontCache.Instance.list[selectedFont].size;
                 textWriter.text = text;
                 textWriter.red = r;
                 textWriter.green = g;
