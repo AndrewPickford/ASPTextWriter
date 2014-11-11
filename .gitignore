@@ -19,5 +19,7 @@ Unity/Unity-csharp.sln
 Unity/Unity.sln
 Unity/Unity.userprefs
 sysinfo.txt
+**/UnityLockFile
+**/*.unity
 **/*.blend1
 **/*.blend1.meta
