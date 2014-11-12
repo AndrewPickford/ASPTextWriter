@@ -1,8 +1,12 @@
 ASPTextWriter
 =============
 
+by CmdrThyte (aka Andrew Pickford)
+
 ASP text writer is a mod for Kerbal Space Program which allows text to be written to part textures during
 ship construction.
+
+github page: https://github.com/AndrewPickford/ASPTextWriter
 
 ### License
 

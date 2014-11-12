@@ -1,0 +1,8 @@
+ASPTextWriter
+
+Installation:
+
+Place the ASP folder in this zip file into the KSP GameData folder. The folder
+structure should then be:
+
+Kerbal Space Program/GameData/ASP

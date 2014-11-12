@@ -5,6 +5,8 @@ obj/
 
 GameData/ASP/ASPTextWriter/Plugins/ASPTextWriter.dll
 
+Ignore
+
 #Unity3D
 Unity/**/*.csproj
 Unity/Assets/Fonts
