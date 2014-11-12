@@ -1,2 +1,11 @@
 ASPTextWriter
 =============
+
+ASP text writer is a mod for Kerbal Space Program which allows text to be written to part textures during
+ship construction.
+
+### License
+
+ASPTextWriter is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public
+License. Some files such as font textures are derivative works and are used under their own license terms, see the
+applicable license file.
