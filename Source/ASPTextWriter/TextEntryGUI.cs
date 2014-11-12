@@ -94,7 +94,8 @@ namespace ASP
             _windowPosition = GUILayout.Window(0, _windowPosition, drawWindow, "Text Editor");
         }
 
-        // From Kerbal Engineer Redux and modified slightly
+        // fix for editor click through: http://forum.kerbalspaceprogram.com/threads/83660-Fixed-Stopping-click-through-a-GUI-window-%28Part-menu-in-flight-and-Editor%29
+        // with mouse pos inversion fix from Kerbal Engineer Redux
         private void checkGUILock()
         {
             Vector2 mouse = Input.mousePosition;
