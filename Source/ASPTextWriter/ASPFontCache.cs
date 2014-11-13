@@ -13,11 +13,11 @@ namespace ASP
 
         public List<MappedFont> list { get; private set; }
 
-        private Dictionary<string, MappedFont> dictionary;
+        private Dictionary<string, MappedFont> _dictionary;
 
         public MappedFont getFontByID(string id)
         {
-            return dictionary[id];
+            return _dictionary[id];
         }
 
         public int getFontIndexByID(string id)
@@ -37,7 +37,7 @@ namespace ASP
             Instance = this;
             DontDestroyOnLoad(this);
 
-            dictionary = new Dictionary<string, MappedFont>();
+            _dictionary = new Dictionary<string, MappedFont>();
 
             list = new List<MappedFont>();
             foreach (UrlDir.UrlConfig url in GameDatabase.Instance.GetConfigs("ASPFONT"))
@@ -49,10 +49,10 @@ namespace ASP
 
                 Debug.Log(String.Format("ASPFontLoader: Loading font {0}", url.config.GetValue("name")));
                 MappedFont font = new MappedFont(url.config, url.parent.url);
-                dictionary[font.id] = font;
+                _dictionary[font.id] = font;
             }
 
-            foreach(KeyValuePair<string, MappedFont> entry in dictionary)
+            foreach(KeyValuePair<string, MappedFont> entry in _dictionary)
             {
                 list.Add(entry.Value);
             }

@@ -62,18 +62,18 @@ namespace ASP
         public NormalOption normalOption = NormalOption.RAISE_TEXT;
         public bool hasNormalMap = false;
 
-        private TextEntryGUI gui;
-        private Texture2D originalTexture;
-        private Texture2D originalBumpMap;
+        private TextEntryGUI _gui;
+        private Texture2D _backgroundTexture;
+        private Texture2D _backgroundBumpMap;
 
         [KSPEvent(name = "Edit Text Event", guiName = "Edit text", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
         {
-            gui = gameObject.GetComponent<TextEntryGUI>();
-            if (gui == null)
+            _gui = gameObject.GetComponent<TextEntryGUI>();
+            if (_gui == null)
             {
-                gui = gameObject.AddComponent<TextEntryGUI>();
-                gui.initialise(this);
+                _gui = gameObject.AddComponent<TextEntryGUI>();
+                _gui.initialise(this);
             }
         }
 
@@ -157,21 +157,21 @@ namespace ASP
 
             Color color = new Color((float) red/255f, (float) green/255f, (float) blue/255f);
 
-            Texture2D newTexture = PaintText(originalTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, alpha, alphaOption);
+            Texture2D newTexture = PaintText(_backgroundTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, alpha, alphaOption);
 
             material.SetTexture("_MainTex", newTexture);
             
-            if (originalBumpMap != null)
+            if (_backgroundBumpMap != null)
             {
                 if (normalOption == NormalOption.RAISE_TEXT)
                 {
-                    Texture2D newBumpMap = PaintBumpMap(originalBumpMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, normalScale);
+                    Texture2D newBumpMap = PaintBumpMap(_backgroundBumpMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, normalScale);
                     material.SetTexture("_BumpMap", newBumpMap);
                 }
                 else
                 {
                     Texture2D bumpMap = material.GetTexture("_BumpMap") as Texture2D;
-                    if (bumpMap != originalBumpMap) material.SetTexture("_BumpMap", originalBumpMap);
+                    if (bumpMap != _backgroundBumpMap) material.SetTexture("_BumpMap", _backgroundBumpMap);
                 }
             }
             transform.gameObject.renderer.material = material;
@@ -179,7 +179,7 @@ namespace ASP
 
         private void OnEditorDestroy()
         {
-            if (gui != null) GameObject.Destroy(gui);
+            if (_gui != null) GameObject.Destroy(_gui);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -210,9 +210,9 @@ namespace ASP
             Transform transform = this.part.FindModelTransform(transformName);
             if (transform == null) return;
 
-            originalTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
-            originalBumpMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
-            if (originalBumpMap != null) hasNormalMap = true;
+            _backgroundTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
+            _backgroundBumpMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+            if (_backgroundBumpMap != null) hasNormalMap = true;
 
             writeText();
         }

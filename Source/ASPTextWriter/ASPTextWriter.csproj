@@ -47,6 +47,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ASPFlatPlateScale.cs" />
     <Compile Include="CharacterMap.cs" />
     <Compile Include="NormalMap.cs" />
     <Compile Include="Rectangle.cs" />
