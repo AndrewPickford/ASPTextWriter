@@ -188,7 +188,6 @@ namespace ASP
             GUILayout.BeginVertical();
             if (GUILayout.RepeatButton("+", GUILayout.Height(25), GUILayout.Width(20)))
             {
-                Debug.Log(String.Format("q1 {0}", _value));
                 _lastButtonPress = Time.time;
                 if (repeatOK)
                 {

@@ -9,7 +9,7 @@ namespace ASP
 {
     public enum AlphaOption { USE_TEXTURE, TEXT_ONLY, WHOLE_TEXTURE };
 
-    public enum NormalOption { RAISE_TEXT, USE_BACKGROUND };
+    public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
 
     public class ASPTextWriter : PartModule
     {
@@ -58,13 +58,30 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public float normalScale = 2.0f;
 
+        [KSPField(isPersistant = true)]
+        public string textures = "";
+
+        [KSPField(isPersistant = true)]
+        public string normals = "";
+
+        [KSPField(isPersistant = true)]
+        public string displayNames = "";
+
+        [KSPField(isPersistant = true)]
+        public int selectedTexture = 0;
+
         public AlphaOption alphaOption = AlphaOption.USE_TEXTURE;
         public NormalOption normalOption = NormalOption.RAISE_TEXT;
         public bool hasNormalMap = false;
+        public Rectangle boundingBox { get; private set; }
+        public Texture2D backgroundTexture { get; private set; }
+        public Texture2D backgroundNormalMap { get; private set; }
+        public string[] textureArray { get; private set; }
+        public string[] normalArray { get; private set; }
+        public string[] displayNameArray { get; private set; }
+        public string url { get; private set; }
 
         private TextEntryGUI _gui;
-        private Texture2D _backgroundTexture;
-        private Texture2D _backgroundBumpMap;
 
         [KSPEvent(name = "Edit Text Event", guiName = "Edit text", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
@@ -77,17 +94,17 @@ namespace ASP
             }
         }
 
-        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, int alpha, AlphaOption alphaOption)
+        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, int alpha, AlphaOption alphaOption)
         {
             Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
 
             Color32[] pixels = background.GetPixels32();
             texture.name = background.name;
             texture.SetPixels32(pixels);
-            texture.Apply();
+            //texture.Apply();
 
-            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, true, alpha);
-            else texture.DrawText(text, font, color, x, y);
+            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, bBox, true, alpha);
+            else texture.DrawText(text, font, color, x, y, bBox);
 
             if (alphaOption == AlphaOption.WHOLE_TEXTURE)
             {
@@ -105,21 +122,24 @@ namespace ASP
             return texture;
         }
 
-        public static Texture2D PaintBumpMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, float scale)
+        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, float scale, NormalOption normalOption)
         {
             Texture2D normalMap = Utils.LoadNormalMapFromUrl(background.name);
 
             Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
             textMap.Fill(Color.gray);
-            textMap.DrawText(text, font, Color.white, x, y);
-            textMap.Apply(false);
+            Color normalColor = Color.gray;
+            if (normalOption == NormalOption.RAISE_TEXT) normalColor = Color.black;
+            if (normalOption == NormalOption.LOWER_TEXT) normalColor = Color.white;
+            textMap.DrawText(text, font, normalColor, x, y, bBox);
+
+            if (normalOption == NormalOption.FLAT) textMap.Fill(Color.gray);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);
 
             Color transparent = new Color(0f, 0f, 0f, 0f);
             textMap.Fill(transparent);
-            textMap.DrawText(text, font, Color.white, x, y);
-            textMap.Apply();
+            textMap.DrawText(text, font, Color.white, x, y, bBox);
 
             for (int i = 0; i < normalMap.width; ++i)
             {
@@ -157,21 +177,30 @@ namespace ASP
 
             Color color = new Color((float) red/255f, (float) green/255f, (float) blue/255f);
 
-            Texture2D newTexture = PaintText(_backgroundTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, alpha, alphaOption);
+            string textureURL = url + "/" + textureArray[selectedTexture];
+            backgroundTexture = GameDatabase.Instance.GetTexture(textureURL, false);
+
+            textureURL = url + "/" + normalArray[selectedTexture];
+            backgroundNormalMap = GameDatabase.Instance.GetTexture(textureURL, true);
+
+            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, alpha, alphaOption);
 
             material.SetTexture("_MainTex", newTexture);
             
-            if (_backgroundBumpMap != null)
+            if (backgroundNormalMap != null)
             {
-                if (normalOption == NormalOption.RAISE_TEXT)
+                if (normalOption != NormalOption.USE_BACKGROUND)
                 {
-                    Texture2D newBumpMap = PaintBumpMap(_backgroundBumpMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, normalScale);
-                    material.SetTexture("_BumpMap", newBumpMap);
+                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, normalScale, normalOption);
+                    material.SetTexture("_BumpMap", newNormalMap);
                 }
                 else
                 {
-                    Texture2D bumpMap = material.GetTexture("_BumpMap") as Texture2D;
-                    if (bumpMap != _backgroundBumpMap) material.SetTexture("_BumpMap", _backgroundBumpMap);
+                    Texture2D normalMap = material.GetTexture("_BumpMap") as Texture2D;
+                    if (normalMap != backgroundNormalMap)
+                    {
+                        material.SetTexture("_BumpMap", backgroundNormalMap);
+                    }
                 }
             }
             transform.gameObject.renderer.material = material;
@@ -210,9 +239,17 @@ namespace ASP
             Transform transform = this.part.FindModelTransform(transformName);
             if (transform == null) return;
 
-            _backgroundTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
-            _backgroundBumpMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
-            if (_backgroundBumpMap != null) hasNormalMap = true;
+            backgroundTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
+            backgroundNormalMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+            if (backgroundNormalMap != null) hasNormalMap = true;
+
+            url = Utils.FindModelDir(part.partInfo.name);
+
+            textureArray = Utils.SplitString(textures);
+            normalArray = Utils.SplitString(normals);
+            displayNameArray = Utils.SplitString(displayNames);
+
+            boundingBox = new Rectangle(topLeftX, backgroundTexture.height - (topLeftY + height), width, height);
 
             writeText();
         }

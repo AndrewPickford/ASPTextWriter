@@ -8,12 +8,30 @@ namespace ASP
 {
     public class Utils
     {
-        private static string[] textureExtentionNames = { "png", "jpg", "tga" };
+        private static string[] _textureExtentionNames = { "png", "jpg", "tga" };
+        private static char[] _delimiters = { ',' };
+
+        public static string[] SplitString(string text)
+        {
+            string[] splitText = text.Split(_delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < splitText.Length; ++i)
+            {
+                string str = splitText[i];
+                while (str.Length > 0 && str[0] == ' ')
+                {
+                    str.Remove(0, 1);
+                }
+            }
+
+            return splitText;
+        }
+        
 
         public static string GetTextureFileName(string url)
         {
             string fileNameBase = "GameData/" + url;
-            foreach (string extention in textureExtentionNames)
+            foreach (string extention in _textureExtentionNames)
             {
                 string fileName = fileNameBase + "." + extention;
                 bool exists = System.IO.File.Exists(fileName);
@@ -190,6 +208,48 @@ namespace ASP
         public static void SetElement2D<T>(ref T[] array, T value, int i, int j, int w)
         {
             array[i + j * w] = value;
+        }
+
+        public static string FindModelURL(string partName)
+        {
+            string name = "";
+            UrlDir.UrlConfig[] configs = GameDatabase.Instance.GetConfigs("PART");
+
+            UrlDir.UrlConfig config = Array.Find<UrlDir.UrlConfig>(configs, (c => partName == c.name.Replace('_', '.')));
+            if (config != null)
+            {
+                ConfigNode cn = config.config;
+                var id = new UrlDir.UrlIdentifier(config.url);
+                for (int i = 0; i < (id.urlDepth - 1); ++i)
+                {
+                    name += id[i] + "/";
+                }
+                string meshName = cn.GetValue("mesh");
+                meshName = System.IO.Path.GetFileNameWithoutExtension(meshName);
+                name += meshName;
+            }
+
+            return name;
+        }
+
+        public static string FindModelDir(string partName)
+        {
+            string name = "";
+            UrlDir.UrlConfig[] configs = GameDatabase.Instance.GetConfigs("PART");
+
+            UrlDir.UrlConfig config = Array.Find<UrlDir.UrlConfig>(configs, (c => partName == c.name.Replace('_', '.')));
+            if (config != null)
+            {
+                ConfigNode cn = config.config;
+                var id = new UrlDir.UrlIdentifier(config.url);
+                for (int i = 0; i < (id.urlDepth - 1); ++i)
+                {
+                    name += id[i];
+                    if (i != (id.urlDepth - 2)) name += "/";
+                }
+            }
+
+            return name;
         }
     }
 }

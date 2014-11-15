@@ -13,7 +13,6 @@ namespace ASP
         private Texture2D _previewTexture;
         private string _lockText = "TextEntryGUILock";
         private bool _remakePreview;
-        private Color32[] _pixels;
         private Vector2 _fontScrollPos;
         private int _selectedFont = 0;
         private Color _notSelectedColor;
@@ -35,12 +34,13 @@ namespace ASP
         private ValueSelector<float, FloatField> _scaleSelector;
         private string[] _normalSelectionGrid;
         private int _normalSelection;
+        private Vector2 _backgroundScrollPos;
+        private int _selectedBackground = 0;
 
         public void initialise(ASPTextWriter tw)
         {
             _textWriter = tw;
             _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
-            _pixels = _previewTexture.GetPixels32();
             _windowPosition = new Rect(700, 100, 400, 500);
             _remakePreview = true;
             _selectedFont = 0;
@@ -65,14 +65,18 @@ namespace ASP
             _alphaSelectionGrid[2] = "Whole Texture";
             _alphaSelection = (int) _textWriter.alphaOption;
 
-            _normalSelectionGrid = new String[2];
-            _normalSelectionGrid[0] = "Raise Text";
-            _normalSelectionGrid[1] = "Use background";
+            _normalSelectionGrid = new String[4];
+            _normalSelectionGrid[0] = "Flat";
+            _normalSelectionGrid[1] = "Raise Text";
+            _normalSelectionGrid[2] = "Lower Text";
+            _normalSelectionGrid[3] = "Use background";
             _normalSelection = (int) _textWriter.normalOption;
 
             string fontID = _textWriter.fontName + "-" + _textWriter.fontSize.ToString();
             _selectedFont = ASPFontCache.Instance.getFontIndexByID(fontID);
             if (_selectedFont < 0) _selectedFont = 0;
+
+            _selectedBackground = _textWriter.selectedTexture;
         }
 
         public void Awake()
@@ -133,6 +137,10 @@ namespace ASP
 
             GUILayout.Space(5);
 
+            drawBackgroundList();
+
+            GUILayout.Space(5);
+
             drawFontList();
 
             GUILayout.EndHorizontal();
@@ -154,6 +162,10 @@ namespace ASP
             {
                 if (_remakePreview)
                 {
+                    string textureURL = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+                    Texture2D texture = GameDatabase.Instance.GetTexture(textureURL, false);
+                    Color[] pixels = texture.GetPixelsFromCompressed(_textWriter.boundingBox);
+
                     MappedFont font = ASPFontCache.Instance.list[_selectedFont];
 
                     if (font != null)
@@ -164,7 +176,7 @@ namespace ASP
 
                         Color color = new Color(r, g, b);
 
-                        _previewTexture.SetPixels32(_pixels);
+                        _previewTexture.SetPixels(pixels);
                         _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY);
                         _previewTexture.Apply();
                     }
@@ -192,6 +204,14 @@ namespace ASP
         {
             Color contentColor = GUI.contentColor;
 
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Fonts");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
             _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(500));
 
             for (int i = 0; i < ASPFontCache.Instance.list.Count; ++i)
@@ -211,6 +231,45 @@ namespace ASP
             }
 
             GUILayout.EndScrollView();
+
+            GUILayout.EndVertical();
+
+            GUI.contentColor = contentColor;
+        }
+
+        private void drawBackgroundList()
+        {
+            Color contentColor = GUI.contentColor;
+
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Background Texture");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            _backgroundScrollPos = GUILayout.BeginScrollView(_backgroundScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(500));
+
+            for (int i = 0; i < _textWriter.displayNameArray.Length; ++i)
+            {
+                GUILayout.BeginHorizontal();
+
+                if (i == _selectedBackground) GUI.contentColor = _selectedColor;
+                else GUI.contentColor = _notSelectedColor;
+
+                if (GUILayout.Button(_textWriter.displayNameArray[i], GUILayout.ExpandWidth(true)))
+                {
+                    _selectedBackground = i;
+                    _remakePreview = true;
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.EndScrollView();
+
+            GUILayout.EndVertical();
 
             GUI.contentColor = contentColor;
         }
@@ -268,6 +327,7 @@ namespace ASP
                 _textWriter.alphaOption = (AlphaOption) _alphaSelection;
                 _textWriter.normalScale = _scaleSelector.value();
                 _textWriter.normalOption = (NormalOption) _normalSelection;
+                _textWriter.selectedTexture = _selectedBackground;
                 _textWriter.writeText();
             }
 

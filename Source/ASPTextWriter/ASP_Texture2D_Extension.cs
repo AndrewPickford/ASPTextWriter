@@ -8,6 +8,17 @@ namespace UnityEngine
 {
     public static class ASP_Texture2D_Extension
     {
+        public static Color[] GetPixelsFromCompressed(this Texture2D texture, ASP.Rectangle pos)
+        {
+            Texture2D temp = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, true);
+
+            Color32[] pixels = texture.GetPixels32();
+            temp.name = texture.name;
+            temp.SetPixels32(pixels);
+
+            return GetPixels(temp, pos);
+        }
+
         public static void Fill(this Texture2D texture, Color color)
         {
             for (int i = 0; i < texture.width; ++i)
@@ -21,7 +32,7 @@ namespace UnityEngine
 
         public static Color[] GetPixels(this Texture2D texture, ASP.Rectangle pos)
         {
-            if (pos.x >= 0 && pos.y >= 0 && (pos.x + pos.w) < texture.width && (pos.y + pos.h) < texture.height)
+            if (pos.x >= 0 && pos.y >= 0 && pos.wx() < texture.width && pos.hy() < texture.height)
             {
                 return texture.GetPixels(pos.x, pos.y, pos.w, pos.h);
             }
@@ -36,7 +47,7 @@ namespace UnityEngine
                         int py = pos.y + j;
                         if (px >= 0 && px < texture.width && py >= 0 && py < texture.height)
                         {
-                            pixels[i + j * pos.w] = texture.GetPixel(i, j);
+                            pixels[i + j * pos.w] = texture.GetPixel(px, py);
                         }
                         else
                         {
@@ -49,11 +60,12 @@ namespace UnityEngine
             }
         }
 
-        public static void SetPixels(this Texture2D texture, ASP.Rectangle pos, Color[] pixels)
+        public static void SetPixels(this Texture2D texture, ASP.Rectangle pos, Color[] pixels, ASP.Rectangle boundingBox)
         {
-            if (pos.x >= 0 && pos.y >= 0 && (pos.x + pos.w) < texture.width && (pos.y + pos.h) < texture.height)
+            if (pos.x >= 0 && pos.y >= 0 && pos.wx() < texture.width && pos.hy() < texture.height &&
+                pos.x >= boundingBox.x && pos.wx() < boundingBox.wx() && pos.y >= boundingBox.y && pos.hy() < boundingBox.hy())
             {
-                texture.SetPixels(pos.x, pos.y, pos.w, pos.h, pixels);
+                    texture.SetPixels(pos.x, pos.y, pos.w, pos.h, pixels);
             }
             else
             {
@@ -65,16 +77,25 @@ namespace UnityEngine
                         int py = pos.y + j;
                         if (px >= 0 && px < texture.width && py >= 0 && py < texture.height)
                         {
-                            //Color col = Color.Lerp(texture.GetPixel(px, py), pixels[i + j * pos.w], pixels[i + j * pos.w].a);
-                            texture.SetPixel(px, py, pixels[i + j*pos.w]);
+                            if (px >= boundingBox.x && px < boundingBox.wx() && py >= boundingBox.y && py < boundingBox.hy())
+                            {
+                                texture.SetPixel(px, py, pixels[i + j * pos.w]);
+                            }
                         }
                     }
                 }
             }
+            texture.Apply();
+        }
+
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY)
+        {
+            ASP.Rectangle boundingBox = new ASP.Rectangle(0, 0, texture.width, texture.height);
+            DrawText(texture, text, font, color, offsetX, offsetY, boundingBox);
         }
 
         // basic idea from http://forum.unity3d.com/threads/drawtext-on-texture2d.220217/
-        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, bool applyAlpha = false, int alpha = 255)
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.Rectangle boundingBox, bool applyAlpha = false, int alpha = 255)
         {
             ASP.CharacterMap cMap;
             int x = 0;
@@ -144,7 +165,7 @@ namespace UnityEngine
                         }
                     }
 
-                    texture.SetPixels(cPos, texturePixels);
+                    texture.SetPixels(cPos, texturePixels, boundingBox);
 
                     x += (int)cMap.cw;
                 }

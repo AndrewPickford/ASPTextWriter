@@ -9,6 +9,9 @@ namespace ASP
     public class ASPFlatPlateScale : PartModule
     {
         [KSPField(isPersistant = true)]
+        public string transformName = "";
+
+        [KSPField(isPersistant = true)]
         public float size = 1f;
 
         [KSPField(isPersistant = true)]
@@ -35,7 +38,8 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public float baseMass = -1f;
 
-        Vector3 _originalScale;
+        private Vector3 _originalScale;
+        private Transform _transform;
 
         [KSPEvent(name = "Increase Size Event", guiName = "Increase Size", guiActive = false, guiActiveEditor = true)]
         public void increaseSizeEvent()
@@ -71,9 +75,11 @@ namespace ASP
 
         private void rescale()
         {
-            Vector3 scale = new Vector3(size * _originalScale.x, thickness * size * _originalScale.y, size * _originalScale.z);
-            part.transform.localScale = scale;
-            part.transform.hasChanged = true;
+            if (_transform == null) return;
+
+            Vector3 scale = new Vector3(size * _originalScale.x, size * _originalScale.y, size * thickness * _originalScale.z);
+            _transform.localScale = scale;
+            _transform.hasChanged = true;
             part.mass = baseMass * scale.x * scale.y * scale.z;
         }
 
@@ -86,7 +92,9 @@ namespace ASP
                 baseMass = part.mass;
             }
 
-            _originalScale = part.transform.localScale;
+            _transform = this.part.FindModelTransform(transformName);
+
+            if (_transform != null) _originalScale = _transform.localScale;
 
             rescale();
         }
