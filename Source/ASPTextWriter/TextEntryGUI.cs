@@ -39,6 +39,7 @@ namespace ASP
         private Texture2D _cachedBackground;
         private Color[] _cachedPixels;
         private string _cachedBackgroundUrl = string.Empty;
+        private Vector2 _previewScrollPos;
 
         public void initialise(ASPTextWriter tw)
         {
@@ -50,9 +51,9 @@ namespace ASP
             _notSelectedColor = new Color(0.7f, 0.7f, 0.7f);
             _selectedColor = new Color(1.0f, 1.0f, 1.0f);
             _backgroundColor = new Color(0.5f, 0.5f, 0.5f);
-            _offsetX = 0;
-            _offsetY = 0;
-            _text = tw.text;
+            _offsetX = _textWriter.offsetX;
+            _offsetY = _textWriter.offsetY;
+            _text = _textWriter.text;
             _lastButtonPress = 0;
             _autoRepeatGap = 0.4f;
             _redSelector = new ValueSelector<int, IntField>(_textWriter.red, 0, 255, 1, "Red", Color.red);
@@ -199,7 +200,9 @@ namespace ASP
                     _remakePreview = false;
                 }
 
+                if (_previewTexture.width > 500 || _previewTexture.height > 500) _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(500), GUILayout.MinHeight(500));
                 GUILayout.Box(_previewTexture, GUI.skin.box, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
+                if (_previewTexture.width > 500 || _previewTexture.height > 500) GUILayout.EndScrollView();
             }
         }
 
