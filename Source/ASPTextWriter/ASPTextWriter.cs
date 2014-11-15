@@ -14,28 +14,28 @@ namespace ASP
     public class ASPTextWriter : PartModule
     {
         [KSPField(isPersistant = true)]
-        public string text = "";
+        public string text = "text";
 
         [KSPField(isPersistant = true)]
-        public string fontName = "";
+        public string fontName = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public int fontSize = 0;
+        public int fontSize = -1;
 
         [KSPField(isPersistant = true)]
-        public string transformName = "";
+        public string transformName = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public int topLeftX = 0;
+        public int topLeftX = -1;
 
         [KSPField(isPersistant = true)]
-        public int topLeftY = 0;
+        public int topLeftY = -1;
 
         [KSPField(isPersistant = true)]
-        public int width = 100;
+        public int width = -1;
 
         [KSPField(isPersistant = true)]
-        public int height = 100;
+        public int height = -1;
 
         [KSPField(isPersistant = true)]
         public int offsetX = 0;
@@ -59,13 +59,13 @@ namespace ASP
         public float normalScale = 2.0f;
 
         [KSPField(isPersistant = true)]
-        public string textures = "";
+        public string textures = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public string normals = "";
+        public string normals = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public string displayNames = "";
+        public string displayNames = string.Empty;
 
         [KSPField(isPersistant = true)]
         public int selectedTexture = 0;
@@ -96,12 +96,13 @@ namespace ASP
 
         public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, int alpha, AlphaOption alphaOption)
         {
+            // load the texture in otherwise we can't read the pixels
+            Texture2D backgroundReadable = Utils.LoadTextureFromUrl(background.name);
             Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
 
-            Color32[] pixels = background.GetPixels32();
-            texture.name = background.name;
+            Color32[] pixels = backgroundReadable.GetPixels32();
+            texture.name = backgroundReadable.name;
             texture.SetPixels32(pixels);
-            //texture.Apply();
 
             if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, bBox, true, alpha);
             else texture.DrawText(text, font, color, x, y, bBox);
@@ -124,6 +125,7 @@ namespace ASP
 
         public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, float scale, NormalOption normalOption)
         {
+            // load the texture in otherwise we can't read the pixels
             Texture2D normalMap = Utils.LoadNormalMapFromUrl(background.name);
 
             Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
@@ -236,6 +238,21 @@ namespace ASP
                 this.part.OnEditorDestroy += OnEditorDestroy;
             }
 
+            if (transformName == "__FIRST__" || transformName == string.Empty)
+            {
+                transformName = string.Empty;
+                Transform[] children = part.gameObject.GetComponentsInChildren<Transform>();
+                foreach (Transform child in children)
+                {
+                    if (child.gameObject.renderer != null && child.gameObject.renderer.material != null) transformName = child.name;
+                }
+            }
+            if (transformName == string.Empty)
+            {
+                Debug.LogError("Unable to find transform with material");
+                return;
+            }
+
             Transform transform = this.part.FindModelTransform(transformName);
             if (transform == null) return;
 
@@ -243,13 +260,50 @@ namespace ASP
             backgroundNormalMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
             if (backgroundNormalMap != null) hasNormalMap = true;
 
-            url = Utils.FindModelDir(part.partInfo.name);
+            // all the textures need to be in the same directory as the first texture
+            url = Path.GetDirectoryName(backgroundTexture.name);
+            Debug.Log(String.Format("q22 {0}", url));
 
-            textureArray = Utils.SplitString(textures);
-            normalArray = Utils.SplitString(normals);
-            displayNameArray = Utils.SplitString(displayNames);
+            if (textures == string.Empty)
+            {
+                textureArray = new string[1];
+                normalArray = new string[1];
+                displayNameArray = new string[1];
 
+                textureArray[0] = Path.GetFileName(backgroundTexture.name);
+                displayNameArray[0] = textureArray[0];
+
+                if (backgroundNormalMap != null) normalArray[0] = Path.GetFileName(backgroundNormalMap.name);
+            }
+            else
+            {
+                textureArray = Utils.SplitString(textures);
+                normalArray = Utils.SplitString(normals);
+                displayNameArray = Utils.SplitString(displayNames);
+            }
+
+            if (topLeftX == -1)
+            {
+                // if no bounding box is given write on the whole texture
+                // usually a bad idea, but very usefull for testing
+                topLeftX = 0;
+                topLeftY = 0;
+                width = backgroundTexture.width;
+                height = backgroundTexture.height;
+            }
+
+            // invert the y position, unity starts at the bottom left
             boundingBox = new Rectangle(topLeftX, backgroundTexture.height - (topLeftY + height), width, height);
+
+            string fontID = fontName + "-" + fontSize.ToString();
+            MappedFont font = ASPFontCache.Instance.getFontByID(fontID);
+            if (font == null)
+            {
+                font = ASPFontCache.Instance.list.First();
+                if (font == null) return;
+                fontName = font.name;
+                fontSize = font.size;
+            }
 
             writeText();
         }

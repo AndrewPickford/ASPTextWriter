@@ -17,7 +17,8 @@ namespace ASP
 
         public MappedFont getFontByID(string id)
         {
-            return _dictionary[id];
+            if (_dictionary.ContainsKey(id)) return _dictionary[id];
+            else return null;
         }
 
         public int getFontIndexByID(string id)
