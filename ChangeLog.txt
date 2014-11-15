@@ -1,0 +1,12 @@
+0.3.0
+ * added ability to use mbm files
+ * will now search for first transform with a mesh if not given a transform
+   to use
+ * if no bounding box given will now use whole texture
+
+0.2.0 
+ * Lowered texture resolution
+ * Added texture selector
+
+0.1.0
+ * Initial text release

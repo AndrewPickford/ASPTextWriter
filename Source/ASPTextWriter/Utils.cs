@@ -8,7 +8,7 @@ namespace ASP
 {
     public class Utils
     {
-        private static string[] _textureExtentionNames = { "png", "jpg", "tga", "mbm" };
+        private static string[] _textureExtentionNames = { "png", "jpg", "mbm" };
         private static char[] _delimiters = { ',' };
 
         public static string[] SplitString(string text)
@@ -76,10 +76,20 @@ namespace ASP
 
         public static Texture2D LoadTexture(string fileName)
         {
-            byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+            string extension = System.IO.Path.GetExtension(fileName);
+            Texture2D texture = null;
 
-            Texture2D texture = new Texture2D(1, 1);
-            texture.LoadImage(bytes);
+            if (extension == ".mbm")
+            {
+                texture = FromATM.MBMToTexture(fileName, true);
+            }
+            else
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+
+                texture = new Texture2D(1, 1);
+                texture.LoadImage(bytes);
+            }
 
             texture.Apply();
 
@@ -250,6 +260,24 @@ namespace ASP
             }
 
             return name;
+        }
+
+        public static void DebugMaterial(Material material)
+        {
+            Debug.Log(String.Format("Material: {0}", material.name));
+
+            Type materialType = typeof(Material);
+            System.Reflection.FieldInfo[] fieldInfo = materialType.GetFields();
+            foreach (System.Reflection.FieldInfo info in fieldInfo)
+            {
+                Debug.Log(String.Format("    {0}: {1}", info.Name, info.GetValue(material).ToString()));
+            }
+
+            System.Reflection.PropertyInfo[] propertyInfo = materialType.GetProperties();
+            foreach (System.Reflection.PropertyInfo info in propertyInfo)
+            {
+                Debug.Log(String.Format("    {0}: {1}", info.Name, info.GetValue(material, null)));
+            }
         }
     }
 }
