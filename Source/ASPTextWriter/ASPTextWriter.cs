@@ -71,7 +71,7 @@ namespace ASP
         public int selectedTexture = 0;
 
         public AlphaOption alphaOption = AlphaOption.USE_TEXTURE;
-        public NormalOption normalOption = NormalOption.RAISE_TEXT;
+        public NormalOption normalOption = NormalOption.USE_BACKGROUND;
         public bool hasNormalMap = false;
         public Rectangle boundingBox { get; private set; }
         public Texture2D backgroundTexture { get; private set; }
@@ -175,8 +175,6 @@ namespace ASP
                 fontSize = font.size;
             }
 
-            Material material = Instantiate(transform.gameObject.renderer.material) as Material;
-
             Color color = new Color((float) red/255f, (float) green/255f, (float) blue/255f);
 
             string textureURL = url + "/" + textureArray[selectedTexture];
@@ -187,24 +185,24 @@ namespace ASP
 
             Texture2D newTexture = PaintText(backgroundTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, alpha, alphaOption);
 
+            // have to make a new material 
+            Material material = Instantiate(transform.gameObject.renderer.material) as Material;
+            material.CopyPropertiesFromMaterial(transform.gameObject.renderer.material);
             material.SetTexture("_MainTex", newTexture);
-            
+
             if (backgroundNormalMap != null)
             {
-                if (normalOption != NormalOption.USE_BACKGROUND)
+                if (normalOption == NormalOption.USE_BACKGROUND)
+                {
+                    material.SetTexture("_BumpMap", backgroundNormalMap);
+                }
+                else
                 {
                     Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
-                else
-                {
-                    Texture2D normalMap = material.GetTexture("_BumpMap") as Texture2D;
-                    if (normalMap != backgroundNormalMap)
-                    {
-                        material.SetTexture("_BumpMap", backgroundNormalMap);
-                    }
-                }
             }
+
             transform.gameObject.renderer.material = material;
         }
 
@@ -262,7 +260,6 @@ namespace ASP
 
             // all the textures need to be in the same directory as the first texture
             url = Path.GetDirectoryName(backgroundTexture.name);
-            Debug.Log(String.Format("q22 {0}", url));
 
             if (textures == string.Empty)
             {
