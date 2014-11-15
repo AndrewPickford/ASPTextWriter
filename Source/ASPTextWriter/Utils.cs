@@ -8,7 +8,7 @@ namespace ASP
 {
     public class Utils
     {
-        private static string[] _textureExtentionNames = { "png", "jpg", "tga" };
+        private static string[] _textureExtentionNames = { "png", "jpg", "tga", "mbm" };
         private static char[] _delimiters = { ',' };
 
         public static string[] SplitString(string text)
