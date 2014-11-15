@@ -36,6 +36,9 @@ namespace ASP
         private int _normalSelection;
         private Vector2 _backgroundScrollPos;
         private int _selectedBackground = 0;
+        private Texture2D _cachedBackground;
+        private Color[] _cachedPixels;
+        private string _cachedBackgroundUrl = string.Empty;
 
         public void initialise(ASPTextWriter tw)
         {
@@ -162,9 +165,21 @@ namespace ASP
             {
                 if (_remakePreview)
                 {
-                    string textureURL = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
-                    Texture2D texture = GameDatabase.Instance.GetTexture(textureURL, false);
-                    Color[] pixels = texture.GetPixelsFromCompressed(_textWriter.boundingBox);
+                    string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+
+                    if (_cachedBackgroundUrl != textureUrl)
+                    {
+                        _cachedBackground = Utils.LoadTextureFromUrl(textureUrl);
+                        _cachedBackgroundUrl = textureUrl;
+
+                        if (_cachedBackground == null)
+                        {
+                            Debug.LogError(String.Format("No such texture: {0}", _cachedBackground));
+                            _remakePreview = false;
+                        }
+
+                        _cachedPixels = _cachedBackground.GetPixelsFromCompressed(_textWriter.boundingBox);
+                    }
 
                     MappedFont font = ASPFontCache.Instance.list[_selectedFont];
 
@@ -176,7 +191,7 @@ namespace ASP
 
                         Color color = new Color(r, g, b);
 
-                        _previewTexture.SetPixels(pixels);
+                        _previewTexture.SetPixels(_cachedPixels);
                         _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY);
                         _previewTexture.Apply();
                     }
