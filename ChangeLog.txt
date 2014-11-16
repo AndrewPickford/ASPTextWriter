@@ -1,8 +1,9 @@
 0.3.0
- * added ability to use mbm files
- * will now search for first transform with a mesh if not given a transform
-   to use
+ * now works with mbm texture files, using Active Texture Managements MBMToTexture method
+ * added search for first transform in a part with a mesh if not given a transform to use
  * if no bounding box given will now use whole texture
+ * added oswald, russo one, capsmall fonts
+ * fix (at least some of) the memory leaks
 
 0.2.0 
  * Lowered texture resolution
