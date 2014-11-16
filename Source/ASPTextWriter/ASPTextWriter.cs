@@ -82,6 +82,9 @@ namespace ASP
         public string url { get; private set; }
 
         private TextEntryGUI _gui;
+        private Material _currentMaterial = null;
+        private Texture2D _currentTexture = null;
+        private Texture2D _currentNormalMap = null;
 
         [KSPEvent(name = "Edit Text Event", guiName = "Edit text", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
@@ -101,7 +104,7 @@ namespace ASP
             Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
 
             Color32[] pixels = backgroundReadable.GetPixels32();
-            texture.name = backgroundReadable.name;
+            texture.name = background.name + "(Copy)";
             texture.SetPixels32(pixels);
 
             if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, bBox, true, alpha);
@@ -120,23 +123,19 @@ namespace ASP
 
             if (background.format == TextureFormat.DXT1 || background.format == TextureFormat.DXT5) texture.Compress(true);
 
+            if (!System.Object.ReferenceEquals(background, backgroundReadable)) Destroy(backgroundReadable);
+
             return texture;
         }
 
         public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, float scale, NormalOption normalOption)
         {
-            Texture2D normalMap = Utils.GetReadableTexture(background, true);
+            Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
-            // is the texture readable?
-            try
-            {
-                Color test = normalMap.GetPixel(0, 0);
-            }
-            catch
-            {
-                // it's not readable so load in a readable version
-                normalMap = Utils.LoadNormalMapFromUrl(background.name);
-            }
+            Texture2D normalMap = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
+            Color32[] pixels = backgroundReadable.GetPixels32();
+            normalMap.name = background.name + "(Copy)";
+            normalMap.SetPixels32(pixels);
 
             Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
             textMap.Fill(Color.gray);
@@ -164,7 +163,11 @@ namespace ASP
                 }
             }
             normalMap.Apply();
-
+            
+            if (!System.Object.ReferenceEquals(background, backgroundReadable)) Destroy(backgroundReadable);
+            Destroy(textMap);
+            Destroy(textNormalMap);
+            
             return normalMap;
         }
 
@@ -214,6 +217,16 @@ namespace ASP
             }
 
             transform.gameObject.renderer.material = material;
+
+            if (_currentMaterial != null) Destroy(_currentMaterial);
+            _currentMaterial = material;
+
+            if (_currentTexture != null) Destroy(_currentTexture);
+            _currentTexture = newTexture;
+
+            if (_currentNormalMap != null) Destroy(_currentNormalMap);
+            _currentNormalMap = null;
+            if (backgroundNormalMap != null && normalOption != NormalOption.USE_BACKGROUND) _currentNormalMap = material.GetTexture("_BumpMap") as Texture2D;
         }
 
         private void OnEditorDestroy()

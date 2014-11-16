@@ -36,7 +36,7 @@ namespace ASP
         private int _normalSelection;
         private Vector2 _backgroundScrollPos;
         private int _selectedBackground = 0;
-        private Texture2D _cachedBackground;
+        private Texture2D _cachedBackground = null;
         private Color[] _cachedPixels;
         private string _cachedBackgroundUrl = string.Empty;
         private Vector2 _previewScrollPos;
@@ -92,6 +92,9 @@ namespace ASP
         public void OnDestroy()
         {
             EditorLogic.fetch.Unlock(_lockText);
+
+            if (_cachedBackground != null) Destroy(_cachedBackground);
+            if (_previewTexture != null) Destroy(_previewTexture);
         }
 
         public void OnGUI()
@@ -170,6 +173,7 @@ namespace ASP
 
                     if (_cachedBackgroundUrl != textureUrl)
                     {
+                        if (_cachedBackground != null) Destroy(_cachedBackground);
                         _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
 
                         if (_cachedBackground == null)
@@ -179,6 +183,7 @@ namespace ASP
                         }
 
                         _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
+                        _cachedBackgroundUrl = textureUrl;
                     }
 
                     MappedFont font = ASPFontCache.Instance.list[_selectedFont];
@@ -372,7 +377,11 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY--;
+                if (repeatOK)
+                {
+                    if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) _offsetY -= 10;
+                    else _offsetY--;
+                }
             }
 
             GUILayout.FlexibleSpace();
@@ -387,7 +396,11 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetX--;
+                if (repeatOK)
+                {
+                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetX -= 10;
+                    else _offsetX--;
+                }
             }
 
             GUILayout.Space(5);
@@ -405,7 +418,11 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetX++;
+                if (repeatOK)
+                {
+                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetX += 10;
+                    else _offsetX++;
+                }
             }
 
             GUILayout.FlexibleSpace();
@@ -420,7 +437,11 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY++;
+                if (repeatOK)
+                {
+                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetY += 10;
+                    else _offsetY++;
+                }
             }
 
             GUILayout.FlexibleSpace();
