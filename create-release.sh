@@ -29,6 +29,6 @@ cd Ignore
 zip $file README-ASP-TextWriter.txt
 zip $file INSTALL-ASP-TextWriter.txt
 
-cd /cygdrive/d/ksp/asp/ksptest/GameData
+cd /cygdrive/d/ksp/asp/ASPTextWriter/GameData
 find . -perm 000 -exec chmod 644 {} \;
 zip -r /cygdrive/d/ksp/asp/ASPTextWriter/Ignore/$file ASP/ASPTextWriter
