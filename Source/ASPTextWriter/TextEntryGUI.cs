@@ -370,6 +370,21 @@ namespace ASP
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.RepeatButton("++", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                _lastButtonPress = Time.time;
+                if (repeatOK) _offsetY -= 10;
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
@@ -377,11 +392,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK)
-                {
-                    if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) _offsetY -= 10;
-                    else _offsetY--;
-                }
+                if (repeatOK) _offsetY--;
             }
 
             GUILayout.FlexibleSpace();
@@ -392,15 +403,20 @@ namespace ASP
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
+            if (GUILayout.RepeatButton("<<", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                _lastButtonPress = Time.time;
+                if (repeatOK) _offsetX -= 10;
+            }
+
+            GUILayout.Space(3);
+
             if (GUILayout.RepeatButton("<", GUILayout.Width(25), GUILayout.Height(25)))
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK)
-                {
-                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetX -= 10;
-                    else _offsetX--;
-                }
+                if (repeatOK) _offsetX--;
             }
 
             GUILayout.Space(5);
@@ -418,11 +434,16 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK)
-                {
-                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetX += 10;
-                    else _offsetX++;
-                }
+                if (repeatOK)_offsetX++;
+            }
+
+            GUILayout.Space(3);
+
+            if (GUILayout.RepeatButton(">>", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                _lastButtonPress = Time.time;
+                if (repeatOK) _offsetX += 10;
             }
 
             GUILayout.FlexibleSpace();
@@ -437,11 +458,22 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK)
-                {
-                    if (Input.GetKeyDown(KeyCode.LeftShift)) _offsetY += 10;
-                    else _offsetY++;
-                }
+                if (repeatOK) _offsetY++;
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.RepeatButton("--", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                _lastButtonPress = Time.time;
+                if (repeatOK) _offsetY += 10;
             }
 
             GUILayout.FlexibleSpace();
