@@ -96,8 +96,8 @@ namespace ASP
 
         public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, int alpha, AlphaOption alphaOption)
         {
-            // load the texture in otherwise we can't read the pixels
-            Texture2D backgroundReadable = Utils.LoadTextureFromUrl(background.name);
+            Texture2D backgroundReadable = Utils.GetReadable32Texture(background, false);
+            
             Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
 
             Color32[] pixels = backgroundReadable.GetPixels32();
@@ -125,8 +125,18 @@ namespace ASP
 
         public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, float scale, NormalOption normalOption)
         {
-            // load the texture in otherwise we can't read the pixels
-            Texture2D normalMap = Utils.LoadNormalMapFromUrl(background.name);
+            Texture2D normalMap = Utils.GetReadableTexture(background, true);
+
+            // is the texture readable?
+            try
+            {
+                Color test = normalMap.GetPixel(0, 0);
+            }
+            catch
+            {
+                // it's not readable so load in a readable version
+                normalMap = Utils.LoadNormalMapFromUrl(background.name);
+            }
 
             Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
             textMap.Fill(Color.gray);

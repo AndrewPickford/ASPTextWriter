@@ -170,8 +170,7 @@ namespace ASP
 
                     if (_cachedBackgroundUrl != textureUrl)
                     {
-                        _cachedBackground = Utils.LoadTextureFromUrl(textureUrl);
-                        _cachedBackgroundUrl = textureUrl;
+                        _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
 
                         if (_cachedBackground == null)
                         {
@@ -179,7 +178,7 @@ namespace ASP
                             _remakePreview = false;
                         }
 
-                        _cachedPixels = _cachedBackground.GetPixelsFromCompressed(_textWriter.boundingBox);
+                        _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
                     }
 
                     MappedFont font = ASPFontCache.Instance.list[_selectedFont];

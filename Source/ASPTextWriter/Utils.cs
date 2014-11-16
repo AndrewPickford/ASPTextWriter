@@ -91,9 +91,44 @@ namespace ASP
                 texture.LoadImage(bytes);
             }
 
+            texture.name = System.IO.Path.GetFileNameWithoutExtension(fileName);
             texture.Apply();
 
             return texture;
+        }
+
+        // compressed textures can be GetPixels32 readable even if they are
+        // not GetPixel readable
+        public static Texture2D GetReadable32Texture(Texture2D texture, bool normalMap)
+        {
+            Texture2D readable = texture;
+            try
+            {
+                Color32[] test = readable.GetPixels32();
+            }
+            catch
+            {
+                if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
+                else readable = Utils.LoadTextureFromUrl(texture.name);
+            }
+
+            return readable;
+        }
+
+        public static Texture2D GetReadableTexture(Texture2D texture, bool normalMap)
+        {
+            Texture2D readable = texture;
+            try
+            {
+                Color test = readable.GetPixel(0, 0);
+            }
+            catch
+            {
+                if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
+                else readable = Utils.LoadTextureFromUrl(texture.name);
+            }
+
+            return readable;
         }
 
         public static int ParseIntWithLimits(string value, int min, int max)
