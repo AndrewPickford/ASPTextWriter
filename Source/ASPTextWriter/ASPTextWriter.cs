@@ -14,7 +14,7 @@ namespace ASP
     public class ASPTextWriter : PartModule
     {
         [KSPField(isPersistant = true)]
-        public string text = "text";
+        public string text = string.Empty;
 
         [KSPField(isPersistant = true)]
         public string fontName = string.Empty;
@@ -312,7 +312,7 @@ namespace ASP
                 fontSize = font.size;
             }
 
-            writeText();
+            if (text != string.Empty) writeText();
         }
     }
 }
