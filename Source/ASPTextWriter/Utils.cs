@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using UnityEngine;
 
 namespace ASP
@@ -30,7 +31,7 @@ namespace ASP
 
         public static string GetTextureFileName(string url)
         {
-            string fileNameBase = "GameData/" + url;
+            string fileNameBase = KSPUtil.ApplicationRootPath + "GameData/" + url;
             foreach (string extention in _textureExtentionNames)
             {
                 string fileName = fileNameBase + "." + extention;
@@ -51,6 +52,10 @@ namespace ASP
         public static Texture2D LoadNormalMap(string fileName)
         {
             Texture2D normalMap = LoadTexture(fileName);
+
+#if DEBUG
+            Debug.Log(String.Format("Converting {0} to normal map", fileName));
+#endif
 
             for (int i = 0; i < normalMap.width; ++i)
             {
@@ -79,6 +84,10 @@ namespace ASP
             string extension = System.IO.Path.GetExtension(fileName);
             Texture2D texture = null;
 
+#if DEBUG
+            Debug.Log(String.Format("Loading texture file: {0}", fileName));
+#endif
+
             if (extension == ".mbm")
             {
                 texture = FromATM.MBMToTexture(fileName, true);
@@ -86,6 +95,11 @@ namespace ASP
             else
             {
                 byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+
+                if (bytes == null || (bytes != null && bytes.Length == 0))
+                {
+                    Debug.LogError(String.Format("Unable to load texture file: {0}", fileName));
+                }
 
                 texture = new Texture2D(1, 1);
                 texture.LoadImage(bytes);
@@ -105,9 +119,16 @@ namespace ASP
             try
             {
                 Color32[] test = readable.GetPixels32();
+
+#if DEBUG
+                Debug.Log(String.Format("Texture: {0} readable 32", texture.name));
+#endif
             }
             catch
             {
+#if DEBUG
+                Debug.Log(String.Format("Texture: {0} not readable 32, loading from file", texture.name));
+#endif
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
                 else readable = Utils.LoadTextureFromUrl(texture.name);
             }
@@ -121,9 +142,17 @@ namespace ASP
             try
             {
                 Color test = readable.GetPixel(0, 0);
+
+#if DEBUG
+                Debug.Log(String.Format("Texture: {0} readable", texture.name));
+#endif
             }
             catch
             {
+#if DEBUG
+                Debug.Log(String.Format("Texture: {0} not readable, loading from file", texture.name));
+#endif
+
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
                 else readable = Utils.LoadTextureFromUrl(texture.name);
             }
