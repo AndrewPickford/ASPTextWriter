@@ -97,7 +97,7 @@ namespace ASP
             }
         }
 
-        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, int alpha, AlphaOption alphaOption)
+        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle boundingBox, int alpha, AlphaOption alphaOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, false);
             
@@ -106,6 +106,15 @@ namespace ASP
             Color32[] pixels = backgroundReadable.GetPixels32();
             texture.name = background.name + "(Copy)";
             texture.SetPixels32(pixels);
+
+            Rectangle bBox = new Rectangle(boundingBox);
+            if (bBox.w == -1)
+            {
+                bBox.x = 0;
+                bBox.y = 0;
+                bBox.w = backgroundReadable.width;
+                bBox.h = backgroundReadable.height;
+            }
 
             if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, bBox, true, alpha);
             else texture.DrawText(text, font, color, x, y, bBox);
@@ -128,7 +137,7 @@ namespace ASP
             return texture;
         }
 
-        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle bBox, float scale, NormalOption normalOption)
+        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle boundingBox, float scale, NormalOption normalOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
@@ -136,6 +145,15 @@ namespace ASP
             Color32[] pixels = backgroundReadable.GetPixels32();
             normalMap.name = background.name + "(Copy)";
             normalMap.SetPixels32(pixels);
+
+            Rectangle bBox = new Rectangle(boundingBox);
+            if (bBox.w == -1)
+            {
+                bBox.x = 0;
+                bBox.y = 0;
+                bBox.w = backgroundReadable.width;
+                bBox.h = backgroundReadable.height;
+            }
 
             Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
             textMap.Fill(Color.gray);

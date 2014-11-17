@@ -30,6 +30,14 @@ namespace ASP
             h = 0;
         }
 
+        public Rectangle(Rectangle r)
+        {
+            x = r.x;
+            y = r.y;
+            w = r.w;
+            h = r.h;
+        }
+
         public Rectangle(int xx, int yy, int ww, int hh)
         {
             x = xx;

@@ -194,7 +194,6 @@ namespace ASP
 
                     if (_previewTexture == null)
                     {
-                        Debug.Log(String.Format("q1: new preview {0} {1}", _textWriter.width, _cachedBackground.width));
                         if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
                         else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
                     }
