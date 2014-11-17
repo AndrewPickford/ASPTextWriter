@@ -130,7 +130,7 @@ namespace UnityEngine
 
                     ASP.Rectangle cPos = new ASP.Rectangle();
                     cPos.x = offsetX + x + (int)cMap.vx;
-                    cPos.y = texture.height - (offsetY + y - (int)cMap.vy + cMap.uv.h);
+                    cPos.y = offsetY + y + font.size + (int)cMap.vy +(int)cMap.vh;
                     cPos.w = cMap.uv.w;
                     cPos.h = cMap.uv.h;
 
@@ -139,7 +139,7 @@ namespace UnityEngine
                         charPixels = ASP.Utils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, false);
                         cPos.w = cMap.uv.h;
                         cPos.h = cMap.uv.w;
-                        cPos.y = texture.height - (offsetY + y - (int)cMap.vy + cMap.uv.w);
+                        cPos.y = offsetY + y + font.size + (int)cMap.vy + (int)cMap.vh;
                     }
                     else
                     {

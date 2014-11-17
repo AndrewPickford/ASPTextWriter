@@ -26,10 +26,10 @@ namespace ASP
         public string transformName = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public int topLeftX = -1;
+        public int bottomLeftX = -1;
 
         [KSPField(isPersistant = true)]
-        public int topLeftY = -1;
+        public int bottomLeftY = -1;
 
         [KSPField(isPersistant = true)]
         public int width = -1;
@@ -101,7 +101,7 @@ namespace ASP
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, false);
             
-            Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
+            Texture2D texture = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
 
             Color32[] pixels = backgroundReadable.GetPixels32();
             texture.name = background.name + "(Copy)";
@@ -132,7 +132,7 @@ namespace ASP
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
-            Texture2D normalMap = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
+            Texture2D normalMap = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
             Color32[] pixels = backgroundReadable.GetPixels32();
             normalMap.name = background.name + "(Copy)";
             normalMap.SetPixels32(pixels);
@@ -196,7 +196,7 @@ namespace ASP
             textureURL = url + "/" + normalArray[selectedTexture];
             backgroundNormalMap = GameDatabase.Instance.GetTexture(textureURL, true);
 
-            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, alpha, alphaOption);
+            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, boundingBox, alpha, alphaOption);
 
             // have to make a new material 
             Material material = Instantiate(transform.gameObject.renderer.material) as Material;
@@ -211,7 +211,7 @@ namespace ASP
                 }
                 else
                 {
-                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, topLeftX + offsetX, topLeftY + offsetY, boundingBox, normalScale, normalOption);
+                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
             }
@@ -293,7 +293,7 @@ namespace ASP
                 textureArray[0] = Path.GetFileName(backgroundTexture.name);
                 displayNameArray[0] = textureArray[0];
 
-                if (backgroundNormalMap != null) normalArray[0] = Path.GetFileName(backgroundNormalMap.name);
+                if (hasNormalMap) normalArray[0] = Path.GetFileName(backgroundNormalMap.name);
             }
             else
             {
@@ -302,18 +302,7 @@ namespace ASP
                 displayNameArray = Utils.SplitString(displayNames);
             }
 
-            if (topLeftX == -1)
-            {
-                // if no bounding box is given write on the whole texture
-                // usually a bad idea, but very usefull for testing
-                topLeftX = 0;
-                topLeftY = 0;
-                width = backgroundTexture.width;
-                height = backgroundTexture.height;
-            }
-
-            // invert the y position, unity starts at the bottom left
-            boundingBox = new Rectangle(topLeftX, backgroundTexture.height - (topLeftY + height), width, height);
+            boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
 
             string fontID = fontName + "-" + fontSize.ToString();
             MappedFont font = ASPFontCache.Instance.getFontByID(fontID);

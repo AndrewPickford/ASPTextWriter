@@ -12,7 +12,7 @@ namespace ASP
 
         private ASPTextWriter _textWriter;
         private Rect _windowPosition;
-        private Texture2D _previewTexture;
+        private Texture2D _previewTexture = null;
         private string _lockText = "TextEntryGUILock";
         private bool _remakePreview;
         private Vector2 _fontScrollPos;
@@ -48,7 +48,6 @@ namespace ASP
         public void initialise(ASPTextWriter tw)
         {
             _textWriter = tw;
-            _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
             _windowPosition = new Rect(700, 100, 400, 500);
             _remakePreview = true;
             _selectedFont = 0;
@@ -174,51 +173,56 @@ namespace ASP
 
         private void drawTexture()
         {
-            if (_previewTexture != null)
+            if (_remakePreview)
             {
-                if (_remakePreview)
+                string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+
+                if (_cachedBackgroundUrl != textureUrl)
                 {
-                    string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+                    if (_cachedBackground != null) Destroy(_cachedBackground);
+                    _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
 
-                    if (_cachedBackgroundUrl != textureUrl)
+                    if (_cachedBackground == null)
                     {
-                        if (_cachedBackground != null) Destroy(_cachedBackground);
-                        _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
-
-                        if (_cachedBackground == null)
-                        {
-                            Debug.LogError(String.Format("No such texture: {0}", _cachedBackground));
-                            _remakePreview = false;
-                        }
-
-                        _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
-                        _cachedBackgroundUrl = textureUrl;
-
-                        if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
+                        Debug.LogError(String.Format("No such texture: {0}", _cachedBackground));
+                        _remakePreview = false;
                     }
 
-                    MappedFont font = ASPFontCache.Instance.list[_selectedFont];
+                    if (_textWriter.width > 0) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
+                    else _cachedPixels = _cachedBackground.GetPixels();
+                    _cachedBackgroundUrl = textureUrl;
 
-                    if (font != null)
+                    if (_previewTexture == null)
                     {
-                        float r = (float)(_redSelector.value() / 255f);
-                        float g = (float)(_greenSelector.value() / 255f);
-                        float b = (float)(_blueSelector.value() / 255f);
-
-                        Color color = new Color(r, g, b);
-
-                        _previewTexture.SetPixels(_cachedPixels);
-                        _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY);
-                        _previewTexture.Apply();
+                        Debug.Log(String.Format("q1: new preview {0} {1}", _textWriter.width, _cachedBackground.width));
+                        if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
+                        else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
                     }
 
-                    _remakePreview = false;
+                    if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
                 }
 
-                if (_previewTexture.width > 500 || _previewTexture.height > 500) _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(500), GUILayout.MinHeight(500));
-                GUILayout.Box(_previewTexture, GUI.skin.box, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
-                if (_previewTexture.width > 500 || _previewTexture.height > 500) GUILayout.EndScrollView();
+                MappedFont font = ASPFontCache.Instance.list[_selectedFont];
+
+                if (font != null)
+                {
+                    float r = (float)(_redSelector.value() / 255f);
+                    float g = (float)(_greenSelector.value() / 255f);
+                    float b = (float)(_blueSelector.value() / 255f);
+
+                    Color color = new Color(r, g, b);
+
+                    _previewTexture.SetPixels(_cachedPixels);
+                    _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY);
+                    _previewTexture.Apply();
+                }
+
+                _remakePreview = false;
             }
+
+            if (_previewTexture.width > 500 || _previewTexture.height > 500) _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(500), GUILayout.MinHeight(500));
+            GUILayout.Box(_previewTexture, GUI.skin.box, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
+            if (_previewTexture.width > 500 || _previewTexture.height > 500) GUILayout.EndScrollView();
         }
 
         private void drawCloseButton()
@@ -401,7 +405,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY -= delta;
+                if (repeatOK) _offsetY += delta;
             }
 
             GUILayout.FlexibleSpace();
@@ -449,7 +453,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY += delta;
+                if (repeatOK) _offsetY -= delta;
             }
 
             GUILayout.FlexibleSpace();
