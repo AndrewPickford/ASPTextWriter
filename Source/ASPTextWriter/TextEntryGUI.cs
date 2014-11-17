@@ -42,7 +42,8 @@ namespace ASP
         private Color[] _cachedPixels;
         private string _cachedBackgroundUrl = string.Empty;
         private Vector2 _previewScrollPos;
-        private bool _fastMove;
+        private string[] _speedGrid;
+        private int _speedSelection;
 
         public void initialise(ASPTextWriter tw)
         {
@@ -84,7 +85,11 @@ namespace ASP
             if (_selectedFont < 0) _selectedFont = 0;
 
             _selectedBackground = _textWriter.selectedTexture;
-            _fastMove = false;
+
+            _speedGrid = new String[2];
+            _speedGrid[0] = "x 1";
+            _speedGrid[1] = "x 10";
+            _speedSelection = 0;
         }
 
         public void Awake()
@@ -99,12 +104,6 @@ namespace ASP
 
             if (_cachedBackground != null) Destroy(_cachedBackground);
             if (_previewTexture != null) Destroy(_previewTexture);
-        }
-
-        public void Update()
-        {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) _fastMove = true;
-            else _fastMove = false;
         }
 
         public void OnGUI()
@@ -194,6 +193,8 @@ namespace ASP
 
                         _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
                         _cachedBackgroundUrl = textureUrl;
+
+                        if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
                     }
 
                     MappedFont font = ASPFontCache.Instance.list[_selectedFont];
@@ -322,7 +323,10 @@ namespace ASP
             GUILayout.Label("Text", GUILayout.ExpandWidth(false));
             GUILayout.Space(5);
             string oldText = _text;
+
+            GUI.SetNextControlName("TextField");
             _text = GUILayout.TextField(_text, GUILayout.ExpandWidth(true));
+
             if (oldText != _text) _remakePreview = true;
             GUILayout.EndHorizontal();
 
@@ -374,7 +378,7 @@ namespace ASP
             int delta = 1;
 
             if ((Time.time - _lastRepeat) > _autoRepeatGap) repeatOK = true;
-            if (_fastMove)
+            if (_speedSelection == 1)
             {
                 button = 4;
                 delta = 10;
@@ -455,7 +459,9 @@ namespace ASP
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("(Shift x 10)");
+
+            _speedSelection = GUILayout.SelectionGrid(_speedSelection, _speedGrid, 2);
+
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
