@@ -8,6 +8,8 @@ namespace ASP
 {
     public class TextEntryGUI : MonoBehaviour
     {
+        static private string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
+
         private ASPTextWriter _textWriter;
         private Rect _windowPosition;
         private Texture2D _previewTexture;
@@ -40,6 +42,7 @@ namespace ASP
         private Color[] _cachedPixels;
         private string _cachedBackgroundUrl = string.Empty;
         private Vector2 _previewScrollPos;
+        private bool _fastMove;
 
         public void initialise(ASPTextWriter tw)
         {
@@ -81,6 +84,7 @@ namespace ASP
             if (_selectedFont < 0) _selectedFont = 0;
 
             _selectedBackground = _textWriter.selectedTexture;
+            _fastMove = false;
         }
 
         public void Awake()
@@ -95,6 +99,12 @@ namespace ASP
 
             if (_cachedBackground != null) Destroy(_cachedBackground);
             if (_previewTexture != null) Destroy(_previewTexture);
+        }
+
+        public void Update()
+        {
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) _fastMove = true;
+            else _fastMove = false;
         }
 
         public void OnGUI()
@@ -359,8 +369,16 @@ namespace ASP
         private void drawOffsetButtons()
         {
             bool repeatOK = false;
-            if ((Time.time - _lastRepeat) > _autoRepeatGap) repeatOK = true;
             bool buttonPressed = false;
+            int button = 0;
+            int delta = 1;
+
+            if ((Time.time - _lastRepeat) > _autoRepeatGap) repeatOK = true;
+            if (_fastMove)
+            {
+                button = 4;
+                delta = 10;
+            }
 
             GUILayout.BeginVertical(GUI.skin.box,GUILayout.Width(120), GUILayout.Height(120));
 
@@ -375,24 +393,11 @@ namespace ASP
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.RepeatButton("++", GUILayout.Width(25), GUILayout.Height(25)))
+            if (GUILayout.RepeatButton(_posButtons[button], GUILayout.Width(25), GUILayout.Height(25)))
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY -= 10;
-            }
-
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-            if (GUILayout.RepeatButton("+", GUILayout.Width(25), GUILayout.Height(25)))
-            {
-                buttonPressed = true;
-                _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY--;
+                if (repeatOK) _offsetY -= delta;
             }
 
             GUILayout.FlexibleSpace();
@@ -403,20 +408,11 @@ namespace ASP
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.RepeatButton("<<", GUILayout.Width(25), GUILayout.Height(25)))
+            if (GUILayout.RepeatButton(_posButtons[button+2], GUILayout.Width(25), GUILayout.Height(25)))
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetX -= 10;
-            }
-
-            GUILayout.Space(3);
-
-            if (GUILayout.RepeatButton("<", GUILayout.Width(25), GUILayout.Height(25)))
-            {
-                buttonPressed = true;
-                _lastButtonPress = Time.time;
-                if (repeatOK) _offsetX--;
+                if (repeatOK) _offsetX -= delta;
             }
 
             GUILayout.Space(5);
@@ -430,20 +426,11 @@ namespace ASP
 
             GUILayout.Space(5);
 
-            if (GUILayout.RepeatButton(">", GUILayout.Width(25), GUILayout.Height(25)))
+            if (GUILayout.RepeatButton(_posButtons[button+3], GUILayout.Width(25), GUILayout.Height(25)))
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK)_offsetX++;
-            }
-
-            GUILayout.Space(3);
-
-            if (GUILayout.RepeatButton(">>", GUILayout.Width(25), GUILayout.Height(25)))
-            {
-                buttonPressed = true;
-                _lastButtonPress = Time.time;
-                if (repeatOK) _offsetX += 10;
+                if (repeatOK) _offsetX += delta;
             }
 
             GUILayout.FlexibleSpace();
@@ -454,11 +441,11 @@ namespace ASP
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.RepeatButton("-", GUILayout.Width(25), GUILayout.Height(25)))
+            if (GUILayout.RepeatButton(_posButtons[button+1], GUILayout.Width(25), GUILayout.Height(25)))
             {
                 buttonPressed = true;
                 _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY++;
+                if (repeatOK) _offsetY += delta;
             }
 
             GUILayout.FlexibleSpace();
@@ -468,14 +455,7 @@ namespace ASP
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-
-            if (GUILayout.RepeatButton("--", GUILayout.Width(25), GUILayout.Height(25)))
-            {
-                buttonPressed = true;
-                _lastButtonPress = Time.time;
-                if (repeatOK) _offsetY += 10;
-            }
-
+            GUILayout.Label("(Shift x 10)");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
