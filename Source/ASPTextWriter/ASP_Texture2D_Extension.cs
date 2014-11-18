@@ -88,14 +88,15 @@ namespace UnityEngine
             texture.Apply();
         }
 
-        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY)
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.TextDirection direction)
         {
             ASP.Rectangle boundingBox = new ASP.Rectangle(0, 0, texture.width, texture.height);
-            DrawText(texture, text, font, color, offsetX, offsetY, boundingBox);
+            DrawText(texture, text, font, color, offsetX, offsetY, direction, boundingBox);
         }
 
         // basic idea from http://forum.unity3d.com/threads/drawtext-on-texture2d.220217/
-        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.Rectangle boundingBox, bool applyAlpha = false, int alpha = 255)
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.TextDirection direction,
+                                    ASP.Rectangle boundingBox, ASP.BlendMethod blend = ASP.BlendMethod.PIXEL, bool applyAlpha = false, int alpha = 255)
         {
             ASP.CharacterMap cMap;
             int x = 0;
@@ -113,8 +114,21 @@ namespace UnityEngine
                 {
                     if (c == 'n')
                     {
-                        y = y + font.height;
-                        x = 0;
+                        switch (direction)
+                        {
+                            case ASP.TextDirection.DOWN_UP:
+                            case ASP.TextDirection.UP_DOWN:
+                                x += font.size;
+                                y = 0;
+                                break;
+
+                            case ASP.TextDirection.LEFT_RIGHT:
+                            case ASP.TextDirection.RIGHT_LEFT:
+                            default:
+                                y += font.size;
+                                x = 0;
+                                break;
+                        }
                         escapeMode = false;
                     }
                 }
@@ -126,29 +140,67 @@ namespace UnityEngine
                     }
 
                     Color[] charPixels = font.texture.GetPixels(cMap.uv);
-                    ASP.Utils.Recolor(ref charPixels, Color.black, color);
+                    ASP.ImageUtils.Recolor(ref charPixels, Color.black, color);
 
-                    ASP.Rectangle cPos = new ASP.Rectangle();
-                    cPos.x = offsetX + x + (int)cMap.vx;
-                    cPos.y = offsetY + y + font.size + (int)cMap.vy +(int)cMap.vh;
-                    cPos.w = cMap.uv.w;
-                    cPos.h = cMap.uv.h;
+                    ASP.Rectangle cPos = new ASP.Rectangle(0, 0, cMap.uv.w, cMap.uv.h);
+                    switch (direction)
+                    {
+                        case ASP.TextDirection.RIGHT_LEFT:
+                            charPixels = ASP.ImageUtils.Rotate180(charPixels, cPos.w, cPos.h);
+                            cPos.x = offsetX - x - ((int)cMap.vx + (int)cMap.vw);
+                            cPos.y = offsetY + y - (font.size + (int)cMap.vy);
+                            break;
+
+                        case ASP.TextDirection.UP_DOWN:
+                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
+                            cPos.swapWH();
+                            cPos.x = offsetX - x + (font.size + (int)cMap.vy + (int)cMap.vh);
+                            cPos.y = offsetY - y - ((int)cMap.vx + (int)cMap.vw);
+                            break;
+
+                        case ASP.TextDirection.DOWN_UP:
+                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, true);
+                            cPos.swapWH();
+                            cPos.x = offsetX + x - (font.size + (int)cMap.vy);
+                            cPos.y = offsetY + y + (int)cMap.vx;
+                            break;
+
+                        case ASP.TextDirection.LEFT_RIGHT:
+                        default:
+                            cPos.x = offsetX + x + (int)cMap.vx;
+                            cPos.y = offsetY - y + (font.size + (int)cMap.vy + (int)cMap.vh);
+                            break;
+                    }
 
                     if (cMap.flipped)
                     {
-                        charPixels = ASP.Utils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, false);
-                        cPos.w = cMap.uv.h;
-                        cPos.h = cMap.uv.w;
-                        cPos.y = offsetY + y + font.size + (int)cMap.vy + (int)cMap.vh;
+                        charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
+                        cPos.swapWH();
                     }
                     else
                     {
-                        charPixels = ASP.Utils.FlipVertically(charPixels, cPos.w, cPos.h);
+                        charPixels = ASP.ImageUtils.FlipVertically(charPixels, cPos.w, cPos.h);
                     }
 
                     Color[] texturePixels = texture.GetPixels(cPos);
                     Color[] texturePixelsOrig = texture.GetPixels(cPos);
-                    ASP.Utils.Overlay(ref texturePixels, charPixels, cPos.w, cPos.h);
+
+                    switch (blend)
+                    {
+                        case ASP.BlendMethod.HSV:
+                            ASP.ImageUtils.BlendHSV(ref texturePixels, charPixels, cPos.w, cPos.h);
+                            break;
+
+                        case ASP.BlendMethod.RGB:
+                            ASP.ImageUtils.BlendRGB(ref texturePixels, charPixels, cPos.w, cPos.h);
+                            break;
+
+                        case ASP.BlendMethod.PIXEL:
+                        default:
+                            ASP.ImageUtils.BlendPixel(ref texturePixels, charPixels, cPos.w, cPos.h);
+                            break;
+                    }
+                    
 
                     if (applyAlpha)
                     {
@@ -167,7 +219,19 @@ namespace UnityEngine
 
                     texture.SetPixels(cPos, texturePixels, boundingBox);
 
-                    x += (int)cMap.cw;
+                    switch (direction)
+                    {
+                        case ASP.TextDirection.DOWN_UP:
+                        case ASP.TextDirection.UP_DOWN:
+                            y += (int)cMap.cw;
+                            break;
+
+                        case ASP.TextDirection.LEFT_RIGHT:
+                        case ASP.TextDirection.RIGHT_LEFT:
+                        default:
+                            x += (int)cMap.cw;
+                            break;
+                    }
                 }
             }
         }

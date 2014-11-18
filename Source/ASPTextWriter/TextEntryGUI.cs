@@ -44,6 +44,10 @@ namespace ASP
         private Vector2 _previewScrollPos;
         private string[] _speedGrid;
         private int _speedSelection;
+        private string[] _blendMethodGrid;
+        private int _blendMethodSelection;
+        private string[] _directionGrid;
+        private int _directionSelection;
 
         public void initialise(ASPTextWriter tw)
         {
@@ -63,7 +67,7 @@ namespace ASP
             _greenSelector = new ValueSelector<int, IntField>(_textWriter.green, 0, 255, 1, "Green", Color.green);
             _blueSelector = new ValueSelector<int, IntField>(_textWriter.blue, 0, 255, 1, "Blue", Color.blue);
             _alphaSelector = new ValueSelector<int, IntField>(_textWriter.alpha, 0, 255, 1, "Alpha", Color.white);
-            _scaleSelector = new ValueSelector<float, FloatField>(_textWriter.normalScale, 0, 255, 1, "Scale", Color.white);
+            _scaleSelector = new ValueSelector<float, FloatField>(_textWriter.normalScale, 0f, 4f, 0.1f, "Scale", Color.white);
             _locked = false;
 
             _alphaSelectionGrid = new string[3];
@@ -72,7 +76,7 @@ namespace ASP
             _alphaSelectionGrid[2] = "Whole Texture";
             _alphaSelection = (int) _textWriter.alphaOption;
 
-            _normalSelectionGrid = new String[4];
+            _normalSelectionGrid = new string[4];
             _normalSelectionGrid[0] = "Flat";
             _normalSelectionGrid[1] = "Raise Text";
             _normalSelectionGrid[2] = "Lower Text";
@@ -85,10 +89,23 @@ namespace ASP
 
             _selectedBackground = _textWriter.selectedTexture;
 
-            _speedGrid = new String[2];
+            _speedGrid = new string[2];
             _speedGrid[0] = "x 1";
             _speedGrid[1] = "x 10";
             _speedSelection = 0;
+
+            _blendMethodGrid = new string[3];
+            _blendMethodGrid[0] = "Pixel";
+            _blendMethodGrid[1] = "RGB";
+            _blendMethodGrid[2] = "HSV";
+            _blendMethodSelection = (int) _textWriter.blendMethod;
+
+            _directionGrid = new string[4];
+            _directionGrid[0] = "Left to Right";
+            _directionGrid[1] = "Right to Left";
+            _directionGrid[2] = "Up to Down";
+            _directionGrid[3] = "Down to Up";
+            _directionSelection = (int) _textWriter.textDirection;
         }
 
         public void Awake()
@@ -212,7 +229,7 @@ namespace ASP
                     Color color = new Color(r, g, b);
 
                     _previewTexture.SetPixels(_cachedPixels);
-                    _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY);
+                    _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY, (TextDirection) _directionSelection);
                     _previewTexture.Apply();
                 }
 
@@ -350,7 +367,14 @@ namespace ASP
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
+            GUILayout.Space(3);
+
+            drawBlendSelector();
+            GUILayout.Space(3);
+            drawDirectionSelector();
+
             GUILayout.Space(10);
+          
 
             if (GUILayout.Button("  Apply  ", GUILayout.Height(20)))
             {
@@ -367,6 +391,8 @@ namespace ASP
                 _textWriter.normalScale = _scaleSelector.value();
                 _textWriter.normalOption = (NormalOption) _normalSelection;
                 _textWriter.selectedTexture = _selectedBackground;
+                _textWriter.blendMethod = (BlendMethod) _blendMethodSelection;
+                _textWriter.textDirection = (TextDirection) _directionSelection;
                 _textWriter.writeText();
             }
 
@@ -498,7 +524,7 @@ namespace ASP
 
         private void drawAlphaSelector()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(GUI.skin.box);
 
             _alphaSelector.draw();
             _alphaSelection = GUILayout.SelectionGrid(_alphaSelection, _alphaSelectionGrid, 1);
@@ -508,12 +534,35 @@ namespace ASP
 
         private void drawNormalSelector()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(GUI.skin.box);
 
             _scaleSelector.draw();
             _normalSelection = GUILayout.SelectionGrid(_normalSelection, _normalSelectionGrid, 1); 
 
             GUILayout.EndHorizontal();
+        }
+
+        private void drawBlendSelector()
+        {
+            GUILayout.BeginVertical(GUI.skin.box);
+
+            GUILayout.Label("Text Blending Method");
+            _blendMethodSelection = GUILayout.SelectionGrid(_blendMethodSelection, _blendMethodGrid, 3);
+
+            GUILayout.EndVertical();
+        }
+
+        private void drawDirectionSelector()
+        {
+            GUILayout.BeginVertical(GUI.skin.box);
+
+            GUILayout.Label("Text Direction");
+
+            int oldDirection = _directionSelection;
+            _directionSelection = GUILayout.SelectionGrid(_directionSelection, _directionGrid, 4);
+            if (oldDirection != _directionSelection) _remakePreview = true;
+
+            GUILayout.EndVertical();
         }
     }
 }

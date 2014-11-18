@@ -8,8 +8,9 @@ using System.IO;
 namespace ASP
 {
     public enum AlphaOption { USE_TEXTURE, TEXT_ONLY, WHOLE_TEXTURE };
-
     public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
+    public enum BlendMethod {  PIXEL, RGB, HSV };
+    public enum TextDirection { LEFT_RIGHT, RIGHT_LEFT, UP_DOWN, DOWN_UP };
 
     public class ASPTextWriter : PartModule
     {
@@ -72,6 +73,8 @@ namespace ASP
 
         public AlphaOption alphaOption = AlphaOption.USE_TEXTURE;
         public NormalOption normalOption = NormalOption.USE_BACKGROUND;
+        public BlendMethod blendMethod = BlendMethod.RGB;
+        public TextDirection textDirection = TextDirection.LEFT_RIGHT;
         public bool hasNormalMap = false;
         public Rectangle boundingBox { get; private set; }
         public Texture2D backgroundTexture { get; private set; }
@@ -97,7 +100,8 @@ namespace ASP
             }
         }
 
-        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle boundingBox, int alpha, AlphaOption alphaOption)
+        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction,
+                                          Rectangle boundingBox, BlendMethod blendMethod, int alpha, AlphaOption alphaOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, false);
             
@@ -116,8 +120,8 @@ namespace ASP
                 bBox.h = backgroundReadable.height;
             }
 
-            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, bBox, true, alpha);
-            else texture.DrawText(text, font, color, x, y, bBox);
+            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, direction, bBox, blendMethod, true, alpha);
+            else texture.DrawText(text, font, color, x, y, direction, bBox, blendMethod, false, 255);
 
             if (alphaOption == AlphaOption.WHOLE_TEXTURE)
             {
@@ -137,7 +141,7 @@ namespace ASP
             return texture;
         }
 
-        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, Rectangle boundingBox, float scale, NormalOption normalOption)
+        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction, Rectangle boundingBox, float scale, NormalOption normalOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
@@ -160,7 +164,7 @@ namespace ASP
             Color normalColor = Color.gray;
             if (normalOption == NormalOption.RAISE_TEXT) normalColor = Color.black;
             if (normalOption == NormalOption.LOWER_TEXT) normalColor = Color.white;
-            textMap.DrawText(text, font, normalColor, x, y, bBox);
+            textMap.DrawText(text, font, normalColor, x, y, direction, bBox);
 
             if (normalOption == NormalOption.FLAT) textMap.Fill(Color.gray);
 
@@ -168,7 +172,7 @@ namespace ASP
 
             Color transparent = new Color(0f, 0f, 0f, 0f);
             textMap.Fill(transparent);
-            textMap.DrawText(text, font, Color.white, x, y, bBox);
+            textMap.DrawText(text, font, Color.white, x, y, direction, bBox);
 
             for (int i = 0; i < normalMap.width; ++i)
             {
@@ -214,7 +218,7 @@ namespace ASP
             textureURL = url + "/" + normalArray[selectedTexture];
             backgroundNormalMap = GameDatabase.Instance.GetTexture(textureURL, true);
 
-            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, boundingBox, alpha, alphaOption);
+            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, textDirection, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
             Material material = Instantiate(transform.gameObject.renderer.material) as Material;
@@ -229,7 +233,7 @@ namespace ASP
                 }
                 else
                 {
-                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, boundingBox, normalScale, normalOption);
+                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, textDirection, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
             }
@@ -258,6 +262,8 @@ namespace ASP
 
             if (node.HasValue("alphaOption")) alphaOption = (AlphaOption) ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
             if (node.HasValue("normalOption")) normalOption = (NormalOption) ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
+            if (node.HasValue("blendMethod")) blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
+            if (node.HasValue("textDirection")) textDirection = (TextDirection)ConfigNode.ParseEnum(typeof(TextDirection), node.GetValue("textDirection"));
         }
 
         public override void OnSave(ConfigNode node)
@@ -266,6 +272,8 @@ namespace ASP
 
             node.AddValue("alphaOption", ConfigNode.WriteEnum(alphaOption));
             node.AddValue("normalOption", ConfigNode.WriteEnum(normalOption));
+            node.AddValue("blendMethod", ConfigNode.WriteEnum(blendMethod));
+            node.AddValue("textDirection", ConfigNode.WriteEnum(textDirection));
         }
 
         public override void OnStart(StartState state)
@@ -333,6 +341,22 @@ namespace ASP
             }
 
             if (text != string.Empty) writeText();
+
+            Color c1 = new Color(1, 0, 0);
+            Color c2 = new Color(0, 1, 0);
+            RGB rgb1 = new RGB(c1.r, c1.g, c1.b);
+            RGB rgb2 = new RGB(c2.r, c2.g, c2.b);
+            HSV hsv1 = rgb1.toHSV();
+            HSV hsv2 = rgb2.toHSV();
+            HSV hsv3 = hsv1.blend(hsv2, 0.0f);
+            RGB rgb3 = hsv3.toRGB();
+
+            Debug.Log(String.Format("w1: rgb1 = {0}", rgb1.ToString()));
+            Debug.Log(String.Format("w2: rgb2 = {0}", rgb2.ToString()));
+            Debug.Log(String.Format("w3: hsv1 = {0}", hsv1.ToString()));
+            Debug.Log(String.Format("w4: hsv2 = {0}", hsv2.ToString()));
+            Debug.Log(String.Format("w5: hsv3 = {0}", hsv3.ToString()));
+            Debug.Log(String.Format("w6: rgb3 = {0}", rgb3.ToString()));
         }
     }
 }

@@ -22,6 +22,13 @@ namespace ASP
             return h + y;
         }
 
+        public void swapWH()
+        {
+            int t = w;
+            w = h;
+            h = t;
+        }
+
         public Rectangle()
         {
             x = 0;
