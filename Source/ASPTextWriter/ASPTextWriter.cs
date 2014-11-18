@@ -141,7 +141,8 @@ namespace ASP
             return texture;
         }
 
-        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction, Rectangle boundingBox, float scale, NormalOption normalOption)
+        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction,
+                                               Rectangle boundingBox, float scale, NormalOption normalOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
@@ -341,22 +342,6 @@ namespace ASP
             }
 
             if (text != string.Empty) writeText();
-
-            Color c1 = new Color(1, 0, 0);
-            Color c2 = new Color(0, 1, 0);
-            RGB rgb1 = new RGB(c1.r, c1.g, c1.b);
-            RGB rgb2 = new RGB(c2.r, c2.g, c2.b);
-            HSV hsv1 = rgb1.toHSV();
-            HSV hsv2 = rgb2.toHSV();
-            HSV hsv3 = hsv1.blend(hsv2, 0.0f);
-            RGB rgb3 = hsv3.toRGB();
-
-            Debug.Log(String.Format("w1: rgb1 = {0}", rgb1.ToString()));
-            Debug.Log(String.Format("w2: rgb2 = {0}", rgb2.ToString()));
-            Debug.Log(String.Format("w3: hsv1 = {0}", hsv1.ToString()));
-            Debug.Log(String.Format("w4: hsv2 = {0}", hsv2.ToString()));
-            Debug.Log(String.Format("w5: hsv3 = {0}", hsv3.ToString()));
-            Debug.Log(String.Format("w6: rgb3 = {0}", rgb3.ToString()));
         }
     }
 }
