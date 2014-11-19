@@ -12,8 +12,8 @@ Unity/**/*.csproj
 Unity/Assets/Fonts
 Unity/Assets/Fonts.meta
 Unity/Assets/PartTools
-Unity/Assets/PartTools.meta
-Unity/Assets/TextPlaqueLong.unity
+Unity/Assets/*.meta
+Unity/Assets/*.unity
 Unity/Library
 Unity/ProjectSettings
 Unity/PartTools.cfg
