@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="1024" height="1024" viewBox="0 0 1024 1024"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+<desc>'PaintBottle.blend', Cube.002, (Blender 2.72 (sub 0))</desc>
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="515.000,412.000 515.000,373.000 424.000,373.000 424.000,412.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="541.000,224.000 443.000,224.000 443.000,316.000 541.000,316.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="443.000,355.000 541.000,355.000 541.000,316.000 443.000,316.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="589.000,193.000 394.000,193.000 443.000,224.000 541.000,224.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="394.000,193.000 589.000,193.000 589.000,167.000 394.000,167.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="572.000,373.000 572.000,412.000 600.000,412.000 600.000,373.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="572.000,412.000 572.000,373.000 515.000,373.000 515.000,412.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="589.000,167.000 589.000,128.000 394.000,128.000 394.000,167.000 " />
+
+</svg>
