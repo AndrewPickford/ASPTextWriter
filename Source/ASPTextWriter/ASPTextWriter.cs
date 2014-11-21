@@ -88,10 +88,18 @@ namespace ASP
         private Material _currentMaterial = null;
         private Texture2D _currentTexture = null;
         private Texture2D _currentNormalMap = null;
+        private bool _ok = false;
 
-        [KSPEvent(name = "Edit Text Event", guiName = "Edit text", guiActive = false, guiActiveEditor = true)]
+        [KSPEvent(name = "Edit Text Event", guiName = "Edit Text", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
         {
+            if (_ok == false)
+            {
+                // something has gone wrong in OnStart
+                Debug.LogError("ASPTextWriter - incorrect start up, cannot display gui");
+                return;
+            }
+
             _gui = gameObject.GetComponent<TextEntryGUI>();
             if (_gui == null)
             {
@@ -289,10 +297,14 @@ namespace ASP
             if (transformName == "__FIRST__" || transformName == string.Empty)
             {
                 transformName = string.Empty;
-                Transform[] children = part.gameObject.GetComponentsInChildren<Transform>();
+                Transform[] children = this.part.partInfo.partPrefab.GetComponentsInChildren<Transform>(true);
                 foreach (Transform child in children)
                 {
-                    if (child.gameObject.renderer != null && child.gameObject.renderer.material != null) transformName = child.name;
+                    if (child.gameObject.renderer != null && child.gameObject.renderer.material != null)
+                    {
+                        transformName = child.name;
+                        break;
+                    }
                 }
             }
             if (transformName == string.Empty)
@@ -341,6 +353,7 @@ namespace ASP
                 fontSize = font.size;
             }
 
+            _ok = true;
             if (text != string.Empty) writeText();
         }
     }

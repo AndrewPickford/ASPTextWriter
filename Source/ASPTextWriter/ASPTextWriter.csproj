@@ -48,11 +48,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASPFlatPlateScale.cs" />
+    <Compile Include="ASPPainter.cs" />
     <Compile Include="CharacterMap.cs" />
     <Compile Include="ImageUtils.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
     <Compile Include="NormalMap.cs" />
+    <Compile Include="PaintPointer.cs" />
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Utils.cs" />

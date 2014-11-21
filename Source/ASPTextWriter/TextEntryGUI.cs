@@ -209,6 +209,11 @@ namespace ASP
                     else _cachedPixels = _cachedBackground.GetPixels();
                     _cachedBackgroundUrl = textureUrl;
 
+                    for (int i = 0; i < _cachedPixels.Length; ++i)
+                    {
+                        _cachedPixels[i].a = 1.0f;
+                    }
+
                     if (_previewTexture == null)
                     {
                         if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);

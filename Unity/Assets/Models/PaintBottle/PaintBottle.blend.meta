@@ -25,6 +25,7 @@ ModelImporter:
     100038: Tube
     100040: Collider
     100042: BackPlate
+    100044: Brush
     400000: //RootNode
     400002: Cube
     400004: Cube_001
@@ -47,6 +48,7 @@ ModelImporter:
     400038: Tube
     400040: Collider
     400042: BackPlate
+    400044: Brush
     2300000: //RootNode
     2300002: Cube
     2300004: Cube_001
@@ -69,6 +71,7 @@ ModelImporter:
     2300038: Tube
     2300040: Collider
     2300042: BackPlate
+    2300044: Brush
     3300000: //RootNode
     3300002: Cube
     3300004: Cube_001
@@ -91,6 +94,7 @@ ModelImporter:
     3300038: Tube
     3300040: Collider
     3300042: BackPlate
+    3300044: Brush
     4300000: Cube
     4300002: Cube_002
     4300004: Cube_001
@@ -112,6 +116,7 @@ ModelImporter:
     4300036: Support_6
     4300038: Collider
     4300040: BackPlate
+    4300042: Brush
     7400000: Default Take
     9500000: //RootNode
   materials:
