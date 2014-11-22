@@ -84,7 +84,7 @@ namespace ASP
             _normalSelection = (int) _textWriter.normalOption;
 
             string fontID = _textWriter.fontName + "-" + _textWriter.fontSize.ToString();
-            _selectedFont = ASPFontCache.Instance.getFontIndexByID(fontID);
+            _selectedFont = FontCache.Instance.getFontIndexByID(fontID);
             if (_selectedFont < 0) _selectedFont = 0;
 
             _selectedBackground = _textWriter.selectedTexture;
@@ -201,7 +201,7 @@ namespace ASP
 
                     if (_cachedBackground == null)
                     {
-                        Debug.LogError(String.Format("No such texture: {0}", _cachedBackground));
+                        Debug.LogError(String.Format("TWS: No such texture: {0}", _cachedBackground));
                         _remakePreview = false;
                     }
 
@@ -223,7 +223,7 @@ namespace ASP
                     if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
                 }
 
-                MappedFont font = ASPFontCache.Instance.list[_selectedFont];
+                MappedFont font = FontCache.Instance.list[_selectedFont];
 
                 if (font != null)
                 {
@@ -272,14 +272,14 @@ namespace ASP
 
             _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(500));
 
-            for (int i = 0; i < ASPFontCache.Instance.list.Count; ++i)
+            for (int i = 0; i < FontCache.Instance.list.Count; ++i)
             {
                 GUILayout.BeginHorizontal();
 
                 if (i == _selectedFont) GUI.contentColor = _selectedColor;
                 else GUI.contentColor = _notSelectedColor;
 
-                if (GUILayout.Button(ASPFontCache.Instance.list[i].displayName + "-" + ASPFontCache.Instance.list[i].size.ToString(), GUILayout.ExpandWidth(true)))
+                if (GUILayout.Button(FontCache.Instance.list[i].displayName + "-" + FontCache.Instance.list[i].size.ToString(), GUILayout.ExpandWidth(true)))
                 {
                     _selectedFont = i;
                     _remakePreview = true;
@@ -385,8 +385,8 @@ namespace ASP
             {
                 _textWriter.offsetX = _offsetX;
                 _textWriter.offsetY = _offsetY;
-                _textWriter.fontName = ASPFontCache.Instance.list[_selectedFont].name;
-                _textWriter.fontSize = ASPFontCache.Instance.list[_selectedFont].size;
+                _textWriter.fontName = FontCache.Instance.list[_selectedFont].name;
+                _textWriter.fontSize = FontCache.Instance.list[_selectedFont].size;
                 _textWriter.text = _text;
                 _textWriter.red = _redSelector.value();
                 _textWriter.green = _greenSelector.value();

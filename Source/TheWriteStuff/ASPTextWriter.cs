@@ -96,7 +96,8 @@ namespace ASP
             if (_ok == false)
             {
                 // something has gone wrong in OnStart
-                Debug.LogError("ASPTextWriter - incorrect start up, cannot display gui");
+                Debug.LogError("TWS - incorrect start up, cannot display gui");
+                ScreenMessages.PostScreenMessage("Error unable to start text writer gui", 5, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
 
@@ -210,10 +211,10 @@ namespace ASP
             if (transform == null) return;
 
             string fontID = fontName + "-" + fontSize.ToString();
-            MappedFont font = ASPFontCache.Instance.getFontByID(fontID);
+            MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
             {
-                font = ASPFontCache.Instance.list.First();
+                font = FontCache.Instance.list.First();
                 if (font == null) return;
                 fontName = font.name;
                 fontSize = font.size;
@@ -309,7 +310,7 @@ namespace ASP
             }
             if (transformName == string.Empty)
             {
-                Debug.LogError("Unable to find transform with material");
+                Debug.LogError("TWS: Unable to find transform with material");
                 return;
             }
 
@@ -344,10 +345,10 @@ namespace ASP
             boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
 
             string fontID = fontName + "-" + fontSize.ToString();
-            MappedFont font = ASPFontCache.Instance.getFontByID(fontID);
+            MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
             {
-                font = ASPFontCache.Instance.list.First();
+                font = FontCache.Instance.list.First();
                 if (font == null) return;
                 fontName = font.name;
                 fontSize = font.size;

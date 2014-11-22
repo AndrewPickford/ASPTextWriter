@@ -22,7 +22,7 @@ namespace ASP
         {
             _painter = painter;
 
-            ScreenMessages.PostScreenMessage("Start pointer", 5, ScreenMessageStyle.UPPER_CENTER);
+            ScreenMessages.PostScreenMessage("Paint Pointer - RMB or Escape to exit", 5, ScreenMessageStyle.UPPER_CENTER);
 
             if (_pointer == null)
             {

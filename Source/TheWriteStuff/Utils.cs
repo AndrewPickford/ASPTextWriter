@@ -54,7 +54,7 @@ namespace ASP
             Texture2D normalMap = LoadTexture(fileName);
 
 #if DEBUG
-            Debug.Log(String.Format("Converting {0} to normal map", fileName));
+            Debug.Log(String.Format("TWS: Converting {0} to normal map", fileName));
 #endif
 
             for (int i = 0; i < normalMap.width; ++i)
@@ -85,7 +85,7 @@ namespace ASP
             Texture2D texture = null;
 
 #if DEBUG
-            Debug.Log(String.Format("Loading texture file: {0}", fileName));
+            Debug.Log(String.Format("TWS: Loading texture file: {0}", fileName));
 #endif
 
             if (extension == ".mbm")
@@ -94,11 +94,11 @@ namespace ASP
             }
             else
             {
-                byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+                byte[] bytes = FileCache.Instance.getData(fileName);
 
                 if (bytes == null || (bytes != null && bytes.Length == 0))
                 {
-                    Debug.LogError(String.Format("Unable to load texture file: {0}", fileName));
+                    Debug.LogError(String.Format("TWS: Unable to load texture file: {0}", fileName));
                 }
 
                 texture = new Texture2D(1, 1);
@@ -121,13 +121,13 @@ namespace ASP
                 Color32[] test = readable.GetPixels32();
 
 #if DEBUG
-                Debug.Log(String.Format("Texture: {0} readable 32", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} readable 32", texture.name));
 #endif
             }
             catch
             {
 #if DEBUG
-                Debug.Log(String.Format("Texture: {0} not readable 32, loading from file", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} not readable 32, loading from file", texture.name));
 #endif
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
                 else readable = Utils.LoadTextureFromUrl(texture.name);
@@ -144,13 +144,13 @@ namespace ASP
                 Color test = readable.GetPixel(0, 0);
 
 #if DEBUG
-                Debug.Log(String.Format("Texture: {0} readable", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} readable", texture.name));
 #endif
             }
             catch
             {
 #if DEBUG
-                Debug.Log(String.Format("Texture: {0} not readable, loading from file", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} not readable, loading from file", texture.name));
 #endif
 
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
@@ -256,19 +256,19 @@ namespace ASP
 
         public static void DebugMaterial(Material material)
         {
-            Debug.Log(String.Format("Material: {0}", material.name));
+            Debug.Log(String.Format("TWS: Material: {0}", material.name));
 
             Type materialType = typeof(Material);
             System.Reflection.FieldInfo[] fieldInfo = materialType.GetFields();
             foreach (System.Reflection.FieldInfo info in fieldInfo)
             {
-                Debug.Log(String.Format("    {0}: {1}", info.Name, info.GetValue(material).ToString()));
+                Debug.Log(String.Format("TWS:    {0}: {1}", info.Name, info.GetValue(material).ToString()));
             }
 
             System.Reflection.PropertyInfo[] propertyInfo = materialType.GetProperties();
             foreach (System.Reflection.PropertyInfo info in propertyInfo)
             {
-                Debug.Log(String.Format("    {0}: {1}", info.Name, info.GetValue(material, null)));
+                Debug.Log(String.Format("TWS:    {0}: {1}", info.Name, info.GetValue(material, null)));
             }
         }
     }
