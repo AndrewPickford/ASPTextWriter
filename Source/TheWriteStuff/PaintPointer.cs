@@ -63,7 +63,7 @@ namespace ASP
             RaycastHit rayCastHit = new RaycastHit();
             Ray ray = FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition);
             bool hit = Physics.Raycast(ray, out rayCastHit, 50);
-            Color color = Color.blue;
+            Color color = Color.yellow;
             float dist = 99f;
 
             if (hit)
@@ -100,9 +100,9 @@ namespace ASP
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.Mouse1))
+            if (Input.GetKeyDown(KeyCode.Mouse1) || Input.GetKeyDown(KeyCode.Escape))
             {
-                ScreenMessages.PostScreenMessage("Mouse 1 pressed", 5, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage("Paint mode cancelled", 5, ScreenMessageStyle.UPPER_CENTER);
                 Destroy(_pointer);
                 Destroy(this);
             }
