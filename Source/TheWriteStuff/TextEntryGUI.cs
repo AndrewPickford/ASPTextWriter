@@ -401,6 +401,7 @@ namespace ASP
 
             GUI.SetNextControlName("TextField");
             _text = GUILayout.TextField(_text, GUILayout.ExpandWidth(true));
+            _text = System.Text.RegularExpressions.Regex.Replace(_text, @"[^\r\n]", "");
 
             if (oldText != _text) _remakePreview = true;
             GUILayout.EndHorizontal();
