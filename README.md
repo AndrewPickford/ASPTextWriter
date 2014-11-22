@@ -1,10 +1,10 @@
-ASPTextWriter
+TheWriteStuff
 =============
 
 by CmdrThyte (aka Andrew Pickford)
 
-ASP text writer is a mod for Kerbal Space Program which allows text to be written to part textures during
-ship construction.
+TheWriteStuff is a mod for Kerbal Space Program which allows text to be written to part textures both in the VAB and
+during eva.
 
 github page: https://github.com/AndrewPickford/ASPTextWriter
 
