@@ -43,6 +43,19 @@ namespace ASP
 
                 _pointer.SetActive(true);
             }
+
+            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+        }
+
+        void OnDestroy()
+        {
+            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+        }
+
+        void OnVesselChange(Vessel vesselChange)
+        {
+            Destroy(_pointer);
+            Destroy(this);
         }
 
         void Update()

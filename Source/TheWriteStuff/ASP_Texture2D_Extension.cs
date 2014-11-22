@@ -96,7 +96,7 @@ namespace UnityEngine
 
         // basic idea from http://forum.unity3d.com/threads/drawtext-on-texture2d.220217/
         public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.TextDirection direction,
-                                    ASP.Rectangle boundingBox, ASP.BlendMethod blend = ASP.BlendMethod.PIXEL, bool applyAlpha = false, int alpha = 255)
+                                    ASP.Rectangle boundingBox, ASP.BlendMethod blend = ASP.BlendMethod.RGB, bool applyAlpha = false, int alpha = 255)
         {
             ASP.CharacterMap cMap;
             int x = 0;

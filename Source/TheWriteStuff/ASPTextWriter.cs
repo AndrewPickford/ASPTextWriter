@@ -18,10 +18,10 @@ namespace ASP
         public string text = string.Empty;
 
         [KSPField(isPersistant = true)]
-        public string fontName = string.Empty;
+        public string fontName = "CAPSMALL_CLEAN";
 
         [KSPField(isPersistant = true)]
-        public int fontSize = -1;
+        public int fontSize = 32;
 
         [KSPField(isPersistant = true)]
         public string transformName = string.Empty;
@@ -214,7 +214,7 @@ namespace ASP
             MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
             {
-                font = FontCache.Instance.list.First();
+                font = FontCache.Instance.mappedList.First();
                 if (font == null) return;
                 fontName = font.name;
                 fontSize = font.size;
@@ -348,7 +348,7 @@ namespace ASP
             MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
             {
-                font = FontCache.Instance.list.First();
+                font = FontCache.Instance.mappedList.First();
                 if (font == null) return;
                 fontName = font.name;
                 fontSize = font.size;

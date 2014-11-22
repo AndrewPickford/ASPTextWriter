@@ -9,7 +9,9 @@ namespace ASP
     public class TextEntryGUI : MonoBehaviour
     {
         static private string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
+        static private int _nextID = 1;
 
+        private int _windowID = 0;
         private ASPTextWriter _textWriter;
         private Rect _windowPosition;
         private Texture2D _previewTexture = null;
@@ -17,6 +19,9 @@ namespace ASP
         private bool _remakePreview;
         private Vector2 _fontScrollPos;
         private int _selectedFont = 0;
+        private string[] _fontSizeGrid = null;
+        private int _fontSizeSelection = 0;
+        private int _lastFontSize = 0;
         private Color _notSelectedColor;
         private Color _selectedColor;
         private Color _backgroundColor;
@@ -51,10 +56,12 @@ namespace ASP
 
         public void initialise(ASPTextWriter tw)
         {
+            _windowID = _nextID;
+            ++_nextID;
+
             _textWriter = tw;
             _windowPosition = new Rect(700, 100, 400, 500);
             _remakePreview = true;
-            _selectedFont = 0;
             _notSelectedColor = new Color(0.7f, 0.7f, 0.7f);
             _selectedColor = new Color(1.0f, 1.0f, 1.0f);
             _backgroundColor = new Color(0.5f, 0.5f, 0.5f);
@@ -83,9 +90,11 @@ namespace ASP
             _normalSelectionGrid[3] = "Use background";
             _normalSelection = (int) _textWriter.normalOption;
 
-            string fontID = _textWriter.fontName + "-" + _textWriter.fontSize.ToString();
-            _selectedFont = FontCache.Instance.getFontIndexByID(fontID);
+            _selectedFont = FontCache.Instance.getFontIndexByName(_textWriter.fontName);
             if (_selectedFont < 0) _selectedFont = 0;
+            _fontSizeSelection = FontCache.Instance.getFontSizeIndex(_textWriter.fontName, _textWriter.fontSize);
+            if (_fontSizeSelection < 0) _fontSizeSelection = 0;
+            _lastFontSize = FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
 
             _selectedBackground = _textWriter.selectedTexture;
 
@@ -108,18 +117,26 @@ namespace ASP
             _directionSelection = (int) _textWriter.textDirection;
         }
 
+        void OnVesselChange(Vessel vesselChange)
+        {
+            GameObject.Destroy(this);
+        }
+
         public void Awake()
         {
             InputLockManager.RemoveControlLock(_lockText);
             _remakePreview = true;
+            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(this.OnVesselChange));
         }
 
         public void OnDestroy()
         {
             EditorLogic.fetch.Unlock(_lockText);
 
-            if (_cachedBackground != null) Destroy(_cachedBackground);
-            if (_previewTexture != null) Destroy(_previewTexture);
+            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+
+            if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
+            if (_previewTexture != null) GameObject.Destroy(_previewTexture);
         }
 
         public void OnGUI()
@@ -127,7 +144,7 @@ namespace ASP
             GUI.backgroundColor = _backgroundColor;
 
             checkGUILock();
-            _windowPosition = GUILayout.Window(0, _windowPosition, drawWindow, "Text Editor");
+            _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Text Editor");
         }
 
         // fix for editor click through: http://forum.kerbalspaceprogram.com/threads/83660-Fixed-Stopping-click-through-a-GUI-window-%28Part-menu-in-flight-and-Editor%29
@@ -169,11 +186,11 @@ namespace ASP
 
             GUILayout.Space(5);
 
+            GUILayout.BeginVertical();
             drawBackgroundList();
-
-            GUILayout.Space(5);
-
+            GUILayout.Space(3);
             drawFontList();
+            GUILayout.EndVertical();
 
             GUILayout.EndHorizontal();
 
@@ -196,7 +213,7 @@ namespace ASP
 
                 if (_cachedBackgroundUrl != textureUrl)
                 {
-                    if (_cachedBackground != null) Destroy(_cachedBackground);
+                    if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
                     _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
 
                     if (_cachedBackground == null)
@@ -223,7 +240,10 @@ namespace ASP
                     if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
                 }
 
-                MappedFont font = FontCache.Instance.list[_selectedFont];
+                MappedFont font = FontCache.Instance.getFontByNameSize(FontCache.Instance.fontInfoArray[_selectedFont].name,
+                                                                       FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection]);
+
+                if (font == null) font = FontCache.Instance.mappedList.First();
 
                 if (font != null)
                 {
@@ -262,26 +282,56 @@ namespace ASP
         {
             Color contentColor = GUI.contentColor;
 
-            GUILayout.BeginVertical();
+            GUILayout.BeginVertical(GUI.skin.box);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Fonts");
+            GUILayout.Label("Size");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            if (_fontSizeGrid == null)
+            {
+                _fontSizeGrid = new string[FontCache.Instance.fontInfoArray[_selectedFont].sizes.Length];
+                for (int i = 0; i < _fontSizeGrid.Length; ++i)
+                {
+                    _fontSizeGrid[i] = FontCache.Instance.fontInfoArray[_selectedFont].sizes[i].ToString();
+                }
+            }
+
+            int oldFontSizeSelection = _fontSizeSelection;
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            _fontSizeSelection = GUILayout.SelectionGrid(_fontSizeSelection, _fontSizeGrid, 6);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+            if (oldFontSizeSelection != _fontSizeSelection) _remakePreview = true;
+
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Font");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(500));
 
-            for (int i = 0; i < FontCache.Instance.list.Count; ++i)
+            int oldSelectedFont = _selectedFont;
+            for (int i = 0; i < FontCache.Instance.fontInfoArray.Length; ++i)
             {
                 GUILayout.BeginHorizontal();
 
                 if (i == _selectedFont) GUI.contentColor = _selectedColor;
                 else GUI.contentColor = _notSelectedColor;
 
-                if (GUILayout.Button(FontCache.Instance.list[i].displayName + "-" + FontCache.Instance.list[i].size.ToString(), GUILayout.ExpandWidth(true)))
+                if (GUILayout.Button(FontCache.Instance.fontInfoArray[i].displayName, GUILayout.ExpandWidth(true)))
                 {
                     _selectedFont = i;
+                    _fontSizeGrid = null;
+                    _lastFontSize = FontCache.Instance.fontInfoArray[oldSelectedFont].sizes[_fontSizeSelection];
+                    _fontSizeSelection = FontCache.Instance.getFontSizeIndex(FontCache.Instance.fontInfoArray[_selectedFont].name, _lastFontSize);
+                    if (_fontSizeSelection < 0) _fontSizeSelection = 0;
                     _remakePreview = true;
                 }
 
@@ -299,7 +349,7 @@ namespace ASP
         {
             Color contentColor = GUI.contentColor;
 
-            GUILayout.BeginVertical();
+            GUILayout.BeginVertical(GUI.skin.box);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -307,7 +357,7 @@ namespace ASP
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            _backgroundScrollPos = GUILayout.BeginScrollView(_backgroundScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(500));
+            _backgroundScrollPos = GUILayout.BeginScrollView(_backgroundScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(100));
 
             for (int i = 0; i < _textWriter.displayNameArray.Length; ++i)
             {
@@ -385,8 +435,8 @@ namespace ASP
             {
                 _textWriter.offsetX = _offsetX;
                 _textWriter.offsetY = _offsetY;
-                _textWriter.fontName = FontCache.Instance.list[_selectedFont].name;
-                _textWriter.fontSize = FontCache.Instance.list[_selectedFont].size;
+                _textWriter.fontName = FontCache.Instance.fontInfoArray[_selectedFont].name;
+                _textWriter.fontSize = FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
                 _textWriter.text = _text;
                 _textWriter.red = _redSelector.value();
                 _textWriter.green = _greenSelector.value();
