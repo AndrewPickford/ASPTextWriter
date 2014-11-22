@@ -8,7 +8,7 @@ function ask_yes_or_no() {
     esac
 }
 
-file=ASPTextWriter-${1}.zip
+file=TheWriteStuff-${1}.zip
 
 if [[ "no" == $(ask_yes_or_no "Create release $file") ]]
 then
@@ -17,18 +17,21 @@ fi
 
 echo creating $file
 
-cd /cygdrive/d/ksp/asp/ASPTextWriter
-rm -f Ignore/README-ASP-TextWriter.txt
-rm -f Ignore/INSTALL-ASP-TextWriter.txt
+cd /cygdrive/d/ksp/asp/ASP-TheWriteStuff
+rm -f Ignore/README-The-Write-Stuff.txt
+rm -f Ignore/INSTALL-The-Write-Stuff.txt
 rm -f Ignore/$file
 
-cp README.md Ignore/README-ASP-TextWriter.txt
-cp INSTALL.txt Ignore/INSTALL-ASP-TextWriter.txt
+cp README.md Ignore/README-The-Write-Stuff.txt
+cp INSTALL.txt Ignore/INSTALL-The-Write-Stuff.txt
 
 cd Ignore
-zip $file README-ASP-TextWriter.txt
-zip $file INSTALL-ASP-TextWriter.txt
+zip $file README-The-Write-Stuff.txt
+zip $file INSTALL-The-Write-Stuff.txt
 
-cd /cygdrive/d/ksp/asp/ASPTextWriter/GameData
+cd /cygdrive/d/ksp/asp/ASP-TheWriteStuff/GameData
+
 find . -perm 000 -exec chmod 644 {} \;
-zip -r /cygdrive/d/ksp/asp/ASPTextWriter/Ignore/$file ASP/ASPTextWriter
+find . -type d ! -perm -u+x -exec chmod a+x {} \;
+
+zip -r /cygdrive/d/ksp/asp/ASP-TheWriteStuff/Ignore/$file ASP/TheWriteStuff
