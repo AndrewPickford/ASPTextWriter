@@ -84,23 +84,19 @@ namespace ASP
             string extension = System.IO.Path.GetExtension(fileName);
             Texture2D texture = null;
 
-#if DEBUG
-            Debug.Log(String.Format("TWS: Loading texture file: {0}", fileName));
-#endif
+            byte[] bytes = FileCache.Instance.getData(fileName);
+            if (bytes == null || (bytes != null && bytes.Length == 0))
+            {
+                Debug.LogError(String.Format("TWS: Unable to load texture file: {0}", fileName));
+                return new Texture2D(1, 1);
+            }
 
             if (extension == ".mbm")
             {
-                texture = FromATM.MBMToTexture(fileName, true);
+                texture = FromATM.MBMToTexture(bytes, true);
             }
             else
             {
-                byte[] bytes = FileCache.Instance.getData(fileName);
-
-                if (bytes == null || (bytes != null && bytes.Length == 0))
-                {
-                    Debug.LogError(String.Format("TWS: Unable to load texture file: {0}", fileName));
-                }
-
                 texture = new Texture2D(1, 1);
                 texture.LoadImage(bytes);
             }
@@ -127,7 +123,7 @@ namespace ASP
             catch
             {
 #if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} not readable 32, loading from file", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
 #endif
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
                 else readable = Utils.LoadTextureFromUrl(texture.name);
@@ -150,7 +146,7 @@ namespace ASP
             catch
             {
 #if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} not readable, loading from file", texture.name));
+                Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
 #endif
 
                 if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);

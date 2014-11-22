@@ -38,33 +38,27 @@ namespace ASP
 {
     class FromATM
     {
-        public static Texture2D MBMToTexture(string fileName, bool mipmaps)
+        public static Texture2D MBMToTexture(byte[] bytes, bool mipmaps)
         {
             bool isNormalMap = false;
-            FileStream mbmStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            mbmStream.Position = 4;
 
             uint width = 0, height = 0;
             for (int b = 0; b < 4; b++)
             {
                 width >>= 8;
-                width |= (uint)(mbmStream.ReadByte() << 24);
+                width |= (uint)(bytes[4+b] << 24);
             }
             for (int b = 0; b < 4; b++)
             {
                 height >>= 8;
-                height |= (uint)(mbmStream.ReadByte() << 24);
+                height |= (uint)(bytes[8+b] << 24);
             }
-            mbmStream.Position = 12;
-            if (mbmStream.ReadByte() == 1)
+            if (bytes[12] == 1)
             {
                 isNormalMap = true;
             }
             
-
-            mbmStream.Position = 16;
-            int format = mbmStream.ReadByte();
-            mbmStream.Position += 3;
+            int format = bytes[16];
 
             int imageSize = (int)(width * height * 3);
             TextureFormat texformat = TextureFormat.RGB24;
@@ -80,21 +74,17 @@ namespace ASP
                 texformat = TextureFormat.ARGB32;
             }
 
-            Byte[] bytes = new Byte[imageSize];
-            mbmStream.Read(bytes, 0, imageSize);
-            mbmStream.Close();
-
             Texture2D texture = new Texture2D((int) width, (int) height, texformat, mipmaps);
             Color32[] colors = new Color32[width * height];
             int n = 0;
             for (int i = 0; i < width * height; i++)
             {
-                colors[i].r = bytes[n++];
-                colors[i].g = bytes[n++];
-                colors[i].b = bytes[n++];
+                colors[i].r = bytes[20 + n++];
+                colors[i].g = bytes[20 + n++];
+                colors[i].b = bytes[20 + n++];
                 if (alpha)
                 {
-                    colors[i].a = bytes[n++];
+                    colors[i].a = bytes[20 + n++];
                 }
                 else
                 {
