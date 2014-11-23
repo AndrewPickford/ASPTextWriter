@@ -205,7 +205,7 @@ namespace ASP
 
         public void writeText()
         {
-            if (text == null || text == "") return;
+            if (text == null || text == string.Empty) return;
 
             Transform transform = this.part.FindModelTransform(transformName);
             if (transform == null) return;
@@ -286,37 +286,22 @@ namespace ASP
             node.AddValue("textDirection", ConfigNode.WriteEnum(textDirection));
         }
 
-        public override void OnStart(StartState state)
+        private void findUsableTransform()
         {
-            base.OnStart(state);
-
-            if (state == StartState.Editor)
+            transformName = string.Empty;
+            Transform[] children = this.part.partInfo.partPrefab.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
             {
-                this.part.OnEditorDestroy += OnEditorDestroy;
-            }
-
-            if (transformName == "__FIRST__" || transformName == string.Empty)
-            {
-                transformName = string.Empty;
-                Transform[] children = this.part.partInfo.partPrefab.GetComponentsInChildren<Transform>(true);
-                foreach (Transform child in children)
+                if (child.gameObject.renderer != null && child.gameObject.renderer.material != null)
                 {
-                    if (child.gameObject.renderer != null && child.gameObject.renderer.material != null)
-                    {
-                        transformName = child.name;
-                        break;
-                    }
+                    transformName = child.name;
+                    break;
                 }
             }
-            if (transformName == string.Empty)
-            {
-                Debug.LogError("TWS: Unable to find transform with material");
-                return;
-            }
+        }
 
-            Transform transform = this.part.FindModelTransform(transformName);
-            if (transform == null) return;
-
+        private void findTextures()
+        {
             backgroundTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
             backgroundNormalMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
             if (backgroundNormalMap != null) hasNormalMap = true;
@@ -341,9 +326,10 @@ namespace ASP
                 normalArray = Utils.SplitString(normals);
                 displayNameArray = Utils.SplitString(displayNames);
             }
+        }
 
-            boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
-
+        private void findFont()
+        {
             string fontID = fontName + "-" + fontSize.ToString();
             MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
@@ -353,6 +339,32 @@ namespace ASP
                 fontName = font.name;
                 fontSize = font.size;
             }
+        }
+
+        public override void OnStart(StartState state)
+        {
+            base.OnStart(state);
+
+            if (state == StartState.Editor)
+            {
+                this.part.OnEditorDestroy += OnEditorDestroy;
+            }
+
+            if (transformName == "__FIRST__" || transformName == string.Empty) findUsableTransform();
+            if (transformName == string.Empty)
+            {
+                Debug.LogError("TWS: Unable to find transform with material");
+                return;
+            }
+
+            Transform transform = this.part.FindModelTransform(transformName);
+            if (transform == null) return;
+
+            findTextures();
+
+            boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
+
+            findFont();
 
             _ok = true;
             if (text != string.Empty) writeText();
