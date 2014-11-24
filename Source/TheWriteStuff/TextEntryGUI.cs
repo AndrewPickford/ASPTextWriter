@@ -9,7 +9,7 @@ namespace ASP
     public class TextEntryGUI : MonoBehaviour
     {
         static private string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
-        static private int _nextID = 1;
+        static private int _nextID = 63851;
 
         private int _windowID = 0;
         private ASPTextWriter _textWriter;
@@ -143,8 +143,8 @@ namespace ASP
         {
             GUI.backgroundColor = _backgroundColor;
 
-            checkGUILock();
             _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Text Editor");
+            checkGUILock();
         }
 
         // fix for editor click through: http://forum.kerbalspaceprogram.com/threads/83660-Fixed-Stopping-click-through-a-GUI-window-%28Part-menu-in-flight-and-Editor%29
@@ -162,6 +162,8 @@ namespace ASP
                     EditorTooltip.Instance.HideToolTip();
                     EditorLogic.fetch.Lock(false, false, false, _lockText);
                 }
+
+                GUI.FocusWindow(_windowID);
             }
             
             if (!_windowPosition.Contains(mouse) && _locked)
