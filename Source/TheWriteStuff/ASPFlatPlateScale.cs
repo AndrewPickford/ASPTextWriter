@@ -92,9 +92,11 @@ namespace ASP
                 baseMass = part.mass;
             }
 
-            _transform = this.part.FindModelTransform(transformName);
+            AvailablePart a = PartLoader.getPartInfoByName(this.part.partInfo.name);
+            Transform t = a.partPrefab.FindModelTransform(transformName);
+            _originalScale = new Vector3(t.localScale.x, t.localScale.y, t.localScale.z);
 
-            if (_transform != null) _originalScale = _transform.localScale;
+            _transform = this.part.FindModelTransform(transformName);
 
             rescale();
         }
