@@ -23,7 +23,7 @@
 
 /*
  * The MBMToTexture function from Active Texture Management
- * Modified a bit
+ * Modified a fair bit by Andrew Pickford
  */
 
 
@@ -96,6 +96,5 @@ namespace ASP
 
             return texture;
         }
-
     }
 }

@@ -65,8 +65,6 @@ namespace ASP
             _notSelectedColor = new Color(0.7f, 0.7f, 0.7f);
             _selectedColor = new Color(1.0f, 1.0f, 1.0f);
             _backgroundColor = new Color(0.5f, 0.5f, 0.5f);
-            _offsetX = _textWriter.offsetX;
-            _offsetY = _textWriter.offsetY;
             _text = _textWriter.text;
             _lastButtonPress = 0;
             _autoRepeatGap = 0.4f;
@@ -115,9 +113,30 @@ namespace ASP
             _directionGrid[2] = "Up to Down";
             _directionGrid[3] = "Down to Up";
             _directionSelection = (int) _textWriter.textDirection;
+
+            getPreviewTexture();
+
+            if (_textWriter.width > 0)
+            {
+                _offsetX = _textWriter.offsetX - _textWriter.bottomLeftX;
+                _offsetY = _textWriter.offsetY - _textWriter.bottomLeftY;
+            }
+            else
+            {
+                _offsetX = _textWriter.offsetX;
+                _offsetY = _textWriter.offsetY;
+            }
+
+            if (_text == string.Empty) centreOffset();           
         }
 
-        void OnVesselChange(Vessel vesselChange)
+        private void centreOffset()
+        {
+            _offsetX = _previewTexture.width / 2;
+            _offsetY = _previewTexture.height / 2;
+        }
+
+        private void OnVesselChange(Vessel vesselChange)
         {
             GameObject.Destroy(this);
         }
@@ -207,40 +226,43 @@ namespace ASP
             GUI.DragWindow();
         }
 
+        private void getPreviewTexture()
+        {
+            string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+
+            if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
+            _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
+
+            if (_cachedBackground == null)
+            {
+                Debug.LogError(String.Format("TWS: No such texture: {0}", _cachedBackground));
+                _remakePreview = false;
+            }
+
+            if (_textWriter.width > 0) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
+            else _cachedPixels = _cachedBackground.GetPixels();
+            _cachedBackgroundUrl = textureUrl;
+
+            for (int i = 0; i < _cachedPixels.Length; ++i)
+            {
+                _cachedPixels[i].a = 1.0f;
+            }
+
+            if (_previewTexture == null)
+            {
+                if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
+                else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
+            }
+
+            if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
+        }
+
         private void drawTexture()
         {
             if (_remakePreview)
             {
                 string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
-
-                if (_cachedBackgroundUrl != textureUrl)
-                {
-                    if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
-                    _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
-
-                    if (_cachedBackground == null)
-                    {
-                        Debug.LogError(String.Format("TWS: No such texture: {0}", _cachedBackground));
-                        _remakePreview = false;
-                    }
-
-                    if (_textWriter.width > 0) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
-                    else _cachedPixels = _cachedBackground.GetPixels();
-                    _cachedBackgroundUrl = textureUrl;
-
-                    for (int i = 0; i < _cachedPixels.Length; ++i)
-                    {
-                        _cachedPixels[i].a = 1.0f;
-                    }
-
-                    if (_previewTexture == null)
-                    {
-                        if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
-                        else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
-                    }
-
-                    if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
-                }
+                if (_cachedBackgroundUrl != textureUrl) getPreviewTexture();
 
                 MappedFont font = FontCache.Instance.getFontByNameSize(FontCache.Instance.fontInfoArray[_selectedFont].name,
                                                                        FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection]);
@@ -436,8 +458,17 @@ namespace ASP
 
             if (GUILayout.Button("  Apply  ", GUILayout.Height(20)))
             {
-                _textWriter.offsetX = _offsetX;
-                _textWriter.offsetY = _offsetY;
+                if (_textWriter.width > 0)
+                {
+                    _textWriter.offsetX = _offsetX + _textWriter.bottomLeftX;
+                    _textWriter.offsetY = _offsetY + _textWriter.bottomLeftY;
+                }
+                else
+                {
+                    _textWriter.offsetX = _offsetX;
+                    _textWriter.offsetY = _offsetY;
+                }
+
                 _textWriter.fontName = FontCache.Instance.fontInfoArray[_selectedFont].name;
                 _textWriter.fontSize = FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
                 _textWriter.text = _text;
@@ -508,10 +539,9 @@ namespace ASP
 
             GUILayout.Space(5);
 
-            if (GUILayout.Button("X", GUILayout.Width(25), GUILayout.Height(25)))
+            if (GUILayout.Button("O", GUILayout.Width(25), GUILayout.Height(25)))
             {
-                _offsetX = 0;
-                _offsetY = 0;
+                centreOffset();
                 _remakePreview = true;
             }
 

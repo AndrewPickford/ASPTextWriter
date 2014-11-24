@@ -208,15 +208,8 @@ namespace ASP
         {
             if (text == null || text == string.Empty) return;
 
-            string fontID = fontName + "-" + fontSize.ToString();
-            MappedFont font = FontCache.Instance.getFontByID(fontID);
-            if (font == null)
-            {
-                font = FontCache.Instance.mappedList.First();
-                if (font == null) return;
-                fontName = font.name;
-                fontSize = font.size;
-            }
+            MappedFont font = findFont();
+            if (font == null) return;
 
             Color color = new Color((float) red/255f, (float) green/255f, (float) blue/255f);
 
@@ -226,7 +219,7 @@ namespace ASP
             textureURL = url + "/" + normalArray[selectedTexture];
             backgroundNormalMap = GameDatabase.Instance.GetTexture(textureURL, true);
 
-            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, textDirection, boundingBox, blendMethod, alpha, alphaOption);
+            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, offsetX, offsetY, textDirection, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
             Material material = Instantiate(_textTransform.gameObject.renderer.material) as Material;
@@ -241,7 +234,7 @@ namespace ASP
                 }
                 else
                 {
-                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, textDirection, boundingBox, normalScale, normalOption);
+                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, offsetX, offsetY, textDirection, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
             }
@@ -326,17 +319,22 @@ namespace ASP
             }
         }
 
-        private void findFont()
+        private MappedFont findFont()
         {
             string fontID = fontName + "-" + fontSize.ToString();
             MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
             {
                 font = FontCache.Instance.mappedList.First();
-                if (font == null) return;
-                fontName = font.name;
-                fontSize = font.size;
+                if (font == null) fontName = string.Empty;
+                else
+                {
+                    fontName = font.name;
+                    fontSize = font.size;
+                }
             }
+
+            return font;
         }
 
         public override void OnStart(StartState state)
@@ -366,7 +364,8 @@ namespace ASP
 
             boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
 
-            findFont();
+            MappedFont font = findFont();
+            if (font == null) return;
 
             _ok = true;
             if (text != string.Empty) writeText();
