@@ -88,6 +88,7 @@ namespace ASP
         private Material _currentMaterial = null;
         private Texture2D _currentTexture = null;
         private Texture2D _currentNormalMap = null;
+        private Transform _textTransform = null;
         private bool _ok = false;
 
         [KSPEvent(name = "Edit Text Event", guiName = "Edit Text", guiActive = false, guiActiveEditor = true)]
@@ -207,9 +208,6 @@ namespace ASP
         {
             if (text == null || text == string.Empty) return;
 
-            Transform transform = this.part.FindModelTransform(transformName);
-            if (transform == null) return;
-
             string fontID = fontName + "-" + fontSize.ToString();
             MappedFont font = FontCache.Instance.getFontByID(fontID);
             if (font == null)
@@ -231,8 +229,8 @@ namespace ASP
             Texture2D newTexture = PaintText(backgroundTexture, text, font, color, bottomLeftX + offsetX, bottomLeftY + offsetY, textDirection, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
-            Material material = Instantiate(transform.gameObject.renderer.material) as Material;
-            material.CopyPropertiesFromMaterial(transform.gameObject.renderer.material);
+            Material material = Instantiate(_textTransform.gameObject.renderer.material) as Material;
+            material.CopyPropertiesFromMaterial(_textTransform.gameObject.renderer.material);
             material.SetTexture("_MainTex", newTexture);
 
             if (backgroundNormalMap != null)
@@ -248,7 +246,7 @@ namespace ASP
                 }
             }
 
-            transform.gameObject.renderer.material = material;
+            _textTransform.gameObject.renderer.material = material;
 
             if (_currentMaterial != null) Destroy(_currentMaterial);
             _currentMaterial = material;
@@ -302,8 +300,8 @@ namespace ASP
 
         private void findTextures()
         {
-            backgroundTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
-            backgroundNormalMap = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+            backgroundTexture = _textTransform.gameObject.renderer.material.mainTexture as Texture2D;
+            backgroundNormalMap = _textTransform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
             if (backgroundNormalMap != null) hasNormalMap = true;
 
             // all the textures need to be in the same directory as the first texture
@@ -357,8 +355,12 @@ namespace ASP
                 return;
             }
 
-            Transform transform = this.part.FindModelTransform(transformName);
-            if (transform == null) return;
+            _textTransform = this.part.FindModelTransform(transformName);
+            if (_textTransform == null)
+            {
+                Debug.LogError(String.Format("TWS: Unable to find transform {0}", transformName));
+                return;
+            }
 
             findTextures();
 
