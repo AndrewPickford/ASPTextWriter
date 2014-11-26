@@ -160,6 +160,7 @@ namespace ASP
             Color32[] pixels = backgroundReadable.GetPixels32();
             normalMap.name = background.name + "(Copy)";
             normalMap.SetPixels32(pixels);
+            
 
             Rectangle bBox = new Rectangle(boundingBox);
             if (bBox.w == -1)
@@ -176,7 +177,6 @@ namespace ASP
             if (normalOption == NormalOption.RAISE_TEXT) normalColor = Color.black;
             if (normalOption == NormalOption.LOWER_TEXT) normalColor = Color.white;
             textMap.DrawText(text, font, normalColor, x, y, direction, bBox);
-
             if (normalOption == NormalOption.FLAT) textMap.Fill(Color.gray);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);

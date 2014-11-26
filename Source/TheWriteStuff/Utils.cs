@@ -42,44 +42,14 @@ namespace ASP
             return "";
         }
 
-        public static Texture2D LoadNormalMapFromUrl(string url)
+        public static Texture2D LoadTextureFromUrl(string url, bool normalMap)
         {
             string fileName = GetTextureFileName(url);
 
-            return LoadNormalMap(fileName);
+            return LoadTexture(fileName, normalMap);
         }
 
-        public static Texture2D LoadNormalMap(string fileName)
-        {
-            Texture2D normalMap = LoadTexture(fileName);
-
-#if DEBUG
-            Debug.Log(String.Format("TWS: Converting {0} to normal map", fileName));
-#endif
-
-            for (int i = 0; i < normalMap.width; ++i)
-            {
-                for (int j = 0; j < normalMap.height; ++j)
-                {
-                    Color oldColor = normalMap.GetPixel(i, j);
-                    Color newColor = new Color(0f, oldColor.g, 0f, oldColor.r);
-                    normalMap.SetPixel(i, j, newColor);
-                }
-            }
-
-            normalMap.Apply();
-
-            return normalMap;
-        }
-
-        public static Texture2D LoadTextureFromUrl(string url)
-        {
-            string fileName = GetTextureFileName(url);
-
-            return LoadTexture(fileName);
-        }
-
-        public static Texture2D LoadTexture(string fileName)
+        public static Texture2D LoadTexture(string fileName, bool normalMap)
         {
             string extension = System.IO.Path.GetExtension(fileName);
             Texture2D texture = null;
@@ -93,12 +63,31 @@ namespace ASP
 
             if (extension == ".mbm")
             {
-                texture = FromATM.MBMToTexture(bytes, true);
+                texture = FromATM.MBMToTexture(bytes, false);
             }
             else
             {
                 texture = new Texture2D(1, 1);
                 texture.LoadImage(bytes);
+            }
+
+            if (normalMap)
+            {
+                bool convertToNormal = true;
+                if (extension == ".mbm" && bytes[12] == 1) convertToNormal = false;
+
+                if (convertToNormal)
+                {
+                    for (int i = 0; i < texture.width; ++i)
+                    {
+                        for (int j = 0; j < texture.height; ++j)
+                        {
+                            Color oldColor = texture.GetPixel(i, j);
+                            Color newColor = new Color(oldColor.g, oldColor.g, oldColor.g, oldColor.r);
+                            texture.SetPixel(i, j, newColor);
+                        }
+                    }
+                }
             }
 
             texture.name = System.IO.Path.GetFileNameWithoutExtension(fileName);
@@ -125,8 +114,7 @@ namespace ASP
 #if DEBUG
                 Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
 #endif
-                if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
-                else readable = Utils.LoadTextureFromUrl(texture.name);
+                readable = Utils.LoadTextureFromUrl(texture.name, normalMap);
             }
 
             return readable;
@@ -149,8 +137,7 @@ namespace ASP
                 Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
 #endif
 
-                if (normalMap) readable = Utils.LoadNormalMapFromUrl(texture.name);
-                else readable = Utils.LoadTextureFromUrl(texture.name);
+                readable = Utils.LoadTextureFromUrl(texture.name, normalMap);
             }
 
             return readable;
@@ -266,6 +253,13 @@ namespace ASP
             {
                 Debug.Log(String.Format("TWS:    {0}: {1}", info.Name, info.GetValue(material, null)));
             }
+        }
+
+        public static void WriteTexture(Texture2D texture, string fileName)
+        {
+            Byte[] bytes = texture.EncodeToPNG();
+
+            System.IO.File.WriteAllBytes(fileName, bytes);
         }
     }
 }

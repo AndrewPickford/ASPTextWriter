@@ -60,36 +60,32 @@ namespace ASP
             
             int format = bytes[16];
 
-            int imageSize = (int)(width * height * 3);
             TextureFormat texformat = TextureFormat.RGB24;
             bool alpha = false;
-            if (format == 32)
+            int mult = 3;
+            if (format == 32 || isNormalMap)
             {
-                imageSize += (int)(width * height);
                 texformat = TextureFormat.ARGB32;
                 alpha = true;
-            }
-            if (isNormalMap)
-            {
-                texformat = TextureFormat.ARGB32;
+                mult = 4;
             }
 
             Texture2D texture = new Texture2D((int) width, (int) height, texformat, mipmaps);
             Color32[] colors = new Color32[width * height];
-            int n = 0;
             for (int i = 0; i < width * height; i++)
             {
-                colors[i].r = bytes[20 + n++];
-                colors[i].g = bytes[20 + n++];
-                colors[i].b = bytes[20 + n++];
+                colors[i].r = bytes[20 + i*mult];
+                colors[i].g = bytes[20 + i*mult + 1];
+                colors[i].b = bytes[20 + i*mult + 2];
                 if (alpha)
                 {
-                    colors[i].a = bytes[20 + n++];
+                    colors[i].a = bytes[20 + i*mult + 3];
                 }
                 else
                 {
                     colors[i].a = 255;
                 }
+                if (i < 2) Debug.Log(String.Format("w1: {0} {0}", i, colors[i]));
             }
 
             texture.SetPixels32(colors);

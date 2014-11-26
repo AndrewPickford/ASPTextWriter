@@ -55,9 +55,9 @@ namespace ASP
                     normal = normal / 2f;
 
                     // change to unity normal format
-                    color.r = 0f;
+                    color.r = normal.y;
                     color.g = normal.y;
-                    color.b = 0f;
+                    color.b = normal.y;
                     color.a = normal.x;
                     normalMap.SetPixel(i, j, color);
                 }
