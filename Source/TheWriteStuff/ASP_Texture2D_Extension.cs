@@ -88,28 +88,22 @@ namespace UnityEngine
             texture.Apply();
         }
 
-        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, bool mirror,
-                                    ASP.TextDirection direction)
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.TextDirection direction)
         {
             ASP.Rectangle boundingBox = new ASP.Rectangle(0, 0, texture.width, texture.height);
-            DrawText(texture, text, font, color, offsetX, offsetY, mirror, direction, boundingBox);
+            DrawText(texture, text, font, color, offsetX, offsetY, direction, boundingBox);
         }
 
         // basic idea from http://forum.unity3d.com/threads/drawtext-on-texture2d.220217/
-        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, bool mirror,
-                                    ASP.TextDirection direction, ASP.Rectangle boundingBox, ASP.BlendMethod blend = ASP.BlendMethod.RGB,
-                                    bool applyAlpha = false, int alpha = 255)
+        public static void DrawText(this Texture2D texture, string text, ASP.MappedFont font, Color color, int offsetX, int offsetY, ASP.TextDirection direction,
+                                    ASP.Rectangle boundingBox, ASP.BlendMethod blend = ASP.BlendMethod.RGB, bool applyAlpha = false, int alpha = 255)
         {
             ASP.CharacterMap cMap;
             int x = 0;
             int y = 0;
             bool escapeMode = false;
 
-            string textToWrite = string.Empty;
-            if (mirror) textToWrite = ASP.Utils.Reverse(text);
-            else textToWrite = text;
-
-            foreach (char c in textToWrite)
+            foreach (char c in text)
             {
                 if (c == '\\')
                 {
@@ -149,16 +143,6 @@ namespace UnityEngine
                     ASP.ImageUtils.Recolor(ref charPixels, Color.black, color);
 
                     ASP.Rectangle cPos = new ASP.Rectangle(0, 0, cMap.uv.w, cMap.uv.h);
-
-                    if (cMap.flipped)
-                    {
-                        charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
-                        cPos.swapWH();
-                    }
-                    else charPixels = ASP.ImageUtils.FlipVertically(charPixels, cPos.w, cPos.h);
-                    
-                    if (mirror) charPixels = ASP.ImageUtils.FlipHorizontally(charPixels, cPos.w, cPos.h);
-
                     switch (direction)
                     {
                         case ASP.TextDirection.RIGHT_LEFT:
@@ -186,6 +170,16 @@ namespace UnityEngine
                             cPos.x = offsetX + x + (int)cMap.vx;
                             cPos.y = offsetY - y + (font.size + (int)cMap.vy + (int)cMap.vh);
                             break;
+                    }
+
+                    if (cMap.flipped)
+                    {
+                        charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
+                        cPos.swapWH();
+                    }
+                    else
+                    {
+                        charPixels = ASP.ImageUtils.FlipVertically(charPixels, cPos.w, cPos.h);
                     }
 
                     Color[] texturePixels = texture.GetPixels(cPos);
@@ -241,25 +235,5 @@ namespace UnityEngine
                 }
             }
         }
-
-        public static void Rescale(this Texture2D texture, int width, int height)
-        {
-            Color[] pixels = new Color[width * height];
-
-            for (int i = 0; i < width; ++i)
-            {
-                for (int j = 0; j < height; ++j)
-                {
-                    float x = (float)i / (float) width;
-                    float y = (float)j / (float) height;
-
-                    pixels[i + j* width] = texture.GetPixelBilinear(x, y);
-                }
-            }
-
-            texture.Resize(width, height);
-            texture.SetPixels(pixels);
-        }
-
     }
 }

@@ -85,6 +85,7 @@ namespace ASP
                 {
                     colors[i].a = 255;
                 }
+                if (i < 2) Debug.Log(String.Format("w1: {0} {0}", i, colors[i]));
             }
 
             texture.SetPixels32(colors);

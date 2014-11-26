@@ -55,21 +55,6 @@ namespace ASP
             return newPixels;
         }
 
-        public static Color[] FlipHorizontally(Color[] pixels, int width, int height)
-        {
-            Color[] newPixels = new Color[pixels.Length];
-
-            for (int i = 0; i < width; ++i)
-            {
-                for (int j = 0; j < height; ++j)
-                {
-                    newPixels[(width - i - 1) + j * width] = pixels[i + j * width];
-                }
-            }
-
-            return newPixels;
-        }
-
         public static Color[] Rotate180(Color[] pixels, int width, int height)
         {
             Color[] newPixels = new Color[pixels.Length];
