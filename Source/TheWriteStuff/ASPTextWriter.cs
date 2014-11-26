@@ -136,7 +136,7 @@ namespace ASP
                 bBox.h = backgroundReadable.height;
             }
 
-            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, true, alpha);
+            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, true, (float) alpha / 255f);
             else texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, false, 255);
 
             if (alphaOption == AlphaOption.WHOLE_TEXTURE)
