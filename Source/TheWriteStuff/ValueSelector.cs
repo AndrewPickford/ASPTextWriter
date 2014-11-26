@@ -140,6 +140,7 @@ namespace ASP
             _label = label;
             _color = color;
 
+            _field.Clamp(ref _value, _min, _max);
             _valueText = _field.ToString(_value);
 
             _lastRepeat = Time.time;
