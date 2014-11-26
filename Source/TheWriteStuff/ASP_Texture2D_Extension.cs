@@ -168,14 +168,14 @@ namespace UnityEngine
                             break;
 
                         case ASP.TextDirection.UP_DOWN:
-                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
+                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, true);
                             cPos.swapWH();
                             cPos.x = offsetX - x + (font.size + (int)cMap.vy + (int)cMap.vh);
                             cPos.y = offsetY - y - ((int)cMap.vx + (int)cMap.vw);
                             break;
 
                         case ASP.TextDirection.DOWN_UP:
-                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, true);
+                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, false);
                             cPos.swapWH();
                             cPos.x = offsetX + x - (font.size + (int)cMap.vy);
                             cPos.y = offsetY + y + (int)cMap.vx;
