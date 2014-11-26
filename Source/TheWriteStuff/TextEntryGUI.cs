@@ -27,6 +27,8 @@ namespace ASP
         private Color _backgroundColor;
         private int _offsetX;
         private int _offsetY;
+        private bool _useBoundingBox;
+        private bool _mirrorText;
         private string _text;
         private float _lastButtonPress;
         private float _lastRepeat;
@@ -72,7 +74,7 @@ namespace ASP
             _greenSelector = new ValueSelector<int, IntField>(_textWriter.green, 0, 255, 1, "Green", Color.green);
             _blueSelector = new ValueSelector<int, IntField>(_textWriter.blue, 0, 255, 1, "Blue", Color.blue);
             _alphaSelector = new ValueSelector<int, IntField>(_textWriter.alpha, 0, 255, 1, "Alpha", Color.white);
-            _scaleSelector = new ValueSelector<float, FloatField>(_textWriter.normalScale, 0f, 4f, 0.1f, "Scale", Color.white);
+            _scaleSelector = new ValueSelector<float, FloatField>(_textWriter.normalScale, 0.01f, 4f, 0.1f, "Scale", Color.white);
             _locked = false;
 
             _alphaSelectionGrid = new string[3];
@@ -114,26 +116,26 @@ namespace ASP
             _directionGrid[3] = "Down to Up";
             _directionSelection = (int) _textWriter.textDirection;
 
+            _offsetX = _textWriter.offsetX;
+            _offsetY = _textWriter.offsetY;
+            _useBoundingBox = _textWriter.useBoundingBox;
+            _mirrorText = _textWriter.mirrorText;
+
             getPreviewTexture();
 
-            if (_textWriter.width > 0)
-            {
-                _offsetX = _textWriter.offsetX - _textWriter.bottomLeftX;
-                _offsetY = _textWriter.offsetY - _textWriter.bottomLeftY;
-            }
-            else
-            {
-                _offsetX = _textWriter.offsetX;
-                _offsetY = _textWriter.offsetY;
-            }
-
-            if (_text == string.Empty) centreOffset();           
+            if (_text == string.Empty) centreOffset();
         }
 
         private void centreOffset()
         {
             _offsetX = _previewTexture.width / 2;
             _offsetY = _previewTexture.height / 2;
+
+            if (_textWriter.width > 0 && _useBoundingBox == true)
+            {
+                _offsetX += _textWriter.bottomLeftX;
+                _offsetY += _textWriter.bottomLeftY;
+            }
         }
 
         private void OnVesselChange(Vessel vesselChange)
@@ -239,7 +241,7 @@ namespace ASP
                 _remakePreview = false;
             }
 
-            if (_textWriter.width > 0) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
+            if (_textWriter.width > 0 && _useBoundingBox) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
             else _cachedPixels = _cachedBackground.GetPixels();
             _cachedBackgroundUrl = textureUrl;
 
@@ -250,7 +252,7 @@ namespace ASP
 
             if (_previewTexture == null)
             {
-                if (_textWriter.width > 0) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
+                if (_textWriter.width > 0 && _useBoundingBox) _previewTexture = new Texture2D(_textWriter.width, _textWriter.height, TextureFormat.ARGB32, true);
                 else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
             }
 
@@ -277,8 +279,16 @@ namespace ASP
 
                     Color color = new Color(r, g, b);
 
+                    int offX = _offsetX;
+                    int offY = _offsetY;
+                    if (_textWriter.width > 0 && _useBoundingBox)
+                    {
+                        offX -= _textWriter.bottomLeftX;
+                        offY -= _textWriter.bottomLeftY;
+                    }
+
                     _previewTexture.SetPixels(_cachedPixels);
-                    _previewTexture.DrawText(_text, font, color, _offsetX, _offsetY, (TextDirection) _directionSelection);
+                    _previewTexture.DrawText(_text, font, color, offX, offY, _mirrorText, (TextDirection) _directionSelection);
                     _previewTexture.Apply();
                 }
 
@@ -419,20 +429,38 @@ namespace ASP
             GUILayout.BeginVertical();
 
             GUILayout.BeginHorizontal();
+
             GUILayout.Label("Text", GUILayout.ExpandWidth(false));
             GUILayout.Space(5);
-            string oldText = _text;
 
+            string oldText = _text;
             GUI.SetNextControlName("TextField");
             _text = GUILayout.TextField(_text, GUILayout.ExpandWidth(true));
             _text = System.Text.RegularExpressions.Regex.Replace(_text, @"[\r\n]", "");
 
             if (oldText != _text) _remakePreview = true;
+
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             drawColorSelector();
+
+            GUILayout.Space(5);
+
+            if (_textWriter.width > 0)
+            {
+                bool oldValue = _useBoundingBox;
+                _useBoundingBox = !GUILayout.Toggle(!_useBoundingBox, "Use Full Texture");
+
+                if (oldValue != _useBoundingBox)
+                {
+                    _cachedBackgroundUrl = string.Empty;
+                    _remakePreview = true;
+                    _windowPosition = new Rect(_windowPosition.x, _windowPosition.y, 400, 500);
+                    if (_previewTexture != null) GameObject.Destroy(_previewTexture);
+                }
+            }
 
             GUILayout.EndVertical();
 
@@ -458,17 +486,6 @@ namespace ASP
 
             if (GUILayout.Button("  Apply  ", GUILayout.Height(20)))
             {
-                if (_textWriter.width > 0)
-                {
-                    _textWriter.offsetX = _offsetX + _textWriter.bottomLeftX;
-                    _textWriter.offsetY = _offsetY + _textWriter.bottomLeftY;
-                }
-                else
-                {
-                    _textWriter.offsetX = _offsetX;
-                    _textWriter.offsetY = _offsetY;
-                }
-
                 _textWriter.fontName = FontCache.Instance.fontInfoArray[_selectedFont].name;
                 _textWriter.fontSize = FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
                 _textWriter.text = _text;
@@ -476,6 +493,10 @@ namespace ASP
                 _textWriter.green = _greenSelector.value();
                 _textWriter.blue = _blueSelector.value();
                 _textWriter.alpha = _alphaSelector.value();
+                _textWriter.offsetX = _offsetX;
+                _textWriter.offsetY = _offsetY;
+                _textWriter.useBoundingBox = _useBoundingBox;
+                _textWriter.mirrorText = _mirrorText;
                 _textWriter.alphaOption = (AlphaOption) _alphaSelection;
                 _textWriter.normalScale = _scaleSelector.value();
                 _textWriter.normalOption = (NormalOption) _normalSelection;
@@ -644,7 +665,16 @@ namespace ASP
         {
             GUILayout.BeginVertical(GUI.skin.box);
 
+            GUILayout.BeginHorizontal();
+
             GUILayout.Label("Text Direction");
+            GUILayout.FlexibleSpace();
+
+            bool oldValue = _mirrorText;
+            _mirrorText = GUILayout.Toggle(_mirrorText, "Mirror Text");
+            if (oldValue != _mirrorText) _remakePreview = true;
+
+            GUILayout.EndHorizontal();
 
             int oldDirection = _directionSelection;
             _directionSelection = GUILayout.SelectionGrid(_directionSelection, _directionGrid, 4);

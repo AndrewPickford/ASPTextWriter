@@ -33,6 +33,9 @@ namespace ASP
         public int bottomLeftY = -1;
 
         [KSPField(isPersistant = true)]
+        public bool useBoundingBox = false;
+
+        [KSPField(isPersistant = true)]
         public int width = -1;
 
         [KSPField(isPersistant = true)]
@@ -43,6 +46,9 @@ namespace ASP
 
         [KSPField(isPersistant = true)]
         public int offsetY = 0;
+
+        [KSPField(isPersistant = true)]
+        public bool mirrorText = false;
 
         [KSPField(isPersistant = true)]
         public int red = 0;
@@ -110,8 +116,8 @@ namespace ASP
             }
         }
 
-        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction,
-                                          Rectangle boundingBox, BlendMethod blendMethod, int alpha, AlphaOption alphaOption)
+        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, bool mirrorText, TextDirection direction,
+                                          bool useBoundingBox, Rectangle boundingBox, BlendMethod blendMethod, int alpha, AlphaOption alphaOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, false);
             
@@ -122,7 +128,7 @@ namespace ASP
             texture.SetPixels32(pixels);
 
             Rectangle bBox = new Rectangle(boundingBox);
-            if (bBox.w == -1)
+            if (bBox.w == -1 || useBoundingBox == false)
             {
                 bBox.x = 0;
                 bBox.y = 0;
@@ -130,8 +136,8 @@ namespace ASP
                 bBox.h = backgroundReadable.height;
             }
 
-            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, direction, bBox, blendMethod, true, alpha);
-            else texture.DrawText(text, font, color, x, y, direction, bBox, blendMethod, false, 255);
+            if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, true, alpha);
+            else texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, false, 255);
 
             if (alphaOption == AlphaOption.WHOLE_TEXTURE)
             {
@@ -140,6 +146,7 @@ namespace ASP
                 {
                     pixels[i].a = (byte) alpha;
                 }
+                texture.SetPixels32(pixels);
             }
 
             texture.Apply(true);
@@ -151,8 +158,9 @@ namespace ASP
             return texture;
         }
 
-        public static Texture2D PaintNormalMap(Texture2D background, string text, MappedFont font, Color color, int x, int y, TextDirection direction,
-                                               Rectangle boundingBox, float scale, NormalOption normalOption)
+        public static Texture2D PaintNormalMap(Texture2D background, Texture2D mainTexture, string text, MappedFont font, Color color, int x, int y,
+                                               bool mirrorText, TextDirection direction, bool useBoundingBox, Rectangle boundingBox, float scale,
+                                               NormalOption normalOption)
         {
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, true);
 
@@ -160,10 +168,9 @@ namespace ASP
             Color32[] pixels = backgroundReadable.GetPixels32();
             normalMap.name = background.name + "(Copy)";
             normalMap.SetPixels32(pixels);
-            
 
             Rectangle bBox = new Rectangle(boundingBox);
-            if (bBox.w == -1)
+            if (bBox.w == -1 || useBoundingBox)
             {
                 bBox.x = 0;
                 bBox.y = 0;
@@ -171,19 +178,19 @@ namespace ASP
                 bBox.h = backgroundReadable.height;
             }
 
-            Texture2D textMap = new Texture2D(normalMap.width, normalMap.height, TextureFormat.ARGB32, false);
-            textMap.Fill(Color.gray);
+            Texture2D textMap = new Texture2D(mainTexture.width, mainTexture.height, TextureFormat.ARGB32, false);
+            Color transparentGray = new Color(0.5f, 0.5f, 0.5f, 0f);
+            textMap.Fill(transparentGray);
+
             Color normalColor = Color.gray;
             if (normalOption == NormalOption.RAISE_TEXT) normalColor = Color.black;
             if (normalOption == NormalOption.LOWER_TEXT) normalColor = Color.white;
-            textMap.DrawText(text, font, normalColor, x, y, direction, bBox);
-            if (normalOption == NormalOption.FLAT) textMap.Fill(Color.gray);
+            textMap.DrawText(text, font, normalColor, x, y, mirrorText, direction, bBox);
+
+            // scale if the main texture is a different size from the normal map
+            if (mainTexture.width != background.width || mainTexture.height != background.height) textMap.Rescale(background.width, background.height);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);
-
-            Color transparent = new Color(0f, 0f, 0f, 0f);
-            textMap.Fill(transparent);
-            textMap.DrawText(text, font, Color.white, x, y, direction, bBox);
 
             for (int i = 0; i < normalMap.width; ++i)
             {
@@ -219,7 +226,7 @@ namespace ASP
             textureURL = url + "/" + normalArray[selectedTexture];
             backgroundNormalMap = GameDatabase.Instance.GetTexture(textureURL, true);
 
-            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, offsetX, offsetY, textDirection, boundingBox, blendMethod, alpha, alphaOption);
+            Texture2D newTexture = PaintText(backgroundTexture, text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
             Material material = Instantiate(_textTransform.gameObject.renderer.material) as Material;
@@ -234,7 +241,7 @@ namespace ASP
                 }
                 else
                 {
-                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, text, font, color, offsetX, offsetY, textDirection, boundingBox, normalScale, normalOption);
+                    Texture2D newNormalMap = PaintNormalMap(backgroundNormalMap, backgroundTexture, text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
             }

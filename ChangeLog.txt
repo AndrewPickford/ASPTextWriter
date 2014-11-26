@@ -1,5 +1,10 @@
 0.5.0
  * fix treatment of normal maps from mbm files
+ * add mirror option
+ * add bounding boxes for squad fuel tanks
+ * add option to ignore bounding box and use full texture
+ * lower limit for scale of 0.01 to prevent divide by zero
+ * deal with case of normal map being a different size to the main texture
 
 0.4.0
  * add paint bottle
