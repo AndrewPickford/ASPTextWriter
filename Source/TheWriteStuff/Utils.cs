@@ -261,5 +261,15 @@ namespace ASP
 
             System.IO.File.WriteAllBytes(fileName, bytes);
         }
+
+        public static string Reverse(string text)
+        {
+            if (text == null) return null;
+
+            char[] array = text.ToCharArray();
+            Array.Reverse(array);
+
+            return new String(array);
+        }
     }
 }
