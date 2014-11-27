@@ -96,6 +96,7 @@ namespace ASP
 
         // compressed textures can be GetPixels32 readable even if they are
         // not GetPixel readable
+        // require the texture url as well as some texture.names are empty
         public static Texture2D GetReadable32Texture(Texture2D texture, string url, bool normalMap)
         {
             Texture2D readable = texture;
