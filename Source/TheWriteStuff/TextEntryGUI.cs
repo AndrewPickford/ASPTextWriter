@@ -233,7 +233,7 @@ namespace ASP
             string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
 
             if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
-            _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), false);
+            _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), textureUrl, false);
 
             if (_cachedBackground == null)
             {

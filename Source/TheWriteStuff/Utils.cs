@@ -9,13 +9,13 @@ namespace ASP
 {
     public class Utils
     {
-        private static string[] _textureExtentionNames = { "png", "jpg", "mbm" };
+        private static string[] _textureExtentionNames = { "png", "jpg", "tga", "mbm" };
         private static char[] _delimiters = { ',' };
 
         public static string[] SplitString(string text)
         {
             string[] splitText = text.Split(_delimiters, StringSplitOptions.RemoveEmptyEntries);
-
+          
             for (int i = 0; i < splitText.Length; ++i)
             {
                 string str = splitText[i];
@@ -61,10 +61,8 @@ namespace ASP
                 return new Texture2D(1, 1);
             }
 
-            if (extension == ".mbm")
-            {
-                texture = FromATM.MBMToTexture(bytes, false);
-            }
+            if (extension == ".mbm") texture = FromATM.MBMToTexture(bytes, false, normalMap);
+            else if (extension == ".tga") texture = FromATM.TGAToTexture(bytes, false, normalMap);
             else
             {
                 texture = new Texture2D(1, 1);
@@ -98,7 +96,7 @@ namespace ASP
 
         // compressed textures can be GetPixels32 readable even if they are
         // not GetPixel readable
-        public static Texture2D GetReadable32Texture(Texture2D texture, bool normalMap)
+        public static Texture2D GetReadable32Texture(Texture2D texture, string url, bool normalMap)
         {
             Texture2D readable = texture;
             try
@@ -114,13 +112,13 @@ namespace ASP
 #if DEBUG
                 Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
 #endif
-                readable = Utils.LoadTextureFromUrl(texture.name, normalMap);
+                readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
 
             return readable;
         }
 
-        public static Texture2D GetReadableTexture(Texture2D texture, bool normalMap)
+        public static Texture2D GetReadableTexture(Texture2D texture, string url, bool normalMap)
         {
             Texture2D readable = texture;
             try
@@ -137,7 +135,7 @@ namespace ASP
                 Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
 #endif
 
-                readable = Utils.LoadTextureFromUrl(texture.name, normalMap);
+                readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
 
             return readable;

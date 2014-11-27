@@ -5,6 +5,7 @@
  * add option to ignore bounding box and use full texture
  * lower limit for scale of 0.01 to prevent divide by zero
  * deal with case of normal map being a different size to the main texture
+ * add support for tga textures
 
 0.4.0
  * add paint bottle
