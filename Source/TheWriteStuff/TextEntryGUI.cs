@@ -230,10 +230,10 @@ namespace ASP
 
         private void getPreviewTexture()
         {
-            string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
+            Texture2D prefabTexture = GameDatabase.Instance.GetTexture(_textWriter.textureArray[_selectedBackground], false);
 
             if (_cachedBackground != null) GameObject.Destroy(_cachedBackground);
-            _cachedBackground = Utils.GetReadableTexture(GameDatabase.Instance.GetTexture(textureUrl, false), textureUrl, false);
+            _cachedBackground = Utils.GetReadableTexture(prefabTexture, _textWriter.textureArray[_selectedBackground], false);
 
             if (_cachedBackground == null)
             {
@@ -243,7 +243,7 @@ namespace ASP
 
             if (_textWriter.width > 0 && _useBoundingBox) _cachedPixels = _cachedBackground.GetPixels(_textWriter.boundingBox);
             else _cachedPixels = _cachedBackground.GetPixels();
-            _cachedBackgroundUrl = textureUrl;
+            _cachedBackgroundUrl = _textWriter.textureArray[_selectedBackground];
 
             for (int i = 0; i < _cachedPixels.Length; ++i)
             {
@@ -256,15 +256,14 @@ namespace ASP
                 else _previewTexture = new Texture2D(_cachedBackground.width, _cachedBackground.height, TextureFormat.ARGB32, true);
             }
 
-            if (System.Object.ReferenceEquals(GameDatabase.Instance.GetTexture(textureUrl, false), _cachedBackground)) _cachedBackground = null;
+            if (System.Object.ReferenceEquals(prefabTexture, _cachedBackground)) _cachedBackground = null;
         }
 
         private void drawTexture()
         {
             if (_remakePreview)
             {
-                string textureUrl = _textWriter.url + "/" + _textWriter.textureArray[_selectedBackground];
-                if (_cachedBackgroundUrl != textureUrl) getPreviewTexture();
+                if (_cachedBackgroundUrl != _textWriter.textureArray[_selectedBackground]) getPreviewTexture();
 
                 MappedFont font = FontCache.Instance.getFontByNameSize(FontCache.Instance.fontInfoArray[_selectedFont].name,
                                                                        FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection]);

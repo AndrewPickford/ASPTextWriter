@@ -38,7 +38,7 @@ namespace ASP
 {
     class FromATM
     {
-        public static Texture2D MBMToTexture(byte[] bytes, bool mipmaps, bool normalMap)
+        public static Texture2D MBMToTexture(byte[] bytes, bool normalMap)
         {
             bool isNormalMap = false;
 
@@ -71,7 +71,7 @@ namespace ASP
             }
             if (normalMap) texformat = TextureFormat.ARGB32;
 
-            Texture2D texture = new Texture2D((int) width, (int) height, texformat, mipmaps);
+            Texture2D texture = new Texture2D((int)width, (int)height, texformat, false);
             Color32[] colors = new Color32[width * height];
             for (int i = 0; i < width * height; i++)
             {
@@ -161,7 +161,7 @@ namespace ASP
             return colors;
         }
 
-        public static Texture2D TGAToTexture(byte[] bytes, bool mipmaps, bool normalMap)
+        public static Texture2D TGAToTexture(byte[] bytes, bool normalMap)
         {
             byte imgType = bytes[2];
             int width = bytes[12] | (bytes[13] << 8);
@@ -188,7 +188,7 @@ namespace ASP
                 colors = new Color32[width * height];
             }
 
-            Texture2D texture = new Texture2D(width, height, format, mipmaps);
+            Texture2D texture = new Texture2D(width, height, format, false);
             texture.SetPixels32(colors);
 
             return texture;

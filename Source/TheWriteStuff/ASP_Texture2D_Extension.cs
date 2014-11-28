@@ -8,17 +8,6 @@ namespace UnityEngine
 {
     public static class ASP_Texture2D_Extension
     {
-        public static Color[] GetPixelsFromCompressed(this Texture2D texture, ASP.Rectangle pos)
-        {
-            Texture2D temp = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, true);
-
-            Color32[] pixels = texture.GetPixels32();
-            temp.name = texture.name;
-            temp.SetPixels32(pixels);
-
-            return GetPixels(temp, pos);
-        }
-
         public static void Fill(this Texture2D texture, Color color)
         {
             for (int i = 0; i < texture.width; ++i)

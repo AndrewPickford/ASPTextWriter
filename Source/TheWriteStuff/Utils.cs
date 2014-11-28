@@ -27,6 +27,18 @@ namespace ASP
 
             return splitText;
         }
+
+        public static string[] AddPrefix(string prefix, string[] array)
+        {
+            string[] newArray = new string[array.Length];
+
+            for (int i = 0; i < array.Length; ++i)
+            {
+                newArray[i] = prefix + array[i];
+            }
+
+            return newArray;
+        }
         
 
         public static string GetTextureFileName(string url)
@@ -61,8 +73,8 @@ namespace ASP
                 return new Texture2D(1, 1);
             }
 
-            if (extension == ".mbm") texture = FromATM.MBMToTexture(bytes, false, normalMap);
-            else if (extension == ".tga") texture = FromATM.TGAToTexture(bytes, false, normalMap);
+            if (extension == ".mbm") texture = FromATM.MBMToTexture(bytes, normalMap);
+            else if (extension == ".tga") texture = FromATM.TGAToTexture(bytes, normalMap);
             else
             {
                 texture = new Texture2D(1, 1);
