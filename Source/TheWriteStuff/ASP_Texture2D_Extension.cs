@@ -124,8 +124,8 @@ namespace UnityEngine
                                 x = 0;
                                 break;
                         }
-                        escapeMode = false;
                     }
+                    if (c != '\\') escapeMode = false;
                 }
                 else
                 {
@@ -164,7 +164,7 @@ namespace UnityEngine
                             break;
 
                         case ASP.TextDirection.DOWN_UP:
-                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cMap.uv.w, cMap.uv.h, false);
+                            charPixels = ASP.ImageUtils.FlipXY(charPixels, cPos.w, cPos.h, false);
                             cPos.swapWH();
                             cPos.x = offsetX + x - (font.size + (int)cMap.vy);
                             cPos.y = offsetY + y + (int)cMap.vx;
