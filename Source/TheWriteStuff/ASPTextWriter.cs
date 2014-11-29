@@ -120,9 +120,16 @@ namespace ASP
         }
 
         public static Texture2D PaintText(string textureURL, string text, MappedFont font, Color color, int x, int y, bool mirrorText,
-                                          TextDirection direction, bool useBoundingBox, Rectangle boundingBox, BlendMethod blendMethod, int alpha, AlphaOption alphaOption)
+                                          TextDirection direction, bool useBoundingBox, Rectangle boundingBox, BlendMethod blendMethod,
+                                          int alpha, AlphaOption alphaOption)
         {
             Texture2D background = GameDatabase.Instance.GetTexture(textureURL, false);
+            if (background == null)
+            {
+                Debug.LogError(String.Format("TWS: bad texture [{0}]", textureURL));
+                throw new ArgumentNullException("texture not found");
+            }
+
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, textureURL, false);
             Texture2D texture = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
 
@@ -166,7 +173,19 @@ namespace ASP
                                                NormalOption normalOption)
         {
             Texture2D background = GameDatabase.Instance.GetTexture(normalMapURL, true);
+            if (background == null)
+            {
+                Debug.LogError(String.Format("TWS: bad normal map [{0}]", normalMapURL));
+                throw new ArgumentNullException("normal map not found");
+            }
+
             Texture2D mainTexture = GameDatabase.Instance.GetTexture(mainTextureURL, false);
+            if (mainTexture == null)
+            {
+                Debug.LogError(String.Format("TWS: bad main texture [{0}]", mainTextureURL));
+                throw new ArgumentNullException("main texture not found");
+            }
+
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, normalMapURL, true);
             Texture2D normalMap = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
             Color32[] pixels = backgroundReadable.GetPixels32();
@@ -308,6 +327,22 @@ namespace ASP
 
             if (found) return;
 
+            // if not use the first with a texture and non empty name
+            foreach (Transform child in children)
+            {
+                if (child.gameObject.renderer != null && child.gameObject.renderer.material != null)
+                {
+                    Texture2D main = child.gameObject.renderer.material.mainTexture as Texture2D;
+
+                    if (main != null && main.name != string.Empty)
+                    {
+                        transformName = child.name;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
             // fall back to the first object with a material
             foreach (Transform child in children)
             {
@@ -417,8 +452,12 @@ namespace ASP
             MappedFont font = findFont();
             if (font == null) return;
 
-            _ok = true;
-            if (text != string.Empty) writeText();
+            try
+            {
+                if (text != string.Empty) writeText();
+                _ok = true;
+            }
+            catch { }
         }
     }
 }
