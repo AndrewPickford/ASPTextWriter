@@ -58,6 +58,7 @@
     <Compile Include="PaintPointer.cs" />
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
+    <Compile Include="Global.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="MappedFont.cs" />
     <Compile Include="FontCache.cs" />

@@ -115,16 +115,11 @@ namespace ASP
             try
             {
                 Color32[] test = readable.GetPixels32();
-
-#if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} readable 32", texture.name));
-#endif
+                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} readable 32", texture.name));
             }
             catch
             {
-#if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
-#endif
+                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
 
@@ -137,16 +132,11 @@ namespace ASP
             try
             {
                 Color test = readable.GetPixel(0, 0);
-
-#if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} readable", texture.name));
-#endif
+                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} readable", texture.name));
             }
             catch
             {
-#if DEBUG
-                Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
-#endif
+                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
 
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
