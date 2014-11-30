@@ -1,3 +1,10 @@
+0.6.0
+ * change for single transformName to transformNames list of transforms
+ * add option to use first or all transforms of a given name
+ * add escape codes '\n' to start a new line and '\\' to print a single '\'
+ * add global config file
+ * add global debugging option
+
 0.5.0
  * fix treatment of normal maps from mbm files
  * add mirror option
@@ -6,6 +13,7 @@
  * lower limit for scale of 0.01 to prevent divide by zero
  * deal with case of normal map being a different size to the main texture
  * add support for tga textures
+ * fix key capture during eva 
 
 0.4.0
  * add paint bottle

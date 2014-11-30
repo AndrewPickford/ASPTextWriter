@@ -11,6 +11,7 @@ namespace ASP
     public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
     public enum BlendMethod {  PIXEL, RGB, HSV };
     public enum TextDirection { LEFT_RIGHT, RIGHT_LEFT, UP_DOWN, DOWN_UP };
+    public enum TransformOption { USE_FIRST, USE_ALL };
 
     public class ASPTextWriter : PartModule
     {
@@ -24,7 +25,7 @@ namespace ASP
         public int fontSize = 32;
 
         [KSPField(isPersistant = true)]
-        public string transformName = string.Empty;
+        public string transformNames = string.Empty;
 
         [KSPField(isPersistant = true)]
         public int bottomLeftX = -1;
@@ -80,24 +81,26 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public int selectedTexture = 0;
 
+        [KSPField(isPersistant = true)]
+        public bool debugging = true;
+
         public AlphaOption alphaOption = AlphaOption.USE_TEXTURE;
         public NormalOption normalOption = NormalOption.USE_BACKGROUND;
         public BlendMethod blendMethod = BlendMethod.RGB;
         public TextDirection textDirection = TextDirection.LEFT_RIGHT;
+        public TransformOption transformOption = TransformOption.USE_FIRST;
         public bool hasNormalMap = false;
         public Rectangle boundingBox { get; private set; }
-        //public Texture2D backgroundTexture { get; private set; }
-        //public Texture2D backgroundNormalMap { get; private set; }
         public string[] textureArray { get; private set; }
         public string[] normalArray { get; private set; }
         public string[] displayNameArray { get; private set; }
-        //public string url { get; private set; }
+        public string[] transformNameArray { get; private set; }
 
         private TextEntryGUI _gui;
         private Material _currentMaterial = null;
         private Texture2D _currentTexture = null;
         private Texture2D _currentNormalMap = null;
-        private Transform _textTransform = null;
+        private Transform[] _textTransforms = null;
         private bool _ok = false;
 
         [KSPEvent(name = "Edit Text Event", guiName = "Edit Text", guiActive = false, guiActiveEditor = true)]
@@ -246,8 +249,8 @@ namespace ASP
             Texture2D newTexture = PaintText(textureArray[selectedTexture], text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
-            Material material = Instantiate(_textTransform.gameObject.renderer.material) as Material;
-            material.CopyPropertiesFromMaterial(_textTransform.gameObject.renderer.material);
+            Material material = Instantiate(_textTransforms[0].gameObject.renderer.material) as Material;
+            material.CopyPropertiesFromMaterial(_textTransforms[0].gameObject.renderer.material);
             material.SetTexture("_MainTex", newTexture);
 
             Texture2D newNormalMap = null;
@@ -265,7 +268,10 @@ namespace ASP
                 }
             }
 
-            _textTransform.gameObject.renderer.material = material;
+            for (int i = 0; i < _textTransforms.Length; ++i)
+            {
+                _textTransforms[i].gameObject.renderer.material = material;
+            }
 
             if (_currentMaterial != null) Destroy(_currentMaterial);
             _currentMaterial = material;
@@ -290,6 +296,7 @@ namespace ASP
             if (node.HasValue("normalOption")) normalOption = (NormalOption) ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
             if (node.HasValue("blendMethod")) blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
             if (node.HasValue("textDirection")) textDirection = (TextDirection)ConfigNode.ParseEnum(typeof(TextDirection), node.GetValue("textDirection"));
+            if (node.HasValue("transformOption")) transformOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformOption"));
         }
 
         public override void OnSave(ConfigNode node)
@@ -300,11 +307,12 @@ namespace ASP
             node.AddValue("normalOption", ConfigNode.WriteEnum(normalOption));
             node.AddValue("blendMethod", ConfigNode.WriteEnum(blendMethod));
             node.AddValue("textDirection", ConfigNode.WriteEnum(textDirection));
+            node.AddValue("transformOption", ConfigNode.WriteEnum(transformOption));
         }
 
-        private void findUsableTransform()
+        private string findFirstUseableTransform()
         {
-            transformName = string.Empty;
+            string transformName = string.Empty;
             Transform[] children = this.part.partInfo.partPrefab.GetComponentsInChildren<Transform>(true);
 
             // use the first object with both a texture and a normal map with non empty names
@@ -325,7 +333,7 @@ namespace ASP
                 }
             }
 
-            if (found) return;
+            if (found) return transformName;
 
             // if not use the first with a texture and non empty name
             foreach (Transform child in children)
@@ -343,6 +351,8 @@ namespace ASP
                 }
             }
 
+            if (found) return transformName;
+
             // fall back to the first object with a material
             foreach (Transform child in children)
             {
@@ -353,6 +363,8 @@ namespace ASP
                     break;
                 }
             }
+
+            return transformName;
         }
 
         private void findTextures()
@@ -363,10 +375,10 @@ namespace ASP
                 normalArray = new string[1];
                 displayNameArray = new string[1];
 
-                Texture2D texture = _textTransform.gameObject.renderer.material.mainTexture as Texture2D;
+                Texture2D texture = _textTransforms[0].gameObject.renderer.material.mainTexture as Texture2D;
                 textureArray[0] = texture.name;
 
-                texture = _textTransform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+                texture = _textTransforms[0].gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
                 if (texture != null && texture.name != string.Empty)
                 {
                     hasNormalMap = true;
@@ -381,7 +393,7 @@ namespace ASP
                 string url = textureDirUrl;
                 if (url == string.Empty)
                 {
-                    Texture2D texture = _textTransform.gameObject.renderer.material.mainTexture as Texture2D;
+                    Texture2D texture = _textTransforms[0].gameObject.renderer.material.mainTexture as Texture2D;
                     url = Path.GetDirectoryName(texture.name);
                 }
 
@@ -421,43 +433,103 @@ namespace ASP
 
             return font;
         }
+        
+        private void findTransforms()
+        {
+            if (transformNames == string.Empty) transformNames = findFirstUseableTransform();
+            if (transformNames == string.Empty)
+            {
+                Debug.LogError("TWS: Unable to find transform with material");
+                return;
+            }
+
+            transformNameArray = Utils.SplitString(transformNames);
+            if (transformNameArray == null || transformNameArray.Length == 0)
+            {
+                Debug.LogError("TWS: transformNames empty");
+                return;
+            }
+
+            int count = 0;
+            for (int i = 0; i < transformNameArray.Length; ++i)
+            {
+                Transform[] transforms = this.part.FindModelTransforms(transformNameArray[i]);
+                if (transforms.Length == 0 || transforms[0] == null) Debug.LogError(String.Format("TWS: Unable to find transform {0}", transformNameArray[i]));
+                else
+                {
+                    int c = 0;
+                    for (int j = 0; j < transforms.Length; ++j)
+                    {
+                        if (transforms[j] != null)
+                        {
+                            ++count;
+                            ++c;
+                            if (transformOption == TransformOption.USE_FIRST) break;
+                        }
+                    }
+                    if (Global.Debugging) Debug.Log(String.Format("TWS: Found transform {0}, {1} times", transformNameArray[i], c));
+                }
+            }
+            if (Global.Debugging) Debug.Log(String.Format("TWS: Found {0} usable transforms", count));
+
+            _textTransforms = new Transform[count];
+            count = 0;
+            for (int i = 0; i < transformNameArray.Length; ++i)
+            {
+                Transform[] transforms = this.part.FindModelTransforms(transformNameArray[i]);
+                for (int j = 0; j < transforms.Length; ++j)
+                {
+                    if (transforms[j] != null)
+                    {
+                        _textTransforms[count] = transforms[j];
+                        ++count;
+                        if (transformOption == TransformOption.USE_FIRST) break;
+                    }
+                }
+            }
+        }
 
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
+            Global.Debugging = debugging;
 
             if (state == StartState.Editor)
             {
                 this.part.OnEditorDestroy += OnEditorDestroy;
             }
 
-            if (transformName == "__FIRST__" || transformName == string.Empty) findUsableTransform();
-            if (transformName == string.Empty)
-            {
-                Debug.LogError("TWS: Unable to find transform with material");
-                return;
-            }
-
-            _textTransform = this.part.FindModelTransform(transformName);
-            if (_textTransform == null)
-            {
-                Debug.LogError(String.Format("TWS: Unable to find transform {0}", transformName));
-                return;
-            }
-
-            findTextures();
-
-            boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
-
-            MappedFont font = findFont();
-            if (font == null) return;
-
+            _ok = false;
             try
             {
+                if (Global.Debugging) Debug.Log(String.Format("TWS: OnStart, part {0}", this.part.name));
+
+                findTransforms();
+
+                if (_textTransforms == null || _textTransforms[0] == null)
+                {
+                    Debug.LogError(String.Format("TWS: No useable transforms, disabling plugin"));
+                    return;
+                }
+
+                findTextures();
+
+                boundingBox = new Rectangle(bottomLeftX, bottomLeftY, width, height);
+
+                MappedFont font = findFont();
+                if (font == null)
+                {
+                    Debug.LogError(String.Format("TWS: No useable fonts, disabling plugin"));
+                    return;
+                }
+
                 if (text != string.Empty) writeText();
                 _ok = true;
             }
-            catch { }
+            catch
+            {
+                Debug.LogError(String.Format("TWS: Something went wrong in OnStart disabling plugin"));
+            }
         }
     }
 }
