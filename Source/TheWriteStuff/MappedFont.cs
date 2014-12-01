@@ -23,7 +23,12 @@ namespace ASP
             size = int.Parse(node.GetValue("size"));
 
             GameDatabase.TextureInfo textInfo = GameDatabase.Instance.databaseTexture.Find(x => x.name == nodeUrl);
-            texture = textInfo.texture;
+            texture = Utils.GetReadableTexture(textInfo.texture, textInfo.texture.name, false);
+
+            if (Global.Debugging)
+            {
+                if (!System.Object.ReferenceEquals(textInfo.texture, texture)) UnityEngine.Debug.Log(String.Format("TWS: texture not readable reloaded from file"));
+            }
 
             characterMap = new Dictionary<char, CharacterMap>();
             float h = 0;
