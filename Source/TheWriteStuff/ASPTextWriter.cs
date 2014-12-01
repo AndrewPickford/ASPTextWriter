@@ -189,6 +189,7 @@ namespace ASP
                 throw new ArgumentNullException("main texture not found");
             }
 
+            Texture2D mainTextureReadable = Utils.GetReadable32Texture(mainTexture, mainTextureURL, false);
             Texture2D backgroundReadable = Utils.GetReadable32Texture(background, normalMapURL, true);
             Texture2D normalMap = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
             Color32[] pixels = backgroundReadable.GetPixels32();
@@ -204,7 +205,7 @@ namespace ASP
                 bBox.h = backgroundReadable.height;
             }
 
-            Texture2D textMap = new Texture2D(mainTexture.width, mainTexture.height, TextureFormat.ARGB32, false);
+            Texture2D textMap = new Texture2D(mainTextureReadable.width, mainTextureReadable.height, TextureFormat.ARGB32, false);
             Color transparentGray = new Color(0.5f, 0.5f, 0.5f, 0f);
             textMap.Fill(transparentGray);
 
@@ -214,7 +215,7 @@ namespace ASP
             textMap.DrawText(text, font, normalColor, x, y, mirrorText, direction, bBox);
 
             // scale if the main texture is a different size from the normal map
-            if (mainTexture.width != background.width || mainTexture.height != background.height) textMap.Rescale(background.width, background.height);
+            if (mainTextureReadable.width != normalMap.width || mainTextureReadable.height != normalMap.height) textMap.Rescale(normalMap.width, normalMap.height);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);
 
