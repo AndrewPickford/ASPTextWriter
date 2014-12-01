@@ -19,7 +19,7 @@ namespace ASP
 
         private Dictionary<string, CacheEntry> _cache;
         private long _totalBytes = 0;
-        private long _maxBytes = 20 * 1024 * 1024;
+        private long _maxBytes = 40 * 1024 * 1024;
 
         public byte[] getData(string fileName)
         {
