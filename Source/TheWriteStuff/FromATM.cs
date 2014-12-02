@@ -177,14 +177,14 @@ namespace ASP
             }
             if (normalMap) format = TextureFormat.ARGB32;
 
-            Debug.Log(String.Format("TWS: loading TGA file format {0}", imgType));
+            Utils.Log("TGAToTexture: Loading TGA file format {0}", imgType);
 
             Color32[] colors;
             if (imgType == 2) colors = TGAType2(bytes, width, height, alpha);
             else if (imgType == 10) colors = TGAType10(bytes, width, height, alpha);
             else
             {
-                Debug.LogError(String.Format("TWS: Unsupported TGA format {0}", imgType));
+                Utils.LogError("TGAToTexture: Unsupported TGA format {0}", imgType);
                 colors = new Color32[width * height];
             }
 

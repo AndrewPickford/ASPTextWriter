@@ -27,7 +27,7 @@ namespace ASP
 
             if (Global.Debugging)
             {
-                if (!System.Object.ReferenceEquals(textInfo.texture, texture)) UnityEngine.Debug.Log(String.Format("TWS: texture not readable reloaded from file"));
+                if (!System.Object.ReferenceEquals(textInfo.texture, texture)) Utils.Log("MappedFont: texture not readable - reloaded from file");
             }
 
             characterMap = new Dictionary<char, CharacterMap>();

@@ -26,7 +26,7 @@ namespace ASP
             if (_cache.ContainsKey(fileName))
             {
                 CacheEntry entry = _cache[fileName];
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Get {0} from cache", fileName));
+                if (Global.Debugging) Utils.Log("FileCache: Get {0} from cache", fileName);
 
                 entry.lastAccess = DateTime.UtcNow.Ticks;
                 return entry.data;
@@ -39,7 +39,7 @@ namespace ASP
                 entry.lastAccess = DateTime.UtcNow.Ticks;
 
                 addToCache(fileName, entry);
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Add {0} to file cache", fileName));
+                if (Global.Debugging) Utils.Log("FileCache: Add {0} to file cache", fileName);
 
                 return entry.data;
             }

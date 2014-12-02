@@ -64,7 +64,12 @@ namespace ASP
 
         public void Awake()
         {
-            if (Instance != null) return;
+            if (Instance != null)
+            {
+                Utils.LogError("Another instance of the FontCache is running exiting.");
+                Destroy(this.gameObject);
+                return;
+            }
 
             Instance = this;
             DontDestroyOnLoad(this);
@@ -76,10 +81,10 @@ namespace ASP
             {
                 if (!url.config.HasValue("name"))
                 {
-                    Debug.Log("TWS: ASPFontLoader: missing font name");
+                    Utils.Log("Fontcache: missing font name");
                 }
 
-                Debug.Log(String.Format("TWS: ASPFontLoader: Loading font {0}", url.config.GetValue("name")));
+                Utils.Log("FontCache: Loading font {0}", url.config.GetValue("name"));
                 MappedFont font = new MappedFont(url.config, url.parent.url);
                 _dictionary[font.id] = font;
             }

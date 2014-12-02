@@ -237,7 +237,7 @@ namespace ASP
 
             if (_cachedBackground == null)
             {
-                Debug.LogError(String.Format("TWS: No such texture: {0}", _cachedBackground));
+                Utils.LogError("getPreviewTexture: No such texture: {0}", _cachedBackground);
                 _remakePreview = false;
             }
 

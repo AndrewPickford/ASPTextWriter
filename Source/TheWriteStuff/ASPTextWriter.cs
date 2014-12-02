@@ -109,7 +109,7 @@ namespace ASP
             if (_ok == false)
             {
                 // something has gone wrong in OnStart
-                Debug.LogError("TWS - incorrect start up, cannot display gui");
+                Utils.LogError("Incorrect start up, not displaying gui");
                 ScreenMessages.PostScreenMessage("Error unable to start text writer gui", 5, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
@@ -129,7 +129,7 @@ namespace ASP
             Texture2D background = GameDatabase.Instance.GetTexture(textureURL, false);
             if (background == null)
             {
-                Debug.LogError(String.Format("TWS: bad texture [{0}]", textureURL));
+                Utils.LogError("PaintText: bad texture [{0}]", textureURL);
                 throw new ArgumentNullException("texture not found");
             }
 
@@ -178,14 +178,14 @@ namespace ASP
             Texture2D background = GameDatabase.Instance.GetTexture(normalMapURL, true);
             if (background == null)
             {
-                Debug.LogError(String.Format("TWS: bad normal map [{0}]", normalMapURL));
+                Utils.LogError("PaintNormalMap: bad normal map [{0}]", normalMapURL);
                 throw new ArgumentNullException("normal map not found");
             }
 
             Texture2D mainTexture = GameDatabase.Instance.GetTexture(mainTextureURL, false);
             if (mainTexture == null)
             {
-                Debug.LogError(String.Format("TWS: bad main texture [{0}]", mainTextureURL));
+                Utils.LogError("PaintNormalMap: bad main texture [{0}]", mainTextureURL);
                 throw new ArgumentNullException("main texture not found");
             }
 
@@ -440,14 +440,14 @@ namespace ASP
             if (transformNames == string.Empty) transformNames = findFirstUseableTransform();
             if (transformNames == string.Empty)
             {
-                Debug.LogError("TWS: Unable to find transform with material");
+                Utils.LogError("findTransforms: unable to find transform with material");
                 return;
             }
 
             transformNameArray = Utils.SplitString(transformNames);
             if (transformNameArray == null || transformNameArray.Length == 0)
             {
-                Debug.LogError("TWS: transformNames empty");
+                Utils.LogError("findTransforms: TransformNames empty");
                 return;
             }
 
@@ -455,7 +455,7 @@ namespace ASP
             for (int i = 0; i < transformNameArray.Length; ++i)
             {
                 Transform[] transforms = this.part.FindModelTransforms(transformNameArray[i]);
-                if (transforms.Length == 0 || transforms[0] == null) Debug.LogError(String.Format("TWS: Unable to find transform {0}", transformNameArray[i]));
+                if (transforms.Length == 0 || transforms[0] == null) Utils.LogError("findTransforms: unable to find transform {0}", transformNameArray[i]);
                 else
                 {
                     int c = 0;
@@ -468,10 +468,10 @@ namespace ASP
                             if (transformOption == TransformOption.USE_FIRST) break;
                         }
                     }
-                    if (Global.Debugging) Debug.Log(String.Format("TWS: Found transform {0}, {1} times", transformNameArray[i], c));
+                    if (Global.Debugging) Utils.Log("Found transform {0}, {1} times", transformNameArray[i], c);
                 }
             }
-            if (Global.Debugging) Debug.Log(String.Format("TWS: Found {0} usable transforms", count));
+            if (Global.Debugging) Utils.Log("Found {0} usable transforms", count);
 
             _textTransforms = new Transform[count];
             count = 0;
@@ -503,13 +503,13 @@ namespace ASP
             _ok = false;
             try
             {
-                if (Global.Debugging) Debug.Log(String.Format("TWS: OnStart, part {0}", this.part.name));
+                if (Global.Debugging) Utils.Log("OnStart, part {0}", this.part.name);
 
                 findTransforms();
 
                 if (_textTransforms == null || _textTransforms[0] == null)
                 {
-                    Debug.LogError(String.Format("TWS: No useable transforms, disabling plugin"));
+                    Utils.LogError("No useable transforms, disabling plugin");
                     return;
                 }
 
@@ -520,7 +520,7 @@ namespace ASP
                 MappedFont font = findFont();
                 if (font == null)
                 {
-                    Debug.LogError(String.Format("TWS: No useable fonts, disabling plugin"));
+                    Utils.LogError("No useable fonts, disabling plugin");
                     return;
                 }
 
@@ -529,7 +529,7 @@ namespace ASP
             }
             catch
             {
-                Debug.LogError(String.Format("TWS: Something went wrong in OnStart disabling plugin"));
+                Utils.LogError("Something went wrong in OnStart disabling plugin");
             }
         }
     }

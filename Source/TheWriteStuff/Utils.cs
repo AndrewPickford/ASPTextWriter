@@ -69,7 +69,7 @@ namespace ASP
             byte[] bytes = FileCache.Instance.getData(fileName);
             if (bytes == null || (bytes != null && bytes.Length == 0))
             {
-                Debug.LogError(String.Format("TWS: Unable to load texture file: {0}", fileName));
+                Utils.LogError("Unable to load texture file: {0}", fileName);
                 return new Texture2D(1, 1);
             }
 
@@ -115,11 +115,11 @@ namespace ASP
             try
             {
                 Color32[] test = readable.GetPixels32();
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} readable 32", texture.name));
+                if (Global.Debugging) Utils.Log("Texture: {0} readable 32", texture.name);
             }
             catch
             {
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} not readable 32", texture.name));
+                if (Global.Debugging) Utils.Log("Texture: {0} not readable 32", texture.name);
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
 
@@ -132,11 +132,11 @@ namespace ASP
             try
             {
                 Color test = readable.GetPixel(0, 0);
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} readable", texture.name));
+                if (Global.Debugging) Utils.Log("Texture: {0} readable", texture.name);
             }
             catch
             {
-                if (Global.Debugging) Debug.Log(String.Format("TWS: Texture: {0} not readable", texture.name));
+                if (Global.Debugging) Utils.Log("Texture: {0} not readable", texture.name);
 
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
@@ -240,19 +240,19 @@ namespace ASP
 
         public static void DebugMaterial(Material material)
         {
-            Debug.Log(String.Format("TWS: Material: {0}", material.name));
+            Utils.Log("Material: {0}", material.name);
 
             Type materialType = typeof(Material);
             System.Reflection.FieldInfo[] fieldInfo = materialType.GetFields();
             foreach (System.Reflection.FieldInfo info in fieldInfo)
             {
-                Debug.Log(String.Format("TWS:    {0}: {1}", info.Name, info.GetValue(material).ToString()));
+                Utils.Log("    {0}: {1}", info.Name, info.GetValue(material).ToString());
             }
 
             System.Reflection.PropertyInfo[] propertyInfo = materialType.GetProperties();
             foreach (System.Reflection.PropertyInfo info in propertyInfo)
             {
-                Debug.Log(String.Format("TWS:    {0}: {1}", info.Name, info.GetValue(material, null)));
+                Utils.Log("    {0}: {1}", info.Name, info.GetValue(material, null));
             }
         }
 
@@ -271,6 +271,16 @@ namespace ASP
             Array.Reverse(array);
 
             return new String(array);
+        }
+
+        public static void Log(string text, params System.Object[] vars)
+        {
+            Debug.Log(String.Format("[TWS] " + text, vars));
+        }
+
+        public static void LogError(string text, params System.Object[] vars)
+        {
+            Debug.LogError(String.Format("[TWS] " + text, vars));
         }
     }
 }
