@@ -122,21 +122,13 @@ namespace ASP
             }
         }
 
-        public static Texture2D PaintText(string textureURL, string text, MappedFont font, Color color, int x, int y, bool mirrorText,
+        public static Texture2D PaintText(Texture2D background, string text, MappedFont font, Color color, int x, int y, bool mirrorText,
                                           TextDirection direction, bool useBoundingBox, Rectangle boundingBox, BlendMethod blendMethod,
                                           int alpha, AlphaOption alphaOption)
         {
-            Texture2D background = GameDatabase.Instance.GetTexture(textureURL, false);
-            if (background == null)
-            {
-                Utils.LogError("PaintText: bad texture [{0}]", textureURL);
-                throw new ArgumentNullException("texture not found");
-            }
+            Texture2D texture = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
 
-            Texture2D backgroundReadable = Utils.GetReadable32Texture(background, textureURL, false);
-            Texture2D texture = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
-
-            Color32[] pixels = backgroundReadable.GetPixels32();
+            Color32[] pixels = background.GetPixels32();
             texture.name = background.name + "(Copy)";
             texture.SetPixels32(pixels);
 
@@ -145,8 +137,8 @@ namespace ASP
             {
                 bBox.x = 0;
                 bBox.y = 0;
-                bBox.w = backgroundReadable.width;
-                bBox.h = backgroundReadable.height;
+                bBox.w = background.width;
+                bBox.h = background.height;
             }
 
             if (alphaOption == AlphaOption.TEXT_ONLY) texture.DrawText(text, font, color, x, y, mirrorText, direction, bBox, blendMethod, true, (float) alpha / 255f);
@@ -166,33 +158,16 @@ namespace ASP
 
             if (background.format == TextureFormat.DXT1 || background.format == TextureFormat.DXT5) texture.Compress(true);
 
-            if (!System.Object.ReferenceEquals(background, backgroundReadable)) Destroy(backgroundReadable);
-
             return texture;
         }
 
-        public static Texture2D PaintNormalMap(string normalMapURL, string mainTextureURL, string text, MappedFont font, Color color, int x, int y,
+        public static Texture2D PaintNormalMap(Texture2D background, Texture2D mainTexture, string text, MappedFont font, Color color, int x, int y,
                                                bool mirrorText, TextDirection direction, bool useBoundingBox, Rectangle boundingBox, float scale,
                                                NormalOption normalOption)
         {
-            Texture2D background = GameDatabase.Instance.GetTexture(normalMapURL, true);
-            if (background == null)
-            {
-                Utils.LogError("PaintNormalMap: bad normal map [{0}]", normalMapURL);
-                throw new ArgumentNullException("normal map not found");
-            }
-
-            Texture2D mainTexture = GameDatabase.Instance.GetTexture(mainTextureURL, false);
-            if (mainTexture == null)
-            {
-                Utils.LogError("PaintNormalMap: bad main texture [{0}]", mainTextureURL);
-                throw new ArgumentNullException("main texture not found");
-            }
-
-            Texture2D mainTextureReadable = Utils.GetReadable32Texture(mainTexture, mainTextureURL, false);
-            Texture2D backgroundReadable = Utils.GetReadable32Texture(background, normalMapURL, true);
-            Texture2D normalMap = new Texture2D(backgroundReadable.width, backgroundReadable.height, TextureFormat.ARGB32, true);
-            Color32[] pixels = backgroundReadable.GetPixels32();
+            
+            Texture2D normalMap = new Texture2D(background.width, background.height, TextureFormat.ARGB32, true);
+            Color32[] pixels = background.GetPixels32();
             normalMap.name = background.name + "(Copy)";
             normalMap.SetPixels32(pixels);
 
@@ -201,11 +176,11 @@ namespace ASP
             {
                 bBox.x = 0;
                 bBox.y = 0;
-                bBox.w = backgroundReadable.width;
-                bBox.h = backgroundReadable.height;
+                bBox.w = background.width;
+                bBox.h = background.height;
             }
 
-            Texture2D textMap = new Texture2D(mainTextureReadable.width, mainTextureReadable.height, TextureFormat.ARGB32, false);
+            Texture2D textMap = new Texture2D(mainTexture.width, mainTexture.height, TextureFormat.ARGB32, false);
             Color transparentGray = new Color(0.5f, 0.5f, 0.5f, 0f);
             textMap.Fill(transparentGray);
 
@@ -215,7 +190,7 @@ namespace ASP
             textMap.DrawText(text, font, normalColor, x, y, mirrorText, direction, bBox);
 
             // scale if the main texture is a different size from the normal map
-            if (mainTextureReadable.width != normalMap.width || mainTextureReadable.height != normalMap.height) textMap.Rescale(normalMap.width, normalMap.height);
+            if (mainTexture.width != normalMap.width || mainTexture.height != normalMap.height) textMap.Rescale(normalMap.width, normalMap.height);
 
             Texture2D textNormalMap = NormalMap.Create(textMap, scale);
 
@@ -231,7 +206,6 @@ namespace ASP
             }
             normalMap.Apply();
             
-            if (!System.Object.ReferenceEquals(background, backgroundReadable)) Destroy(backgroundReadable);
             Destroy(textMap);
             Destroy(textNormalMap);
             
@@ -247,24 +221,41 @@ namespace ASP
 
             Color color = new Color((float) red/255f, (float) green/255f, (float) blue/255f);
 
-            Texture2D newTexture = PaintText(textureArray[selectedTexture], text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, blendMethod, alpha, alphaOption);
+            Texture2D mainTextureBase = GameDatabase.Instance.GetTexture(textureArray[selectedTexture], false);
+            if (mainTextureBase == null)
+            {
+                Utils.LogError("writeText: bad texture [{0}]", textureArray[selectedTexture]);
+                throw new ArgumentNullException("texture not found");
+            }
+            Texture2D mainTextureReadable = Utils.GetReadable32Texture(mainTextureBase, textureArray[selectedTexture], false);
+
+            Texture2D newTexture = PaintText(mainTextureReadable, text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, blendMethod, alpha, alphaOption);
 
             // have to make a new material 
             Material material = Instantiate(_textTransforms[0].gameObject.renderer.material) as Material;
             material.CopyPropertiesFromMaterial(_textTransforms[0].gameObject.renderer.material);
             material.SetTexture("_MainTex", newTexture);
 
+            Texture2D normalMapBase = null;
+            Texture2D normalMapReadable = null;
             Texture2D newNormalMap = null;
             if (hasNormalMap)
             {
+                normalMapBase = GameDatabase.Instance.GetTexture(normalArray[selectedTexture], true);
+                if (normalMapBase == null)
+                {
+                    Utils.LogError("writeText: bad normal map [{0}]", normalArray[selectedTexture]);
+                    throw new ArgumentNullException("normal map not found");
+                }
+
                 if (normalOption == NormalOption.USE_BACKGROUND)
                 {
-                    Texture2D texture = GameDatabase.Instance.GetTexture(normalArray[selectedTexture], true);
-                    material.SetTexture("_BumpMap", texture);
+                    material.SetTexture("_BumpMap", normalMapBase);
                 }
                 else
                 {
-                    newNormalMap = PaintNormalMap(normalArray[selectedTexture], textureArray[selectedTexture], text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, normalScale, normalOption);
+                    normalMapReadable = Utils.GetReadable32Texture(normalMapBase, normalArray[selectedTexture], true);
+                    newNormalMap = PaintNormalMap(normalMapReadable, mainTextureReadable, text, font, color, offsetX, offsetY, mirrorText, textDirection, useBoundingBox, boundingBox, normalScale, normalOption);
                     material.SetTexture("_BumpMap", newNormalMap);
                 }
             }
@@ -273,6 +264,9 @@ namespace ASP
             {
                 _textTransforms[i].gameObject.renderer.material = material;
             }
+
+            if (!System.Object.ReferenceEquals(mainTextureBase, mainTextureReadable)) Destroy(mainTextureReadable);
+            if (normalMapReadable != null && !System.Object.ReferenceEquals(normalMapBase, normalMapReadable)) Destroy(normalMapReadable);
 
             if (_currentMaterial != null) Destroy(_currentMaterial);
             _currentMaterial = material;
