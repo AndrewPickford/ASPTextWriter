@@ -26,7 +26,7 @@ namespace ASP
                 if (url.config.HasValue("cacheSize")) FileCacheSize = int.Parse(url.config.GetValue("cacheSize"));
             }
 
-            Utils.Log("Deugging set to {0}", Debugging);
+            Utils.Log("Debugging set to {0}", Debugging);
         }
 
     }
