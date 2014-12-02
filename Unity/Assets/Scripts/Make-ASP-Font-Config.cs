@@ -28,13 +28,17 @@ public class MakeASPFontConfig :  MonoBehaviour
 		
 		string assetFilePathImport = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + assetFileExt);
 		string texturePath = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + ".png");
+		string texturePathPngMap = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + ".pngmap");
 		string configPath = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() +".cfg");
 
 		Font font = fontImporter.GenerateEditableFont (assetFilePathImport);
-		Debug.Log ("KSP Font Texture created at: " + texturePath);
+
+		FileUtil.ReplaceFile(texturePath, texturePathPngMap);
+
+		Debug.Log ("KSP Font Texture created at: " + texturePathPngMap);
 
 		string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";		
-		font.RequestCharactersInTexture (chars, 0);
+		font.RequestCharactersInTexture(chars, 0);
 
 		StreamWriter swriter = File.CreateText (configPath);
 

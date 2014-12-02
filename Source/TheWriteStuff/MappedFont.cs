@@ -22,13 +22,7 @@ namespace ASP
             displayName = node.GetValue("displayName");
             size = int.Parse(node.GetValue("size"));
 
-            GameDatabase.TextureInfo textInfo = GameDatabase.Instance.databaseTexture.Find(x => x.name == nodeUrl);
-            texture = Utils.GetReadableTexture(textInfo.texture, textInfo.texture.name, false);
-
-            if (Global.Debugging)
-            {
-                if (!System.Object.ReferenceEquals(textInfo.texture, texture)) Utils.Log("MappedFont: texture not readable - reloaded from file");
-            }
+            texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
 
             characterMap = new Dictionary<char, CharacterMap>();
             float h = 0;

@@ -11,11 +11,14 @@ namespace ASP
     {
         public static Global Instance { get; private set; }
         public static bool Debugging = true;
-        public static int FileCacheSize = 40 * 1024 * 1024; // bytes
+        public static int FileCacheSize = 20 * 1024 * 1024; // bytes
 
         public void Awake()
         {
             if (Instance != null) return;
+
+            Instance = this;
+            DontDestroyOnLoad(this);
 
             foreach (UrlDir.UrlConfig url in GameDatabase.Instance.GetConfigs("THE_WRITE_STUFF"))
             {

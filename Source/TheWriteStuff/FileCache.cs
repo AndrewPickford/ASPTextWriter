@@ -17,7 +17,7 @@ namespace ASP
 
         public static FileCache Instance { get; private set; }
 
-        private Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
+        private Dictionary<string, CacheEntry> _cache;
         private long _totalBytes = 0;
         private long _maxBytes = 0;
 
@@ -93,6 +93,8 @@ namespace ASP
 
             Instance = this;
             DontDestroyOnLoad(this);
+
+            _cache = new Dictionary<string, CacheEntry>();
         }
 
         public void Start()
