@@ -54,6 +54,7 @@
     <Compile Include="ImageUtils.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
+    <Compile Include="MappedFontLoader.cs" />
     <Compile Include="NormalMap.cs" />
     <Compile Include="PaintPointer.cs" />
     <Compile Include="RGB.cs" />

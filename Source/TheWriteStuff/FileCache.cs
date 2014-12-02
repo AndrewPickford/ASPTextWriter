@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ASP
 {
-    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class FileCache : MonoBehaviour
     {
         struct CacheEntry
@@ -17,9 +17,9 @@ namespace ASP
 
         public static FileCache Instance { get; private set; }
 
-        private Dictionary<string, CacheEntry> _cache;
+        private Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
         private long _totalBytes = 0;
-        private long _maxBytes = 40 * 1024 * 1024;
+        private long _maxBytes = 0;
 
         public byte[] getData(string fileName)
         {
@@ -81,6 +81,7 @@ namespace ASP
 
             if (entryName != string.Empty)
             {
+                if (Global.Debugging) Utils.Log("FileCache: remove {0} from cache", entryName);
                 _cache.Remove(entryName);
                 calculateTotalSize();
             }
@@ -92,8 +93,12 @@ namespace ASP
 
             Instance = this;
             DontDestroyOnLoad(this);
+        }
 
-            _cache = new Dictionary<string, CacheEntry>();
+        public void Start()
+        {
+            _maxBytes = Global.FileCacheSize;
+            if (Global.Debugging) Utils.Log("FileCache: cache size {0}", _maxBytes);
         }
     }
 }

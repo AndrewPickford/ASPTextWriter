@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ASP
 {
-    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class FontCache : MonoBehaviour
     {
         public struct FontInfo
@@ -75,26 +75,44 @@ namespace ASP
             DontDestroyOnLoad(this);
 
             _dictionary = new Dictionary<string, MappedFont>();
+            mappedList = new List<MappedFont>(); 
+        }
 
-            mappedList = new List<MappedFont>();
-            foreach (UrlDir.UrlConfig url in GameDatabase.Instance.GetConfigs("ASPFONT"))
+        public void Start()
+        {
+            LoadingScreen loadingScreen = FindObjectOfType<LoadingScreen>();
+            if (loadingScreen == null)
             {
-                if (!url.config.HasValue("name"))
-                {
-                    Utils.Log("Fontcache: missing font name");
-                }
-
-                Utils.Log("FontCache: Loading font {0}", url.config.GetValue("name"));
-                MappedFont font = new MappedFont(url.config, url.parent.url);
-                _dictionary[font.id] = font;
+                Utils.LogError("FontCache: unable to find loading screen, exiting");
+                return;
             }
 
-            Dictionary<string, FontInfo> infoDictionary = new Dictionary<string,FontInfo>();
-            Dictionary<string, List<int>> infoSizes = new Dictionary<string,List<int>>();
-            foreach(KeyValuePair<string, MappedFont> entry in _dictionary)
+            List<LoadingSystem> loadersList = LoadingScreen.Instance.loaders;
+            if (loadersList == null)
+            {
+                Utils.LogError("FontCache: empty loading list, exiting.");
+                return;
+            }
+
+            Utils.Log("FontCache: adding fontcache to loading list");
+            MappedFontLoader mappedFontLoader = this.gameObject.AddComponent<MappedFontLoader>();
+            mappedFontLoader.setFontCache(this);
+            loadersList.Add(mappedFontLoader);       
+        }
+
+        public void addFont(MappedFont font)
+        {
+            _dictionary[font.id] = font;
+        }
+
+        public void updateCache()
+        {
+            Dictionary<string, FontInfo> infoDictionary = new Dictionary<string, FontInfo>();
+            Dictionary<string, List<int>> infoSizes = new Dictionary<string, List<int>>();
+            foreach (KeyValuePair<string, MappedFont> entry in _dictionary)
             {
                 mappedList.Add(entry.Value);
-                
+
                 if (!infoDictionary.ContainsKey(entry.Value.name))
                 {
                     FontInfo fontInfo = new FontInfo();
@@ -103,7 +121,7 @@ namespace ASP
                     fontInfo.displayName = entry.Value.displayName;
 
                     infoDictionary.Add(entry.Value.name, fontInfo);
-                    
+
                     List<int> sizeList = new List<int>();
                     sizeList.Add(entry.Value.size);
 
@@ -115,14 +133,14 @@ namespace ASP
                 }
             }
 
-            foreach(KeyValuePair<string, List<int>> entry in infoSizes)
+            foreach (KeyValuePair<string, List<int>> entry in infoSizes)
             {
                 entry.Value.Sort();
             }
 
             fontInfoArray = new FontInfo[infoDictionary.Count];
             int i = 0;
-            foreach(KeyValuePair<string, FontInfo> entry in infoDictionary)
+            foreach (KeyValuePair<string, FontInfo> entry in infoDictionary)
             {
                 fontInfoArray[i] = entry.Value;
                 fontInfoArray[i].sizes = new int[infoSizes[entry.Key].Count];

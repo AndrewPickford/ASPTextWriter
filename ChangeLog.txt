@@ -5,6 +5,7 @@
  * add global config file
  * add global debugging option
  * fix nomalmap scaling
+ * move font setup to loading screen
  * fix for unreadable font texture
 
 0.5.0
