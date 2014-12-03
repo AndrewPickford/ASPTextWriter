@@ -26,7 +26,7 @@ namespace ASP
             if (_cache.ContainsKey(fileName))
             {
                 CacheEntry entry = _cache[fileName];
-                if (Global.Debugging) Utils.Log("FileCache: Get {0} from cache", fileName);
+                if (Global.Debug1) Utils.Log("FileCache: Get {0} from cache", fileName);
 
                 entry.lastAccess = DateTime.UtcNow.Ticks;
                 return entry.data;
@@ -39,7 +39,7 @@ namespace ASP
                 entry.lastAccess = DateTime.UtcNow.Ticks;
 
                 addToCache(fileName, entry);
-                if (Global.Debugging) Utils.Log("FileCache: Add {0} to file cache", fileName);
+                if (Global.Debug1) Utils.Log("FileCache: Add {0} to file cache", fileName);
 
                 return entry.data;
             }
@@ -81,7 +81,7 @@ namespace ASP
 
             if (entryName != string.Empty)
             {
-                if (Global.Debugging) Utils.Log("FileCache: remove {0} from cache", entryName);
+                if (Global.Debug1) Utils.Log("FileCache: remove {0} from cache", entryName);
                 _cache.Remove(entryName);
                 calculateTotalSize();
             }
@@ -100,7 +100,7 @@ namespace ASP
         public void Start()
         {
             _maxBytes = Global.FileCacheSize;
-            if (Global.Debugging) Utils.Log("FileCache: cache size {0}", _maxBytes);
+            if (Global.Debug1) Utils.Log("FileCache: cache size {0}", _maxBytes);
         }
     }
 }

@@ -81,9 +81,6 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public int selectedTexture = 0;
 
-        [KSPField(isPersistant = true)]
-        public bool debugging = true;
-
         public AlphaOption alphaOption = AlphaOption.USE_TEXTURE;
         public NormalOption normalOption = NormalOption.USE_BACKGROUND;
         public BlendMethod blendMethod = BlendMethod.RGB;
@@ -462,10 +459,10 @@ namespace ASP
                             if (transformOption == TransformOption.USE_FIRST) break;
                         }
                     }
-                    if (Global.Debugging) Utils.Log("Found transform {0}, {1} times", transformNameArray[i], c);
+                    if (Global.Debug1) Utils.Log("Found transform {0}, {1} times", transformNameArray[i], c);
                 }
             }
-            if (Global.Debugging) Utils.Log("Found {0} usable transforms", count);
+            if (Global.Debug1) Utils.Log("Found {0} usable transforms", count);
 
             _textTransforms = new Transform[count];
             count = 0;
@@ -487,7 +484,6 @@ namespace ASP
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
-            Global.Debugging = debugging;
 
             if (state == StartState.Editor)
             {
@@ -497,7 +493,7 @@ namespace ASP
             _ok = false;
             try
             {
-                if (Global.Debugging) Utils.Log("OnStart, part {0}", this.part.name);
+                if (Global.Debug1) Utils.Log("OnStart, part {0}", this.part.name);
 
                 findTransforms();
 

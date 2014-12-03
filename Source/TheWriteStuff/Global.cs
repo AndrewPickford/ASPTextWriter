@@ -10,7 +10,9 @@ namespace ASP
     public class Global : MonoBehaviour
     {
         public static Global Instance { get; private set; }
-        public static bool Debugging = true;
+        public static bool Debug1 = true;
+        public static bool Debug2 = true;
+        public static bool Debug3 = true;
         public static int FileCacheSize = 20 * 1024 * 1024; // bytes
 
         public void Awake()
@@ -22,11 +24,15 @@ namespace ASP
 
             foreach (UrlDir.UrlConfig url in GameDatabase.Instance.GetConfigs("THE_WRITE_STUFF"))
             {
-                if (url.config.HasValue("debug")) Debugging = bool.Parse(url.config.GetValue("debug"));
+                int debugLevel = 0;
+                if (url.config.HasValue("debugLevel")) debugLevel = int.Parse(url.config.GetValue("debugLevel"));
+                if (debugLevel >= 1) Debug1 = true;
+                if (debugLevel >= 2) Debug2 = true;
+                if (debugLevel >= 3) Debug3 = true;
+                Utils.Log("Debug level {0}", debugLevel);
+
                 if (url.config.HasValue("cacheSize")) FileCacheSize = int.Parse(url.config.GetValue("cacheSize"));
             }
-
-            Utils.Log("Debugging set to {0}", Debugging);
         }
 
     }

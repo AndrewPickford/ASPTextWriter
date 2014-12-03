@@ -115,11 +115,11 @@ namespace ASP
             try
             {
                 Color32[] test = readable.GetPixels32();
-                if (Global.Debugging) Utils.Log("Texture: {0} readable 32", texture.name);
+                if (Global.Debug1) Utils.Log("Texture: {0} readable 32", texture.name);
             }
             catch
             {
-                if (Global.Debugging) Utils.Log("Texture: {0} not readable 32", texture.name);
+                if (Global.Debug1) Utils.Log("Texture: {0} not readable 32", texture.name);
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
 
@@ -132,11 +132,11 @@ namespace ASP
             try
             {
                 Color test = readable.GetPixel(0, 0);
-                if (Global.Debugging) Utils.Log("Texture: {0} readable", texture.name);
+                if (Global.Debug1) Utils.Log("Texture: {0} readable", texture.name);
             }
             catch
             {
-                if (Global.Debugging) Utils.Log("Texture: {0} not readable", texture.name);
+                if (Global.Debug1) Utils.Log("Texture: {0} not readable", texture.name);
 
                 readable = Utils.LoadTextureFromUrl(url, normalMap);
             }
@@ -275,12 +275,22 @@ namespace ASP
 
         public static void Log(string text, params System.Object[] vars)
         {
-            Debug.Log(String.Format("[TWS] " + text, vars));
+            System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace();
+            MethodBase method = stackTrace.GetFrame(1).GetMethod();
+            string methodName = method.Name;
+            string className = method.ReflectedType.Name;
+
+            Debug.Log(String.Format("[TWS] (" + className + "." + methodName + ") " + text, vars));
         }
 
         public static void LogError(string text, params System.Object[] vars)
         {
-            Debug.LogError(String.Format("[TWS] " + text, vars));
+            System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace();
+            MethodBase method = stackTrace.GetFrame(1).GetMethod();
+            string methodName = method.Name;
+            string className = method.ReflectedType.Name;
+
+            Debug.LogError(String.Format("[TWS] (" + className + "." + methodName + ") " + text, vars));
         }
     }
 }
