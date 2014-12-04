@@ -85,7 +85,7 @@ namespace ASP
         public NormalOption normalOption = NormalOption.USE_BACKGROUND;
         public BlendMethod blendMethod = BlendMethod.RGB;
         public TextDirection textDirection = TextDirection.LEFT_RIGHT;
-        public TransformOption transformOption = TransformOption.USE_FIRST;
+        public TransformOption transformsOption = TransformOption.USE_FIRST;
         public bool hasNormalMap = false;
         public Rectangle boundingBox { get; private set; }
         public string[] textureArray { get; private set; }
@@ -288,7 +288,7 @@ namespace ASP
             if (node.HasValue("normalOption")) normalOption = (NormalOption) ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
             if (node.HasValue("blendMethod")) blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
             if (node.HasValue("textDirection")) textDirection = (TextDirection)ConfigNode.ParseEnum(typeof(TextDirection), node.GetValue("textDirection"));
-            if (node.HasValue("transformOption")) transformOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformOption"));
+            if (node.HasValue("transformsOption")) transformsOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformsOption"));
         }
 
         public override void OnSave(ConfigNode node)
@@ -299,7 +299,7 @@ namespace ASP
             node.AddValue("normalOption", ConfigNode.WriteEnum(normalOption));
             node.AddValue("blendMethod", ConfigNode.WriteEnum(blendMethod));
             node.AddValue("textDirection", ConfigNode.WriteEnum(textDirection));
-            node.AddValue("transformOption", ConfigNode.WriteEnum(transformOption));
+            node.AddValue("transformsOption", ConfigNode.WriteEnum(transformsOption));
         }
 
         private string findFirstUseableTransform()
@@ -456,7 +456,7 @@ namespace ASP
                         {
                             ++count;
                             ++c;
-                            if (transformOption == TransformOption.USE_FIRST) break;
+                            if (transformsOption == TransformOption.USE_FIRST) break;
                         }
                     }
                     if (Global.Debug1) Utils.Log("Found transform {0}, {1} times", transformNameArray[i], c);
@@ -475,7 +475,7 @@ namespace ASP
                     {
                         _textTransforms[count] = transforms[j];
                         ++count;
-                        if (transformOption == TransformOption.USE_FIRST) break;
+                        if (transformsOption == TransformOption.USE_FIRST) break;
                     }
                 }
             }

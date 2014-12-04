@@ -50,9 +50,13 @@
     <Compile Include="ASPFlatPlateScale.cs" />
     <Compile Include="ASPPainter.cs" />
     <Compile Include="ASPTextureEdit.cs" />
+    <Compile Include="BaseTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="CharacterMap.cs" />
     <Compile Include="FileCache.cs" />
+    <Compile Include="Image.cs" />
+    <Compile Include="ImageModifier.cs" />
+    <Compile Include="ImageModifiers.cs" />
     <Compile Include="ImageUtils.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
@@ -62,6 +66,7 @@
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="TextureEditGUI.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="MappedFont.cs" />
     <Compile Include="FontCache.cs" />

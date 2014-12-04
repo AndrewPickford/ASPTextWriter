@@ -36,24 +36,29 @@ namespace ASP
 
         public void save(ConfigNode node)
         {
-            ConfigNode bbNode = node.AddNode("ASP_BOUNDINGBOX");
-
-            bbNode.AddValue("x", x);
-            bbNode.AddValue("y", y);
-            bbNode.AddValue("w", w);
-            bbNode.AddValue("h", h);
-            bbNode.AddValue("valid", valid);
-            bbNode.AddValue("use", use);
+            node.AddValue("x", x);
+            node.AddValue("y", y);
+            node.AddValue("w", w);
+            node.AddValue("h", h);
+            node.AddValue("valid", valid);
+            node.AddValue("use", use);
         }
 
         public void load(ConfigNode node)
         {
-            x = int.Parse(node.GetValue("x"));
-            y = int.Parse(node.GetValue("y"));
-            w = int.Parse(node.GetValue("w"));
-            h = int.Parse(node.GetValue("h"));
-            valid = bool.Parse(node.GetValue("valid"));
-            use = bool.Parse(node.GetValue("use"));
+            x = 0;
+            y = 0;
+            w = 0;
+            h = 0;
+            valid = false;
+            use = false;
+
+            if (node.HasValue("x")) x = int.Parse(node.GetValue("x"));
+            if (node.HasValue("y")) y = int.Parse(node.GetValue("y"));
+            if (node.HasValue("w")) w = int.Parse(node.GetValue("w"));
+            if (node.HasValue("h")) h = int.Parse(node.GetValue("h"));
+            if (node.HasValue("valid")) valid = bool.Parse(node.GetValue("valid"));
+            if (node.HasValue("use")) use = bool.Parse(node.GetValue("use"));
         }
     }
 }

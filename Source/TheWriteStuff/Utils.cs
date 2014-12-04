@@ -28,6 +28,18 @@ namespace ASP
             return splitText;
         }
 
+        public static string CommaSeparatedList(List<string> list)
+        {
+            string text = string.Empty;
+            for (int i = 0; i < list.Count; ++i)
+            {
+                text += list[i];
+                if (i != list.Count - 1) text += ",";
+            }
+
+            return text;
+        }
+
         public static string[] AddPrefix(string prefix, string[] array)
         {
             string[] newArray = new string[array.Length];
