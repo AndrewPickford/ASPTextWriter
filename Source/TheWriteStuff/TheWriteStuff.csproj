@@ -50,6 +50,7 @@
     <Compile Include="ASPFlatPlateScale.cs" />
     <Compile Include="ASPPainter.cs" />
     <Compile Include="ASPTextureEdit.cs" />
+    <Compile Include="IM_BaseTexture.cs" />
     <Compile Include="BaseTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="CharacterMap.cs" />
@@ -60,6 +61,8 @@
     <Compile Include="ImageUtils.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
+    <Compile Include="IM_Text.cs" />
+    <Compile Include="IntVector2.cs" />
     <Compile Include="MappedFontLoader.cs" />
     <Compile Include="NormalMap.cs" />
     <Compile Include="PaintPointer.cs" />

@@ -30,182 +30,126 @@ namespace ASP
         public abstract void drawOnImage(ref Image image);
         public abstract ImageModifier clone();
         public abstract void cleanUp();
+        public abstract string displayName();
+        public abstract bool locked();
+        public abstract ImageModifierGui gui();
     }
 
-    namespace IM
+    public abstract class ImageModifierGui
     {
-        public class BaseTexture : ImageModifier
+        static private string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
+        static private string[] _speedGrid = { "x 1", "x 10" };
+
+        public static void Position(TextureEditGUI gui, ref IntVector2 position)
         {
-            private string _url = string.Empty;
-            private Texture2D _texture = null;
-            private Color32[] _pixels = null;
-            private int _width = 0;
-            private int _height = 0;
+            bool repeatOK = false;
+            bool buttonPressed = false;
+            int button = 0;
+            int delta = 1;
 
-            public void set(string url)
+            if ((Time.time - Global.LastRepeat) > Global.AutoRepeatGap) repeatOK = true;
+            if (gui._speedSelection < 0 || gui._speedSelection > 1) gui._speedSelection = 0;
+            if (gui._speedSelection == 1)
             {
-                _url = url;
-                _pixels = null;
-                _width = _texture.width;
-                _height = _texture.height;
-
-                if (_texture != null)
-                {
-                    UnityEngine.Object.Destroy(_texture);
-                    _texture = null;
-                }
+                button = 4;
+                delta = 10;
             }
 
-            public override void save(ConfigNode node)
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(120), GUILayout.Height(120));
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Position");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.RepeatButton(_posButtons[button], GUILayout.Width(25), GUILayout.Height(25)))
             {
-                node.AddValue("type", "base_texture");
+                buttonPressed = true;
+                Global.LastButtonPress = Time.time;
+                if (repeatOK) position.y += delta;
             }
 
-            public override void load(ConfigNode node)
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.RepeatButton(_posButtons[button + 2], GUILayout.Width(25), GUILayout.Height(25)))
             {
+                buttonPressed = true;
+                Global.LastButtonPress = Time.time;
+                if (repeatOK) position.x -= delta;
             }
 
-            public override void drawOnImage(ref Image image)
+            GUILayout.Space(5);
+
+            if (GUILayout.Button("O", GUILayout.Width(25), GUILayout.Height(25)))
             {
-                if (_texture == null)
-                {
-                    _texture = Utils.LoadTextureFromUrl(_url, false);
-                    _pixels = null;
-                }
-
-                if (_pixels == null) _pixels = _texture.GetPixels32();
-
-
-                image.resizeAndFill(_width, _height, _pixels);
+                gui.centrePosition(ref position);
+                gui.setRemakePreview();
             }
 
-            public override ImageModifier clone()
-            {
-                IM.BaseTexture im = new IM.BaseTexture();
-                im._url = _url;
-                im._texture = null;
-                im._pixels = null;
-                im._width = _width;
-                im._height = _height;
+            GUILayout.Space(5);
 
-                return im;
+            if (GUILayout.RepeatButton(_posButtons[button + 3], GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                Global.LastButtonPress = Time.time;
+                if (repeatOK) position.x += delta;
             }
 
-            public override void cleanUp()
-            {
-                if (_texture != null) UnityEngine.Object.Destroy(_texture);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
 
-                _pixels = null;
-                _texture = null;
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.RepeatButton(_posButtons[button + 1], GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                buttonPressed = true;
+                Global.LastButtonPress = Time.time;
+                if (repeatOK) position.y -= delta;
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            gui._speedSelection = GUILayout.SelectionGrid(gui._speedSelection, _speedGrid, 2);
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            GUILayout.EndVertical();
+
+            if (buttonPressed && repeatOK)
+            {
+                Global.LastRepeat = Global.LastButtonPress;
+                gui.setRemakePreview();
+
+                Global.AutoRepeatGap = Global.AutoRepeatGap * 0.8f;
+                if (Global.AutoRepeatGap < 0.04f) Global.AutoRepeatGap = 0.04f;
             }
         }
 
-
-        public class Text : ImageModifier
-        {
-            private string _text = string.Empty;
-            private string _fontName = "CAPSMALL_CLEAN";
-            private int _fontSize = 32;
-            private int _x = 0;
-            private int _y = 0;
-            private bool _mirror = false;
-            private int _red = 0;
-            private int _green = 0;
-            private int _blue = 0;
-            private int _alpha = 255;
-            private AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
-            private float _normalScale = 2.0f;
-            private NormalOption _normalOption = NormalOption.USE_BACKGROUND;
-            private BlendMethod _blendMethod = BlendMethod.RGB;
-            private TextDirection _textDirection = TextDirection.LEFT_RIGHT;
-
-            public Text()
-            {
-            }
-
-            public override void load(ConfigNode node)
-            {
-                _text = string.Empty;
-                _fontName = "CAPSMALL_CLEAN";
-                _fontSize = 32;
-                _x = 0;
-                _y = 0;
-                _mirror = false;
-                _red = 0;
-                _green = 0;
-                _blue = 0;
-                _alpha = 255;
-                _alphaOption = AlphaOption.USE_TEXTURE;
-                _normalScale = 2.0f;
-                _normalOption = NormalOption.USE_BACKGROUND;
-                _blendMethod = BlendMethod.RGB;
-                _textDirection = TextDirection.LEFT_RIGHT;
-
-                if (node.HasValue("text")) _text = node.GetValue("text");
-                if (node.HasValue("fontName")) _fontName = node.GetValue("fontName");
-                if (node.HasValue("fontSize")) _fontSize = int.Parse(node.GetValue("fontSize"));
-                if (node.HasValue("x")) _x = int.Parse(node.GetValue("x"));
-                if (node.HasValue("y")) _y = int.Parse(node.GetValue("y"));
-                if (node.HasValue("mirror")) _mirror = bool.Parse(node.GetValue("mirror"));
-                if (node.HasValue("red")) _red = int.Parse(node.GetValue("red"));
-                if (node.HasValue("green")) _green = int.Parse(node.GetValue("green"));
-                if (node.HasValue("blue")) _blue = int.Parse(node.GetValue("blue"));
-                if (node.HasValue("alpha")) _alpha = int.Parse(node.GetValue("alpha"));
-                if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
-                if (node.HasValue("normalScale")) _normalScale = int.Parse(node.GetValue("normalScale"));
-                if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
-                if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
-                if (node.HasValue("textDirection")) _textDirection = (TextDirection)ConfigNode.ParseEnum(typeof(TextDirection), node.GetValue("textDirection"));
-            }
-
-            public override void save(ConfigNode node)
-            {
-                node.AddValue("type", "text");
-                node.AddValue("text", _text);
-                node.AddValue("x", _x);
-                node.AddValue("y", _y);
-                node.AddValue("mirror", _mirror);
-                node.AddValue("red", _red);
-                node.AddValue("green", _green);
-                node.AddValue("blue", _blue);
-                node.AddValue("alpha", _alpha);
-                node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
-                node.AddValue("normalScale", _normalScale);
-                node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
-                node.AddValue("blendMethod", ConfigNode.WriteEnum(_blendMethod));
-                node.AddValue("textDirection", ConfigNode.WriteEnum(_textDirection));
-            }
-
-            public override void drawOnImage(ref Image image)
-            {
-            }
-
-            public override ImageModifier clone()
-            {
-                IM.Text im = new IM.Text();
-
-                im._text = _text;
-                im._fontName = _fontName;
-                im._fontSize = _fontSize;
-                im._x = _x;
-                im._y = _y;
-                im._mirror = _mirror;
-                im._red = _red;
-                im._green = _green;
-                im._blue = _blue;
-                im._alpha = _alpha;
-                im._alphaOption = _alphaOption;
-                im._normalScale = _normalScale;
-                im._normalOption = _normalOption;
-                im._blendMethod = _blendMethod;
-                im._textDirection = _textDirection;
-
-                return im;
-            }
-
-            public override void cleanUp()
-            {
-            }
-        }
+        public abstract void draw(TextureEditGUI gui);
+        public abstract void initialise();
     }
 }

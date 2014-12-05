@@ -14,6 +14,9 @@ namespace ASP
         public static bool Debug2 = true;
         public static bool Debug3 = true;
         public static int FileCacheSize = 20 * 1024 * 1024; // bytes
+        public static float LastButtonPress;
+        public static float LastRepeat;
+        public static float AutoRepeatGap;
 
         public void Awake()
         {

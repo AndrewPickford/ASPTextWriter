@@ -23,14 +23,15 @@ namespace ASP
         private TransformOption _transformsOption = TransformOption.USE_FIRST;
 
         private bool _ok = false;
-        private BoundingBox _boundingBox;
+        private BoundingBox _boundingBox = null;
         private List<string> _transformNames = null;
         private List<Transform> _transforms = null;
+        private IM.BaseTexture _baseTexture = null;
         private ImageModifiers _imageModifiers = null;
         private BaseTextureInfo _baseTextureInfo = null;
         private TextureEditGUI _gui;
 
-        [KSPEvent(name = "Edit Texture Event", guiName = "Paint", guiActive = false, guiActiveEditor = true)]
+        [KSPEvent(name = "Edit Texture Event", guiName = "Edit Texture", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
         {
             if (_ok == false)
@@ -52,6 +53,11 @@ namespace ASP
         public ImageModifiers cloneImageModifiers()
         {
             return _imageModifiers.clone();
+        }
+
+        public IM.BaseTexture cloneBaseTexture()
+        {
+            return _baseTexture.cloneBaseTexture();
         }
 
         private string findTransformName(Transform[] transforms, bool validTexture, bool validNormalMap)
@@ -199,6 +205,13 @@ namespace ASP
 
             node.AddValue("transformsOption", ConfigNode.WriteEnum(_transformsOption));
 
+            if (_baseTexture != null)
+            {
+                ConfigNode imNode = new ConfigNode("ASP_BASETEXTURE");
+                _baseTexture.save(imNode);
+                node.AddNode(imNode);
+            }
+
             if (_imageModifiers != null)
             {
                 ConfigNode imNode = new ConfigNode("ASP_IMAGEMODIFIERS");
@@ -211,20 +224,40 @@ namespace ASP
         {
             if (Global.Debug2) Utils.Log("OnLoad start");
 
+            _ok = false;
+            _transformNames = null;
+            _transforms = null;
+            _baseTextureInfo = null;
+            if (_gui != null) Destroy(_gui);
+            _gui = null;
+            _boundingBox = null;
+            _transformsOption = TransformOption.USE_ALL;
+            if (_baseTexture != null) _baseTexture.cleanUp();
+            _baseTexture = null;
+            if (_imageModifiers != null) _imageModifiers.cleanUp();
+            _imageModifiers = null;
+
             if (node.HasNode("ASP_BOUNDINGBOX"))
             {
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
-                ConfigNode bbNode = node.GetNode("ASP_BOUNDINGBOX");
-                _boundingBox.load(node);
+                ConfigNode n = node.GetNode("ASP_BOUNDINGBOX");
+                _boundingBox.load(n);
             }
 
             if (node.HasValue("transformsOption")) _transformsOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformsOption"));
 
+            if (node.HasValue("ASP_BASETEXTURE"))
+            {
+                _baseTexture = new IM.BaseTexture();
+                ConfigNode n = node.GetNode("ASP_BASETEXTURE");
+                _baseTexture.load(n);
+            }
+
             if (node.HasNode("ASP_IMAGEMODIFIERS"))
             {
                 _imageModifiers = new ImageModifiers();
-                ConfigNode imNode = node.GetNode("ASP_IMAGEMODIFIERS");
-                _imageModifiers.load(imNode);
+                ConfigNode n = node.GetNode("ASP_IMAGEMODIFIERS");
+                _imageModifiers.load(n);
             }
         }
 
@@ -251,14 +284,9 @@ namespace ASP
 
                 if (_imageModifiers == null) _imageModifiers = new ImageModifiers();
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
+                if (_baseTexture == null) _baseTexture = new IM.BaseTexture();
 
-                IM.BaseTexture baseTexture = _imageModifiers.findFirst<IM.BaseTexture>() as IM.BaseTexture;
-                if (baseTexture == null)
-                {
-                    baseTexture = new IM.BaseTexture();
-                    _imageModifiers.insert(0, baseTexture);
-                }
-                baseTexture.set(_baseTextureInfo.mainUrl);
+                _baseTexture.set(_baseTextureInfo.mainUrl, false);
 
                 _ok = true;
             }

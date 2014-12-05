@@ -8,16 +8,16 @@ namespace ASP
 {
     public class ImageModifiers
     {
-        private List<ImageModifier> _modifiers;
+        public List<ImageModifier> modifiers {get; private set; }
 
         public ImageModifiers()
         {
-            _modifiers = new List<ImageModifier>();
+            modifiers = new List<ImageModifier>();
         }
 
         public ImageModifier findFirst<T>()
         {
-            foreach (ImageModifier im in _modifiers)
+            foreach (ImageModifier im in modifiers)
             {
                 if (im is T) return im;
             }
@@ -27,17 +27,29 @@ namespace ASP
 
         public void add(ImageModifier im)
         {
-            _modifiers.Add(im);
+            modifiers.Add(im);
+        }
+
+        public void removeAt(int i)
+        {
+            modifiers.RemoveAt(i);
         }
 
         public void insert(int index, ImageModifier im)
         {
-            _modifiers.Insert(index, im);
+            modifiers.Insert(index, im);
+        }
+
+        public void move(int from, int to)
+        {
+            ImageModifier im = modifiers[from];
+            modifiers.Insert(to, im);
+            modifiers.RemoveAt(from);
         }
 
         public void save(ConfigNode node)
         {
-            foreach (ImageModifier im in _modifiers)
+            foreach (ImageModifier im in modifiers)
             {
                 ConfigNode n = new ConfigNode("ASP_IMAGEMODIFIER");
                 im.save(n);
@@ -47,20 +59,20 @@ namespace ASP
 
         public void load(ConfigNode node)
         {
-            _modifiers = new List<ImageModifier>();
+            modifiers = new List<ImageModifier>();
           
             ConfigNode[] nodes = node.GetNodes("ASP_IMAGEMODIFIER");
 
             foreach (ConfigNode n in nodes)
             {
                 ImageModifier im = ImageModifier.CreateFromConfig(n);
-                _modifiers.Add(im);
+                modifiers.Add(im);
             }
         }
 
         public void drawOnImage(ref Image image)
         {
-            foreach (ImageModifier im in _modifiers)
+            foreach (ImageModifier im in modifiers)
             {
                 im.drawOnImage(ref image);
             }
@@ -70,7 +82,7 @@ namespace ASP
         {
             ImageModifiers newIMs = new ImageModifiers();
 
-            foreach (ImageModifier im in _modifiers)
+            foreach (ImageModifier im in modifiers)
             {
                 ImageModifier newIM = im.clone();
                 newIMs.add(im);
@@ -81,8 +93,16 @@ namespace ASP
 
         public void cleanUp()
         {
-            foreach (ImageModifier im in _modifiers)
+            foreach (ImageModifier im in modifiers)
                 im.cleanUp();
+        }
+
+        public void guiInit()
+        {
+            foreach (ImageModifier im in modifiers)
+            {
+                im.gui().initialise();
+            }
         }
     }
 }
