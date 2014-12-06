@@ -18,6 +18,13 @@ namespace ASP
             b = blue;
         }
 
+        public RGB(UnityEngine.Color32 color)
+        {
+            r = (float) color.r / 255f;
+            g = (float) color.g / 255f;
+            b = (float) color.b / 255f;
+        }
+
         public HSV toHSV()
         {
             float min = Math.Min(Math.Min(r, g), b);

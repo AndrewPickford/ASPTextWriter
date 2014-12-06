@@ -11,9 +11,7 @@ namespace ASP
         static private int _nextID = 23851;
 
         private int _windowID = 0;
-        private Color _selectedColor;
-        private Color _notSelectedColor;
-        private Color _backgroundColor;
+        private bool _first = true;
 
         private Rect _windowPosition;
         private string _lockText = "TextureEditGUILock";
@@ -27,7 +25,12 @@ namespace ASP
         private Vector2 _modifiersScrollPos;
         private int _selectedModifier;
         private Vector2 _availableModifiersScrollPos;
-        public int _speedSelection;
+
+        internal Color _selectedColor;
+        internal Color _notSelectedColor;
+        internal Color _backgroundColor;
+        internal int speedSelection;
+        internal GUIStyle largeHeader;
 
         public void centrePosition(ref IntVector2 position)
         {
@@ -93,6 +96,16 @@ namespace ASP
 
         public void OnGUI()
         {
+            if (_first)
+            {
+                _first = false;
+                largeHeader = new GUIStyle(GUI.skin.label);
+                largeHeader.fontSize = 24;
+                largeHeader.fontStyle = FontStyle.Bold;
+                largeHeader.normal.background = Global.WhiteBackground;
+                largeHeader.normal.textColor = Color.black;
+            }
+
             GUI.backgroundColor = _backgroundColor;
 
             if(Event.current.type == EventType.Layout)
@@ -142,31 +155,50 @@ namespace ASP
             GUILayout.BeginVertical();
 
             GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
             drawTexture();
             GUILayout.Space(5);
             drawImageModifiersList();
             GUILayout.Space(5);
             drawAvailableModifiers();
+            GUILayout.Space(5);
+
+            if (_selectedModifier < _imageModifiers.modifiers.Count)
+            {
+                if (_imageModifiers.modifiers[_selectedModifier].gui().drawRightBar())
+                {
+                    GUILayout.Label("", largeHeader, GUILayout.Width(20), GUILayout.ExpandHeight(true));
+                }
+                GUILayout.Space(5);
+            }
+
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
-            if (_selectedModifier < _imageModifiers.modifiers.Count)
-            {
-                _imageModifiers.modifiers[_selectedModifier].gui().draw(this);
-                GUILayout.Space(10);
-            }
+            if (_selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
+         
+            GUILayout.EndVertical();
 
-            drawCloseButton();
+            if (_selectedModifier < _imageModifiers.modifiers.Count)_imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
 
-            GUILayout.Space(20);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            drawMainButtons();
+
+            GUILayout.Space(10);
 
             GUILayout.EndVertical();
 
             GUI.DragWindow();
         }
 
-        private void drawCloseButton()
+        private void drawMainButtons()
         {
             GUILayout.BeginHorizontal();
 
@@ -190,6 +222,7 @@ namespace ASP
             if (_previewImage == null) _previewImage = new Image();
 
             _imageModifiers.drawOnImage(ref _previewImage);
+            _previewImage.fillAlpha((byte) 255);
 
             if (_previewTexture == null) _previewTexture = new Texture2D(_previewImage.width, _previewImage.height, TextureFormat.ARGB32, false);
             
@@ -200,6 +233,7 @@ namespace ASP
             }
 
             _previewTexture.SetPixels32(_previewImage.pixels);
+            _previewTexture.Apply();
 
             _remakePreview = false;
         }
@@ -208,9 +242,13 @@ namespace ASP
         {
             if (_remakePreview) remakePreview();
 
-            if (_previewTexture.width > 520 || _previewTexture.height > 520) _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(520), GUILayout.MinHeight(520));
-            GUILayout.Box(_previewTexture, GUI.skin.box, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
-            if (_previewTexture.width > 520 || _previewTexture.height > 520) GUILayout.EndScrollView();
+            if (_previewTexture.width > 520 || _previewTexture.height > 520)
+            {
+                _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(520), GUILayout.MinHeight(520));
+                GUILayout.Box(_previewTexture, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
+                GUILayout.EndScrollView();
+            }
+            else GUILayout.Box(_previewTexture, GUI.skin.box, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
         }
 
         private void drawImageModifiersList()
@@ -237,7 +275,7 @@ namespace ASP
                 if (i == _selectedModifier) GUI.contentColor = _selectedColor;
                 else GUI.contentColor = _notSelectedColor;
 
-                if (GUILayout.Button(_imageModifiers.modifiers[i].displayName(), GUILayout.ExpandWidth(true)))
+                if (GUILayout.Button(_imageModifiers.modifiers[i].gui().buttonText(), GUILayout.ExpandWidth(true)))
                 {
                     _selectedModifier = i;
                 }
@@ -250,7 +288,9 @@ namespace ASP
                     if (GUILayout.Button("-")) lowerModifier = i;
                     GUILayout.Space(5);
                     if (GUILayout.Button("X")) deleteModifier = i;
-
+                }
+                else
+                {
                     if (i > lowLimit) lowLimit = i;
                 }
 
@@ -266,21 +306,24 @@ namespace ASP
             if (deleteModifier >= 0 && !_imageModifiers.modifiers[deleteModifier].locked())
             {
                 _imageModifiers.removeAt(deleteModifier);
+                _remakePreview = true;
             }
 
             if (raiseModifier >= 0 && !_imageModifiers.modifiers[raiseModifier].locked())
             {
                 if (raiseModifier <= (_imageModifiers.modifiers.Count - 1))
                 {
-                    _imageModifiers.move(raiseModifier, raiseModifier + 2);
+                    _imageModifiers.swap(raiseModifier, raiseModifier + 1);
+                    _remakePreview = true;
                 }
             }
 
             if (lowerModifier >= 2 && !_imageModifiers.modifiers[lowerModifier].locked())
             {
-                if (lowerModifier > (lowLimit + 2))
+                if (lowerModifier >= (lowLimit + 2))
                 {
-                    _imageModifiers.move(lowerModifier, lowerModifier - 2);
+                    _imageModifiers.swap(lowerModifier, lowerModifier - 1);
+                    _remakePreview = true;
                 }
             }
 
@@ -291,7 +334,7 @@ namespace ASP
         {
             GUILayout.BeginVertical(GUI.skin.box);
 
-            GUILayout.Label("Modifiers", GUILayout.ExpandWidth(true));
+            GUILayout.Label("Add Layer", GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 

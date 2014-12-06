@@ -304,5 +304,15 @@ namespace ASP
 
             Debug.LogError(String.Format("[TWS] (" + className + "." + methodName + ") " + text, vars));
         }
+
+        public static T GetElement2D<T>(T[] array, int i, int j, int w)
+        {
+            return array[i + j * w];
+        }
+
+        public static void SetElement2D<T>(ref T[] array, T value, int i, int j, int w)
+        {
+            array[i + j * w] = value;
+        }
     }
 }

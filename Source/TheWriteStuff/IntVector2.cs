@@ -16,6 +16,12 @@ namespace ASP
             y = 0;
         }
 
+        public IntVector2(int X, int Y)
+        {
+            x = X;
+            y = Y;
+        }
+
         public IntVector2(IntVector2 vector)
         {
             x = vector.x;

@@ -17,6 +17,8 @@ namespace ASP
         public static float LastButtonPress;
         public static float LastRepeat;
         public static float AutoRepeatGap;
+        public static Texture2D WhiteBackground;
+        public static Color32 Black32;
 
         public void Awake()
         {
@@ -36,6 +38,12 @@ namespace ASP
 
                 if (url.config.HasValue("cacheSize")) FileCacheSize = int.Parse(url.config.GetValue("cacheSize"));
             }
+
+            WhiteBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            WhiteBackground.SetPixel(1, 1, Color.white);
+            WhiteBackground.Apply();
+
+            Black32 = new Color32(0, 0, 0, 255);
         }
 
     }

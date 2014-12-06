@@ -34,8 +34,8 @@ namespace ASP
                im._name = _name;
                im._texture = null;
                im._pixels = null;
-               im._width = _width;
-               im._height = _height;
+               im._width = 0;
+               im._height = 0;
 
                return im;
            }
@@ -78,6 +78,8 @@ namespace ASP
 
            public override void drawOnImage(ref Image image)
            {
+               if (Global.Debug3) Utils.Log("draw base texture");
+
                setupImage();
 
                image.resizeAndFill(_width, _height, _pixels);
@@ -89,8 +91,8 @@ namespace ASP
                im._url = _url;
                im._texture = null;
                im._pixels = null;
-               im._width = _width;
-               im._height = _height;
+               im._width = 0;
+               im._height = 0;
 
                return im;
            }
@@ -124,35 +126,52 @@ namespace ASP
        public class BaseTextureGui : ImageModifierGui
        {
            private BaseTexture _baseTexture;
-           private bool _scrollBox;
            private Vector2 _scrollPos;
 
            public BaseTextureGui(BaseTexture baseTexture)
            {
                _baseTexture = baseTexture;
-               if (_baseTexture._texture.width > 520 || _baseTexture._texture.height > 520) _scrollBox = true;
-               else _scrollBox = false;
            }
 
-           public override void draw(TextureEditGUI gui)
+           public override void drawBottom(TextureEditGUI gui)
            {
                GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+               Header(gui, "BASE TEXTURE");
 
                GUILayout.Label("Texture: " + _baseTexture._name);
                GUILayout.Label("URL: " + _baseTexture._url);
 
                GUILayout.Space(5);
 
-               if (_scrollBox) _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
-               GUILayout.Box(_baseTexture._texture, GUI.skin.box, GUILayout.Width(_baseTexture._texture.width), GUILayout.Height(_baseTexture._texture.height));
-               if (_scrollBox) GUILayout.EndScrollView();
+               if (_baseTexture._texture.width > 520 || _baseTexture._texture.height > 520)
+               {
+                   _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
+                   GUILayout.Box(_baseTexture._texture, GUI.skin.box, GUILayout.Width(_baseTexture._texture.width), GUILayout.Height(_baseTexture._texture.height));
+                   GUILayout.EndScrollView();
+               }
+               else GUILayout.Box(_baseTexture._texture, GUILayout.Width(_baseTexture._texture.width), GUILayout.Height(_baseTexture._texture.height));
 
                GUILayout.EndVertical();
+           }
+
+           public override void drawRight(TextureEditGUI gui)
+           {
            }
 
            public override void initialise()
            {
                _baseTexture.setupImage();
+           }
+
+           public override bool drawRightBar()
+           {
+               return false;
+           }
+
+           public override string buttonText()
+           {
+               return "Base Texture";
            }
        }
    }

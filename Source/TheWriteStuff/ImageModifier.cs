@@ -48,8 +48,8 @@ namespace ASP
             int delta = 1;
 
             if ((Time.time - Global.LastRepeat) > Global.AutoRepeatGap) repeatOK = true;
-            if (gui._speedSelection < 0 || gui._speedSelection > 1) gui._speedSelection = 0;
-            if (gui._speedSelection == 1)
+            if (gui.speedSelection < 0 || gui.speedSelection > 1) gui.speedSelection = 0;
+            if (gui.speedSelection == 1)
             {
                 button = 4;
                 delta = 10;
@@ -130,7 +130,7 @@ namespace ASP
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            gui._speedSelection = GUILayout.SelectionGrid(gui._speedSelection, _speedGrid, 2);
+            gui.speedSelection = GUILayout.SelectionGrid(gui.speedSelection, _speedGrid, 2);
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -149,7 +149,18 @@ namespace ASP
             }
         }
 
-        public abstract void draw(TextureEditGUI gui);
+        public void Header(TextureEditGUI gui, string text)
+        {
+            GUILayout.BeginHorizontal(gui.largeHeader);
+            GUILayout.Space(20);
+            GUILayout.Label(text, gui.largeHeader, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+        }
+
+        public abstract void drawBottom(TextureEditGUI gui);
+        public abstract void drawRight(TextureEditGUI gui);
+        public abstract bool drawRightBar();
+        public abstract string buttonText();
         public abstract void initialise();
     }
 }

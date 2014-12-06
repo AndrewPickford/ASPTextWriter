@@ -29,10 +29,10 @@ namespace ASP
             {
                 for (int j = 0; j < height; j++)
                 {
-                    Color newColor = GetElement2D(pixels, i, j, width);
+                    Color newColor = Utils.GetElement2D(pixels, i, j, width);
 
-                    if (positive) SetElement2D(ref newPixels, newColor, j, width - 1 - i, height);
-                    else SetElement2D(ref newPixels, newColor, height - 1 - j, i, height);
+                    if (positive) Utils.SetElement2D(ref newPixels, newColor, j, width - 1 - i, height);
+                    else Utils.SetElement2D(ref newPixels, newColor, height - 1 - j, i, height);
                 }
 
             }
@@ -78,22 +78,12 @@ namespace ASP
             {
                 for (int j = 0; j < height; ++j)
                 {
-                    Color newColor = GetElement2D(pixels, width - i - 1, height - j - 1, width);
-                    SetElement2D(ref newPixels, newColor, i, j, width);
+                    Color newColor = Utils.GetElement2D(pixels, width - i - 1, height - j - 1, width);
+                    Utils.SetElement2D(ref newPixels, newColor, i, j, width);
                 }
             }
 
             return newPixels;
-        }
-
-        public static T GetElement2D<T>(T[] array, int i, int j, int w)
-        {
-            return array[i + j * w];
-        }
-
-        public static void SetElement2D<T>(ref T[] array, T value, int i, int j, int w)
-        {
-            array[i + j * w] = value;
         }
 
         public static void BlendPixel(ref Color[] background, Color[] image, int width, int height)
@@ -102,10 +92,10 @@ namespace ASP
             {
                 for (int j = 0; j < height; ++j)
                 {
-                    Color imageColor = GetElement2D(image, i, j, width);
-                    Color backgroundColor = GetElement2D(background, i, j, width);
+                    Color imageColor = Utils.GetElement2D(image, i, j, width);
+                    Color backgroundColor = Utils.GetElement2D(background, i, j, width);
 
-                    if (imageColor.a == 1f) SetElement2D(ref background, imageColor, i, j, width);
+                    if (imageColor.a == 1f) Utils.SetElement2D(ref background, imageColor, i, j, width);
                 }
             }
         }
@@ -116,11 +106,11 @@ namespace ASP
             {
                 for (int j = 0; j < height; ++j)
                 {
-                    Color imageColor = GetElement2D(image, i, j, width);
-                    Color backgroundColor = GetElement2D(background, i, j, width);
+                    Color imageColor = Utils.GetElement2D(image, i, j, width);
+                    Color backgroundColor = Utils.GetElement2D(background, i, j, width);
                     Color newColor = Color.Lerp(backgroundColor, imageColor, imageColor.a);
 
-                    SetElement2D(ref background, newColor, i, j, width);
+                    Utils.SetElement2D(ref background, newColor, i, j, width);
                 }
             }
         }
@@ -131,10 +121,10 @@ namespace ASP
             {
                 for (int j = 0; j < height; ++j)
                 {
-                    Color imageColor = GetElement2D(image, i, j, width);
-                    Color backgroundColor = GetElement2D(background, i, j, width);
+                    Color imageColor = Utils.GetElement2D(image, i, j, width);
+                    Color backgroundColor = Utils.GetElement2D(background, i, j, width);
 
-                    if (imageColor.a == 1f) SetElement2D(ref background, imageColor, i, j, width);
+                    if (imageColor.a == 1f) Utils.SetElement2D(ref background, imageColor, i, j, width);
                     else if (imageColor.a > 0f)
                     {
                         RGB rgb1 = new RGB(backgroundColor.r, backgroundColor.g, backgroundColor.b);
@@ -145,7 +135,7 @@ namespace ASP
                         RGB rgb3 = hsv3.toRGB();
 
                         Color newColor = new Color(rgb3.r, rgb3.g, rgb3.b, imageColor.a);
-                        SetElement2D(ref background, newColor, i, j, width);
+                        Utils.SetElement2D(ref background, newColor, i, j, width);
                     }
                 }
             }

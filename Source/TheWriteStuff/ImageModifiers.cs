@@ -104,5 +104,18 @@ namespace ASP
                 im.gui().initialise();
             }
         }
+
+        public void swap(int first, int second)
+        {
+            if (first < 0 || second < 0 || first >= modifiers.Count || second >= modifiers.Count)
+            {
+                Utils.LogError("swap on of range first={0}, second={1}", first, second);
+                throw new ArgumentOutOfRangeException("swap out of range");
+            }
+
+            ImageModifier im = modifiers[first];
+            modifiers[first] = modifiers[second];
+            modifiers[second] = im;
+        }
     }
 }

@@ -64,6 +64,52 @@ namespace ASP
         }
     }
 
+    public class ByteField : IValueField<byte>
+    {
+        public string ToString(byte value)
+        {
+            return value.ToString();
+        }
+
+        public byte Parse(string text)
+        {
+            return byte.Parse(text);
+        }
+
+        public bool TryParse(string text, out byte value)
+        {
+            return byte.TryParse(text, out value);
+        }
+
+        public bool CheckLimits(byte value, byte min, byte max)
+        {
+            if (value >= min && value <= max) return true;
+            else return false;
+        }
+
+        public void Clamp(ref byte value, byte min, byte max)
+        {
+            if (value < min) value = min;
+            if (value > max) value = max;
+        }
+
+        public void Add(ref byte value, byte step)
+        {
+            value += step;
+        }
+
+        public void Sub(ref byte value, byte step)
+        {
+            value -= step;
+        }
+
+        public bool NotEqual(byte lhs, byte rhs)
+        {
+            if (lhs != rhs) return true;
+            else return false;
+        }
+    }
+
     public class FloatField : IValueField<float>
     {
         public string ToString(float value)
