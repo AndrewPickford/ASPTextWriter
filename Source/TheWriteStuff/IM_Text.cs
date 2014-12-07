@@ -21,14 +21,20 @@ namespace ASP
             internal AlphaOption _alphaOption = AlphaOption.TEXT_ONLY;
             internal float _normalScale = 2.0f;
             internal NormalOption _normalOption = NormalOption.USE_BACKGROUND;
-            internal BlendMethod _blendMethod = BlendMethod.PIXEL;
-            internal TextDirection _textDirection = TextDirection.LEFT_RIGHT;
+            internal BlendMethod _blendMethod = BlendMethod.RGB;
+            internal Rotation _rotation = Rotation.R0;
 
             private TextGui _gui;
 
             public Text()
             {
                 _position = new IntVector2();
+            }
+
+            public void setPosition(IntVector2 position)
+            {
+                _position.x = position.x;
+                _position.y = position.y;
             }
 
             public override void load(ConfigNode node)
@@ -43,7 +49,7 @@ namespace ASP
                 _normalScale = 2.0f;
                 _normalOption = NormalOption.USE_BACKGROUND;
                 _blendMethod = BlendMethod.RGB;
-                _textDirection = TextDirection.LEFT_RIGHT;
+                _rotation = Rotation.R0;
 
                 if (node.HasValue("text")) _text = node.GetValue("text");
                 if (node.HasValue("fontName")) _fontName = node.GetValue("fontName");
@@ -59,7 +65,7 @@ namespace ASP
                 if (node.HasValue("normalScale")) _normalScale = int.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
                 if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
-                if (node.HasValue("textDirection")) _textDirection = (TextDirection)ConfigNode.ParseEnum(typeof(TextDirection), node.GetValue("textDirection"));
+                if (node.HasValue("rotation")) _rotation = (Rotation)ConfigNode.ParseEnum(typeof(Rotation), node.GetValue("rotation"));
             }
 
             public override void save(ConfigNode node)
@@ -79,12 +85,17 @@ namespace ASP
                 node.AddValue("normalScale", _normalScale);
                 node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
                 node.AddValue("blendMethod", ConfigNode.WriteEnum(_blendMethod));
-                node.AddValue("textDirection", ConfigNode.WriteEnum(_textDirection));
+                node.AddValue("rotation", ConfigNode.WriteEnum(_rotation));
             }
 
             public override void drawOnImage(ref Image image)
             {
-                image.drawText(_text, _fontName, _fontSize, _position, _textDirection, _color, _mirror, _alphaOption, _blendMethod);
+                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _blendMethod);
+            }
+
+            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            {
+                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _blendMethod, boundingBox);
             }
 
             public override ImageModifier clone()
@@ -101,7 +112,7 @@ namespace ASP
                 im._normalScale = _normalScale;
                 im._normalOption = _normalOption;
                 im._blendMethod = _blendMethod;
-                im._textDirection = _textDirection;
+                im._rotation = _rotation;
 
                 return im;
             }
@@ -149,7 +160,7 @@ namespace ASP
             {
                 GUILayout.BeginVertical(GUI.skin.box);
 
-                Header(gui, "TEXT");
+                header(gui, "TEXT");
 
                 GUILayout.BeginHorizontal();
 
@@ -168,12 +179,31 @@ namespace ASP
                 GUILayout.Space(5);
 
                 GUILayout.BeginHorizontal();
-                Position(gui, ref _imText._position);
+                positionSelector(gui, ref _imText._position);
                 GUILayout.Space(5);
-                guiColorSelector(gui);
+
+                GUILayout.BeginVertical();
+
+                GUILayout.BeginHorizontal();
+                colorSelector(gui, ref _redSelector, ref _greenSelector, ref _blueSelector, ref _alphaSelector);
+                GUILayout.Space(10f);
+                rotationSelector(gui,  ref _imText._rotation, ref _imText._mirror);
+                GUILayout.Space(10f);
+                blendMethodSelector(gui, ref _imText._blendMethod);
+                GUILayout.Space(10f);
+                alphaOptionSelector(gui, ref _imText._alphaOption);
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+
+                GUILayout.FlexibleSpace();
+
+                GUILayout.EndVertical();
+
                 GUILayout.EndHorizontal();
 
                 GUILayout.EndVertical();
+
+                setColor(gui);
             }
 
             public override void drawRight(TextureEditGUI gui)
@@ -253,21 +283,8 @@ namespace ASP
                 }
             }
 
-            private void guiColorSelector(TextureEditGUI gui)
+            private void setColor(TextureEditGUI gui)
             {
-                GUILayout.BeginHorizontal();
-
-                if (_redSelector.draw()) gui.setRemakePreview();
-                GUILayout.Space(10f);
-                if (_greenSelector.draw()) gui.setRemakePreview();
-                GUILayout.Space(10f);
-                if (_blueSelector.draw()) gui.setRemakePreview();
-                GUILayout.Space(10f);
-                if (_alphaSelector.draw()) gui.setRemakePreview();
-                GUILayout.FlexibleSpace();
-
-                GUILayout.EndHorizontal();
-
                 if (_imText._color.r != _redSelector.value())
                 {
                     _imText._color.r = _redSelector.value();
@@ -306,16 +323,11 @@ namespace ASP
                 if (_fontSizeSelection < 0) _fontSizeSelection = 0;
             }
 
-            public override bool drawRightBar()
-            {
-                return true;
-            }
-
             public override string buttonText()
             {
                 if (_imText._text == string.Empty) return "Text";
-                else if (_imText._text.Length < 6) return _imText._text;
-                else return _imText._text.Substring(0, 5) + "..";
+                else if (_imText._text.Length < 8) return _imText._text;
+                else return _imText._text.Substring(0, 7) + "..";
             }
         }
     }

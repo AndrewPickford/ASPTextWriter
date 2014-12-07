@@ -21,10 +21,16 @@ namespace ASP
         private Texture2D _previewTexture = null;
         private Image _previewImage = null;
         private Vector2 _previewScrollPos;
+        private IM.BaseTexture _baseTexture = null;
         private ImageModifiers _imageModifiers = null;
         private Vector2 _modifiersScrollPos;
         private int _selectedModifier;
         private Vector2 _availableModifiersScrollPos;
+        private BoundingBox _boundingBox = null;
+        private ValueSelector<int, IntField> _bbXselector;
+        private ValueSelector<int, IntField> _bbYselector;
+        private ValueSelector<int, IntField> _bbWselector;
+        private ValueSelector<int, IntField> _bbHselector;
 
         internal Color _selectedColor;
         internal Color _notSelectedColor;
@@ -32,8 +38,15 @@ namespace ASP
         internal int speedSelection;
         internal GUIStyle largeHeader;
 
-        public void centrePosition(ref IntVector2 position)
+        ~TextureEditGUI()
         {
+            if (_previewTexture != null) Destroy(_previewTexture);
+        }
+
+        public IntVector2 centrePosition()
+        {
+            IntVector2 position = new IntVector2();
+
             if (_previewImage == null)
             {
                 position.x = 0;
@@ -44,6 +57,8 @@ namespace ASP
                 position.x = _previewImage.width / 2;
                 position.y = _previewImage.height / 2;
             }
+
+            return position;
         }
 
         public void setRemakePreview()
@@ -64,10 +79,19 @@ namespace ASP
             _windowPosition = new Rect(700, 100, 400, 400);
             _locked = false;
             _remakePreview = true;
+
             _imageModifiers = _textureEdit.cloneImageModifiers();
-            _imageModifiers.insert(0, _textureEdit.cloneBaseTexture());
+            _baseTexture = _textureEdit.cloneBaseTexture();
+            _baseTexture.gui().initialise();
             _imageModifiers.guiInit();
-            _selectedModifier = 0;
+
+            _boundingBox = _textureEdit.cloneBoundingBox();
+            _bbXselector = new ValueSelector<int, IntField>(_boundingBox.x, 0, 999999, 1, "Bottom Left X", Color.white);
+            _bbYselector = new ValueSelector<int, IntField>(_boundingBox.y, 0, 999999, 1, "Bottom Left Y", Color.white);
+            _bbWselector = new ValueSelector<int, IntField>(_boundingBox.w, 0, 999999, 1, "Width", Color.white);
+            _bbHselector = new ValueSelector<int, IntField>(_boundingBox.h, 0, 999999, 1, "Height", Color.white);
+
+            _selectedModifier = -2;
 
             Global.LastButtonPress = 0f;
             Global.AutoRepeatGap = 0.4f;
@@ -76,6 +100,11 @@ namespace ASP
         private void OnVesselChange(Vessel vesselChange)
         {
             GameObject.Destroy(this);
+            if (_previewTexture != null)
+            {
+                Destroy(_previewTexture);
+                _previewTexture = null;
+            }
         }
 
         public void Awake()
@@ -165,25 +194,20 @@ namespace ASP
             GUILayout.Space(5);
             drawAvailableModifiers();
             GUILayout.Space(5);
-
-            if (_selectedModifier < _imageModifiers.modifiers.Count)
-            {
-                if (_imageModifiers.modifiers[_selectedModifier].gui().drawRightBar())
-                {
-                    GUILayout.Label("", largeHeader, GUILayout.Width(20), GUILayout.ExpandHeight(true));
-                }
-                GUILayout.Space(5);
-            }
-
+            GUILayout.Label("", largeHeader, GUILayout.Width(20), GUILayout.ExpandHeight(true));
+            GUILayout.Space(5);
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
-            if (_selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
+            if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
+            if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
          
             GUILayout.EndVertical();
 
-            if (_selectedModifier < _imageModifiers.modifiers.Count)_imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
+            if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count)_imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
 
             GUILayout.EndHorizontal();
 
@@ -204,7 +228,10 @@ namespace ASP
 
             if (GUILayout.Button("Apply", GUILayout.MinWidth(250)))
             {
-
+                _textureEdit.setBaseTexture(_baseTexture);
+                _textureEdit.setImageModifiers(_imageModifiers);
+                _textureEdit.setBoundingBox(_boundingBox);
+                _textureEdit.writeTexture();
             }
 
             GUILayout.FlexibleSpace();
@@ -221,8 +248,10 @@ namespace ASP
         {
             if (_previewImage == null) _previewImage = new Image();
 
-            _imageModifiers.drawOnImage(ref _previewImage);
+            _baseTexture.drawOnImage(ref _previewImage, _boundingBox);
+            _imageModifiers.drawOnImage(ref _previewImage, _boundingBox);
             _previewImage.fillAlpha((byte) 255);
+            _previewImage.clip(_boundingBox);
 
             if (_previewTexture == null) _previewTexture = new Texture2D(_previewImage.width, _previewImage.height, TextureFormat.ARGB32, false);
             
@@ -267,7 +296,8 @@ namespace ASP
             int raiseModifier = -1;
             int lowerModifier = -1;
             int deleteModifier = -1;
-            int lowLimit = 0;
+            int lowLimit = -1;
+
             for (int i = _imageModifiers.modifiers.Count - 1; i >= 0; --i)
             {
                 GUILayout.BeginHorizontal();
@@ -275,7 +305,7 @@ namespace ASP
                 if (i == _selectedModifier) GUI.contentColor = _selectedColor;
                 else GUI.contentColor = _notSelectedColor;
 
-                if (GUILayout.Button(_imageModifiers.modifiers[i].gui().buttonText(), GUILayout.ExpandWidth(true)))
+                if (GUILayout.Button(_imageModifiers.modifiers[i].gui().buttonText(), GUILayout.ExpandWidth(true), GUILayout.MinWidth(80)))
                 {
                     _selectedModifier = i;
                 }
@@ -296,6 +326,12 @@ namespace ASP
 
                 GUILayout.EndHorizontal();
             }
+
+            GUI.contentColor = (_selectedModifier == -1) ? _selectedColor : _notSelectedColor;
+            if (GUILayout.Button("Bounding Box", GUILayout.ExpandWidth(true), GUILayout.MinWidth(80))) _selectedModifier = -1;
+
+            GUI.contentColor = (_selectedModifier == -2) ? _selectedColor : _notSelectedColor;
+            if (GUILayout.Button(_baseTexture.gui().buttonText(), GUILayout.ExpandWidth(true), GUILayout.MinWidth(80))) _selectedModifier = -2;
 
             GUILayout.EndScrollView();
 
@@ -318,7 +354,7 @@ namespace ASP
                 }
             }
 
-            if (lowerModifier >= 2 && !_imageModifiers.modifiers[lowerModifier].locked())
+            if (lowerModifier >= 1 && !_imageModifiers.modifiers[lowerModifier].locked())
             {
                 if (lowerModifier >= (lowLimit + 2))
                 {
@@ -343,6 +379,7 @@ namespace ASP
             if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
             {
                 IM.Text im = new IM.Text();
+                im.setPosition(centrePosition());
                 im.gui().initialise();
                 _imageModifiers.add(im);
             }
@@ -350,6 +387,83 @@ namespace ASP
             GUILayout.EndScrollView();
 
             GUILayout.EndVertical();
+        }
+
+        private void drawGlobalBoundingBoxSelector()
+        {
+            bool bbChanged = false;
+
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+            GUILayout.BeginHorizontal(largeHeader);
+            GUILayout.Space(20);
+            GUILayout.Label("GLOBAL BOUNDING BOX", largeHeader, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
+            GUILayout.BeginHorizontal();
+            if (_boundingBox.valid) GUILayout.Label("Status: Valid", GUILayout.MinWidth(100));
+            else GUILayout.Label("Status: Invalid", GUILayout.MinWidth(100));
+            GUILayout.Space(5);
+            bool oldUse = _boundingBox.use;
+            _boundingBox.use = GUILayout.Toggle(_boundingBox.use, "Use bounding box");
+            if (oldUse != _boundingBox.use) _remakePreview = true;
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
+            GUILayout.BeginHorizontal();
+            if (_bbXselector.draw())
+            {
+                _boundingBox.x = _bbXselector.value();
+                bbChanged = true;
+            }
+            GUILayout.Space(10f);
+
+            if (_bbYselector.draw())
+            {
+                _boundingBox.y = _bbYselector.value();
+                bbChanged = true;
+            }
+            GUILayout.Space(10f);
+
+            if (_bbWselector.draw())
+            {
+                if (_bbWselector.value() > _baseTexture._width) _bbWselector.set(_baseTexture._width);
+                _boundingBox.w = _bbWselector.value();
+                bbChanged = true;
+            }
+
+            GUILayout.Space(10f);
+
+            if (_bbHselector.draw())
+            {
+                if (_bbHselector.value() > _baseTexture._height) _bbHselector.set(_baseTexture._height);
+                _boundingBox.h = _bbHselector.value();
+                bbChanged = true;
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.EndVertical();
+
+            if (bbChanged)
+            {
+                _boundingBox.valid = false;
+
+                if (_boundingBox.x >= 0 && _boundingBox.y >= 0 && _boundingBox.w > 0 && _boundingBox.h > 0)
+                {
+                    if (_baseTexture == null) _boundingBox.valid = true;
+                    else
+                    {
+                        if (_boundingBox.x < _baseTexture._width && _boundingBox.y < _baseTexture._height) _boundingBox.valid = true;
+                    }
+                }
+                _remakePreview = true;
+            }
         }
     }
 }

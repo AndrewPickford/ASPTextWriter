@@ -85,6 +85,15 @@ namespace ASP
                image.resizeAndFill(_width, _height, _pixels);
            }
 
+           public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+           {
+               if (Global.Debug3) Utils.Log("draw base texture");
+
+               setupImage();
+
+               image.resizeAndFill(_width, _height, _pixels, boundingBox);
+           }
+
            public override ImageModifier clone()
            {
                IM.BaseTexture im = new IM.BaseTexture();
@@ -137,7 +146,7 @@ namespace ASP
            {
                GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
-               Header(gui, "BASE TEXTURE");
+               header(gui, "BASE TEXTURE");
 
                GUILayout.Label("Texture: " + _baseTexture._name);
                GUILayout.Label("URL: " + _baseTexture._url);
@@ -162,11 +171,6 @@ namespace ASP
            public override void initialise()
            {
                _baseTexture.setupImage();
-           }
-
-           public override bool drawRightBar()
-           {
-               return false;
            }
 
            public override string buttonText()

@@ -30,11 +30,14 @@ namespace ASP
             foreach (UrlDir.UrlConfig url in GameDatabase.Instance.GetConfigs("THE_WRITE_STUFF"))
             {
                 int debugLevel = 0;
-                if (url.config.HasValue("debugLevel")) debugLevel = int.Parse(url.config.GetValue("debugLevel"));
-                if (debugLevel >= 1) Debug1 = true;
-                if (debugLevel >= 2) Debug2 = true;
-                if (debugLevel >= 3) Debug3 = true;
-                Utils.Log("Debug level {0}", debugLevel);
+                if (url.config.HasValue("debugLevel"))
+                {
+                    debugLevel = int.Parse(url.config.GetValue("debugLevel"));
+                    if (debugLevel >= 1) Debug1 = true;
+                    if (debugLevel >= 2) Debug2 = true;
+                    if (debugLevel >= 3) Debug3 = true;
+                    Utils.Log("Debug level {0}", debugLevel);
+                }
 
                 if (url.config.HasValue("cacheSize")) FileCacheSize = int.Parse(url.config.GetValue("cacheSize"));
             }

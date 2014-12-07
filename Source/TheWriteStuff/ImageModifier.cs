@@ -6,8 +6,22 @@ using UnityEngine;
 
 namespace ASP
 {
+    public enum Rotation { R0, R90, R180, R270 };
+    public enum BlendMethod { PIXEL, RGB, HSV };
+    public enum TransformOption { USE_FIRST, USE_ALL };
+
     public abstract class ImageModifier
     {
+        public abstract void save(ConfigNode node);
+        public abstract void load(ConfigNode node);
+        public abstract void drawOnImage(ref Image image);
+        public abstract void drawOnImage(ref Image image, BoundingBox boundingBox);
+        public abstract ImageModifier clone();
+        public abstract void cleanUp();
+        public abstract string displayName();
+        public abstract bool locked();
+        public abstract ImageModifierGui gui();
+
         public static ImageModifier CreateFromConfig(ConfigNode node)
         {
             ImageModifier imageModifier = null;
@@ -24,23 +38,22 @@ namespace ASP
                 return imageModifier;
             }
         }
-
-        public abstract void save(ConfigNode node);
-        public abstract void load(ConfigNode node);
-        public abstract void drawOnImage(ref Image image);
-        public abstract ImageModifier clone();
-        public abstract void cleanUp();
-        public abstract string displayName();
-        public abstract bool locked();
-        public abstract ImageModifierGui gui();
     }
 
     public abstract class ImageModifierGui
     {
-        static private string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
-        static private string[] _speedGrid = { "x 1", "x 10" };
+        private static string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
+        private static string[] _speedGrid = { "x 1", "x 10" };
+        private static string[] _rotationGrid = { "0", "90", "180", "270" };
+        private static string[] _blendMethodGrid = { "Pixel", "RGB", "HSV" };
+        private static string[] _alphaOptionGrid = { "Use Texture", "Overwrite" };
 
-        public static void Position(TextureEditGUI gui, ref IntVector2 position)
+        public abstract void drawBottom(TextureEditGUI gui);
+        public abstract void drawRight(TextureEditGUI gui);
+        public abstract string buttonText();
+        public abstract void initialise();
+
+        public void positionSelector(TextureEditGUI gui, ref IntVector2 position)
         {
             bool repeatOK = false;
             bool buttonPressed = false;
@@ -94,7 +107,7 @@ namespace ASP
 
             if (GUILayout.Button("O", GUILayout.Width(25), GUILayout.Height(25)))
             {
-                gui.centrePosition(ref position);
+                position = gui.centrePosition();
                 gui.setRemakePreview();
             }
 
@@ -149,7 +162,19 @@ namespace ASP
             }
         }
 
-        public void Header(TextureEditGUI gui, string text)
+        public void colorSelector(TextureEditGUI gui, ref ValueSelector<byte, ByteField> redSelector, ref ValueSelector<byte, ByteField> greenSelector,
+                                  ref ValueSelector<byte, ByteField> blueSelector, ref ValueSelector<byte, ByteField> alphaSelector)
+        {
+            if (redSelector.draw()) gui.setRemakePreview();
+            GUILayout.Space(10f);
+            if (greenSelector.draw()) gui.setRemakePreview();
+            GUILayout.Space(10f);
+            if (blueSelector.draw()) gui.setRemakePreview();
+            GUILayout.Space(10f);
+            if (alphaSelector.draw()) gui.setRemakePreview();     
+        }
+
+        public void header(TextureEditGUI gui, string text)
         {
             GUILayout.BeginHorizontal(gui.largeHeader);
             GUILayout.Space(20);
@@ -157,10 +182,65 @@ namespace ASP
             GUILayout.EndHorizontal();
         }
 
-        public abstract void drawBottom(TextureEditGUI gui);
-        public abstract void drawRight(TextureEditGUI gui);
-        public abstract bool drawRightBar();
-        public abstract string buttonText();
-        public abstract void initialise();
+        public void rotationSelector(TextureEditGUI gui, ref Rotation rotation, ref bool mirror)
+        {
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+
+            GUILayout.Label("Direction");
+
+            int selection = (int) rotation;
+            int oldSelection = selection;
+            selection = GUILayout.SelectionGrid(selection, _rotationGrid, 2);
+
+            bool oldMirror = mirror;
+            mirror = GUILayout.Toggle(mirror, "Mirror");
+            if (oldMirror != mirror) gui.setRemakePreview();
+
+            if (oldSelection != selection)
+            {
+                rotation = (Rotation)selection;
+                gui.setRemakePreview();
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        public void blendMethodSelector(TextureEditGUI gui, ref BlendMethod blendMethod)
+        {
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+
+            GUILayout.Label("Blend Method");
+
+            int selection = (int)blendMethod;
+            int oldSelection = selection;
+            selection = GUILayout.SelectionGrid(selection, _blendMethodGrid, 2);
+
+            if (oldSelection != selection)
+            {
+                blendMethod = (BlendMethod)selection;
+                gui.setRemakePreview();
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        public void alphaOptionSelector(TextureEditGUI gui, ref AlphaOption alphaOption)
+        {
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+
+            GUILayout.Label("Alpha Option");
+
+            int selection = (int) alphaOption;
+            int oldSelection = selection;
+            selection = GUILayout.SelectionGrid(selection, _alphaOptionGrid, 1);
+
+            if (oldSelection != selection)
+            {
+                alphaOption = (AlphaOption) selection;
+                gui.setRemakePreview();
+            }
+
+            GUILayout.EndVertical();
+        }
     }
 }

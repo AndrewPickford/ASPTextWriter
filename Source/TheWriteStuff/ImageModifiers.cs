@@ -78,6 +78,14 @@ namespace ASP
             }
         }
 
+        public void drawOnImage(ref Image image, BoundingBox boundingBox)
+        {
+            foreach (ImageModifier im in modifiers)
+            {
+                im.drawOnImage(ref image, boundingBox);
+            }
+        }
+
         public ImageModifiers clone()
         {
             ImageModifiers newIMs = new ImageModifiers();
@@ -85,7 +93,7 @@ namespace ASP
             foreach (ImageModifier im in modifiers)
             {
                 ImageModifier newIM = im.clone();
-                newIMs.add(im);
+                newIMs.add(newIM);
             }
 
             return newIMs;

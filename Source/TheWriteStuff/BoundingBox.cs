@@ -60,5 +60,32 @@ namespace ASP
             if (node.HasValue("valid")) valid = bool.Parse(node.GetValue("valid"));
             if (node.HasValue("use")) use = bool.Parse(node.GetValue("use"));
         }
+
+        public BoundingBox clone()
+        {
+            BoundingBox bb = new BoundingBox();
+            bb.x = x;
+            bb.y = y;
+            bb.w = w;
+            bb.h = h;
+            bb.valid = valid;
+            bb.use = use;
+
+            return bb;
+        }
+
+        public bool inBox(int i, int j)
+        {
+            if (i >= x && i < (x + w) && j >= y && j < (y + h)) return true;
+            else return false;
+        }
+
+        public void fillLimits(ref int minX, ref int minY, ref int maxX, ref int maxY)
+        {
+            minX = x;
+            maxX = x + w - 1;
+            minY = y;
+            maxY = y + h - 1;
+        }
     }
 }

@@ -14,7 +14,9 @@ namespace ASP
         bool CheckLimits(T value, T min, T max);
         void Clamp(ref T value, T min, T max);
         void Add(ref T value, T step);
+        void Add(ref T value, T step, T max);
         void Sub(ref T value, T step);
+        void Sub(ref T value, T step, T min);
         bool NotEqual(T lhs, T rhs);
     }
 
@@ -52,9 +54,21 @@ namespace ASP
             value += step;
         }
 
+        public void Add(ref int value, int step, int max)
+        {
+            if (value < max) value += step;
+            if (value > max) value = max;
+        }
+
         public void Sub(ref int value, int step)
         {
             value -= step;
+        }
+
+        public void Sub(ref int value, int step, int min)
+        {
+            if (value > min) value -= step;
+            if (value < min) value = min;
         }
 
         public bool NotEqual(int lhs, int rhs)
@@ -98,9 +112,21 @@ namespace ASP
             value += step;
         }
 
+        public void Add(ref byte value, byte step, byte max)
+        {
+            if (value < max) value += step;
+            if (value > max) value = max;
+        }
+
         public void Sub(ref byte value, byte step)
         {
             value -= step;
+        }
+
+        public void Sub(ref byte value, byte step, byte min)
+        {
+            if (value > min) value -= step;
+            if (value < min) value = min;
         }
 
         public bool NotEqual(byte lhs, byte rhs)
@@ -144,9 +170,21 @@ namespace ASP
             value += step;
         }
 
+        public void Add(ref float value, float step, float max)
+        {
+            if (value < max) value += step;
+            if (value > max) value = max;
+        }
+
         public void Sub(ref float value, float step)
         {
             value -= step;
+        }
+
+        public void Sub(ref float value, float step, float min)
+        {
+            if (value > min) value -= step;
+            if (value < min) value = min;
         }
 
         public bool NotEqual(float lhs, float rhs)
@@ -174,6 +212,11 @@ namespace ASP
         private bool _changed;
 
         public T value() { return _value; }
+        public void set(T value)
+        {
+            _value = value;
+            _valueText = _field.ToString(_value);
+        }
 
         public ValueSelector(T value, T min, T max, T step, string label, Color color)
         {
@@ -203,13 +246,11 @@ namespace ASP
 
             _changed = false;
 
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
 
-            GUILayout.BeginHorizontal();
             GUI.contentColor = _color;
             GUILayout.Label(_label);
             GUI.contentColor = contentColor;
-            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
 
@@ -239,8 +280,7 @@ namespace ASP
                 if (repeatOK)
                 {
                     T v = _value;
-                    _field.Add(ref v, _step);
-                    _field.Clamp(ref v, _min, _max);
+                    _field.Add(ref v, _step, _max);
                     if (_field.NotEqual(v, _value))
                     {
                         _value = v;
@@ -256,8 +296,7 @@ namespace ASP
                 if (repeatOK)
                 {
                     T v = _value;
-                    _field.Sub(ref v, _step);
-                    _field.Clamp(ref v, _min, _max);
+                    _field.Sub(ref v, _step, _min);
                     if (_field.NotEqual(v, _value))
                     {
                         _value = v;

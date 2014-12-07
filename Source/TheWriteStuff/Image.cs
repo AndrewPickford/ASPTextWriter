@@ -44,6 +44,23 @@ namespace ASP
             }
         }
 
+        public void resizeAndFill(int w, int h, Color32[] pix, BoundingBox boundingBox)
+        {
+            if (boundingBox != null && boundingBox.valid && boundingBox.use)
+            {
+                resize(w, h);
+
+                for (int i = 0; i < width; ++i)
+                {
+                    for (int j = 0; j < height; ++j)
+                    {
+                        if (boundingBox.inBox(i,j)) pixels[i + j * width] = pix[i + j *width];
+                    }
+                }
+            }
+            else resizeAndFill(w, h, pix);
+        }
+
         public void fillAlpha(byte alpha)
         {
             for (int i = 0; i < length; ++i)
@@ -164,15 +181,21 @@ namespace ASP
             pixels = newPixels;
         }
 
-        public void overlay(Image overlay, IntVector2 position, bool keepAlpha)
+        public void overlay(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
         {
+            int minX = 0;
+            int maxX = width - 1;
+            int minY = 0;
+            int maxY = height - 1;
+            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+
             for (int i = 0; i < overlay.width; ++i)
             {
                 for (int j = 0; j < overlay.height; ++j)
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= 0 && px < width && py >= 0 && py < height)
+                    if (px >= minX && px < maxX && py >= minY && py < maxY)
                     {
                         if (overlay.pixels[i + j * overlay.width].a > 20)
                         {
@@ -186,22 +209,28 @@ namespace ASP
             }
         }
 
-        public void blendRGB(Image overlay, IntVector2 position, bool keepAlpha)
+        public void blendRGB(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
         {
+            int minX = 0;
+            int maxX = width - 1;
+            int minY = 0;
+            int maxY = height - 1;
+            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+
             for (int i = 0; i < overlay.width; ++i)
             {
                 for (int j = 0; j < overlay.height; ++j)
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= 0 && px < width && py >= 0 && py < height)
+                    if (px >= minX && px < maxX && py >= minY && py < maxY)
                     {
                         Color32 overlayColor = Utils.GetElement2D(overlay.pixels, i, j, overlay.width);
 
                         if (overlayColor.a > 0)
                         {
                             Color32 color = Utils.GetElement2D(pixels, px, py, width);
-                            Color32 newColor = Color32.Lerp(color, overlayColor, overlayColor.a);
+                            Color32 newColor = Color32.Lerp(color, overlayColor, (float) overlayColor.a / 255f);
 
                             pixels[px + py * width].r = newColor.r;
                             pixels[px + py * width].g = newColor.g;
@@ -213,15 +242,21 @@ namespace ASP
             }
         }
 
-        public void blendHSV(Image overlay, IntVector2 position, bool keepAlpha)
+        public void blendHSV(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
         {
+            int minX = 0;
+            int maxX = width - 1;
+            int minY = 0;
+            int maxY = height - 1;
+            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+
             for (int i = 0; i < overlay.width; ++i)
             {
                 for (int j = 0; j < overlay.height; ++j)
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= 0 && px < width && py >= 0 && py < height)
+                    if (px >= minX && px < maxX && py >= minY && py < maxY)
                     {
                         Color32 overlayColor = Utils.GetElement2D(overlay.pixels, i, j, overlay.width);
                         if (overlayColor.a > 0)
@@ -232,10 +267,10 @@ namespace ASP
                             RGB rgb2 = new RGB(overlayColor);
                             HSV hsv1 = rgb1.toHSV();
                             HSV hsv2 = rgb2.toHSV();
-                            HSV hsv3 = hsv1.blend(hsv2, overlayColor.a);
+                            HSV hsv3 = hsv1.blend(hsv2, (float) overlayColor.a / 255f);
                             RGB rgb3 = hsv3.toRGB();
 
-                            Color32 newColor = new Color(rgb3.r, rgb3.g, rgb3.b, overlayColor.a);
+                            Color32 newColor = new Color(rgb3.r, rgb3.g, rgb3.b, (float) overlayColor.a / 255f);
 
                             pixels[px + py * width].r = newColor.r;
                             pixels[px + py * width].g = newColor.g;
@@ -247,7 +282,7 @@ namespace ASP
             }
         }
 
-        public void drawCharacter(char c, MappedFont font, ref IntVector2 position, TextDirection direction, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod)
+        public void drawCharacter(char c, MappedFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug3) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
 
@@ -268,30 +303,30 @@ namespace ASP
 
             if (mirror) charImage.flipHorizontally();
 
-            switch (direction)
+            switch (rotation)
             {
-                case ASP.TextDirection.RIGHT_LEFT:
+                case Rotation.R180:
                     charImage.rotate180();
                     cPos.x = position.x - ((int)charMap.vx + (int)charMap.vw);
                     cPos.y = position.y - (font.size + (int)charMap.vy);
                     position.x -= (int) charMap.cw;
                     break;
 
-                case ASP.TextDirection.UP_DOWN:
+                case Rotation.R270:
                     charImage.flipXY(true);
                     cPos.x = position.x + (font.size + (int)charMap.vy + (int)charMap.vh);
                     cPos.y = position.y - ((int)charMap.vx + (int)charMap.vw);
                     position.y -= (int)charMap.cw;
                     break;
 
-                case ASP.TextDirection.DOWN_UP:
+                case Rotation.R90:
                     charImage.flipXY(false);
                     cPos.x = position.x - (font.size + (int)charMap.vy);
                     cPos.y = position.y + (int)charMap.vx;
                     position.y += (int)charMap.cw;
                     break;
 
-                case ASP.TextDirection.LEFT_RIGHT:
+                case Rotation.R0:
                 default:
                     cPos.x = position.x + (int)charMap.vx;
                     cPos.y = position.y + (font.size + (int)charMap.vy + (int)charMap.vh);
@@ -304,29 +339,29 @@ namespace ASP
             switch (blendMethod)
             {
                 case ASP.BlendMethod.HSV:
-                    blendHSV(charImage, cPos, keepAlpha);
+                    blendHSV(charImage, cPos, keepAlpha, boundingBox);
                     break;
 
                 case ASP.BlendMethod.RGB:
-                    blendRGB(charImage, cPos, keepAlpha);
+                    blendRGB(charImage, cPos, keepAlpha, boundingBox);
                     break;
 
                 case ASP.BlendMethod.PIXEL:
                 default:
-                    overlay(charImage, cPos, keepAlpha);
+                    overlay(charImage, cPos, keepAlpha, boundingBox);
                     break;
             }
         }
 
-        public void drawText(string text, string fontName, int fontSize, IntVector2 position, TextDirection direction, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod)
+        public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             MappedFont font = FontCache.Instance.getFontByNameSize(fontName, fontSize);
             if (font == null) font = FontCache.Instance.mappedList.First();
 
-            drawText(text, font, position, direction, color, mirror, alphaOption, blendMethod);
+            drawText(text, font, position, rotation, color, mirror, alphaOption, blendMethod, boundingBox);
         }
 
-        public void drawText(string text, MappedFont font, IntVector2 position, TextDirection direction, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod)
+        public void drawText(string text, MappedFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);
 
@@ -348,16 +383,16 @@ namespace ASP
                 {
                     if (c == 'n')
                     {
-                        switch (direction)
+                        switch (rotation)
                         {
-                            case ASP.TextDirection.DOWN_UP:
-                            case ASP.TextDirection.UP_DOWN:
+                            case Rotation.R90:
+                            case Rotation.R270:
                                 charPos.x += font.size;
                                 charPos.y = 0;
                                 break;
 
-                            case ASP.TextDirection.LEFT_RIGHT:
-                            case ASP.TextDirection.RIGHT_LEFT:
+                            case Rotation.R0:
+                            case Rotation.R180:
                             default:
                                 charPos.y += font.size;
                                 charPos.x = 0;
@@ -366,8 +401,31 @@ namespace ASP
                     }
                     if (c != '\\') escapeMode = false;
                 }
-                else drawCharacter(c, font, ref charPos, direction, color, mirror, alphaOption, blendMethod);
+                else drawCharacter(c, font, ref charPos, rotation, color, mirror, alphaOption, blendMethod, boundingBox);
             }
+        }
+
+        public void clip(BoundingBox boundingBox)
+        {
+            if (!boundingBox.valid || !boundingBox.use) return;
+            if (boundingBox.x == 0 && boundingBox.y == 0 && boundingBox.w == width && boundingBox.h == height) return;
+
+            Color32[] newPixels = new Color32[boundingBox.w * boundingBox.h];
+
+            for (int i = 0; i < boundingBox.w; ++i)
+            {
+                for (int j = 0; j < boundingBox.h; ++j)
+                {
+                    int px = boundingBox.x + i;
+                    int py = boundingBox.y + j;
+                    if (px >= 0 && px < width && py >= 0 && py < height) newPixels[i + j * boundingBox.w] = pixels[px + py * width];
+                }
+            }
+
+            pixels = newPixels;
+            width = boundingBox.w;
+            height = boundingBox.h;
+            length = width * height;
         }
     }
 }

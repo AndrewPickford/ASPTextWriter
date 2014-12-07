@@ -20,16 +20,28 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public string baseTextureDirUrl = string.Empty;
 
-        private TransformOption _transformsOption = TransformOption.USE_FIRST;
+        // originialConfig is serialized (copied) when the part is duplicated in the editor
+        // must be public
+        public ConfigNode originalConfig;
 
-        private bool _ok = false;
+        private TransformOption _transformsOption = TransformOption.USE_FIRST;
         private BoundingBox _boundingBox = null;
-        private List<string> _transformNames = null;
-        private List<Transform> _transforms = null;
         private IM.BaseTexture _baseTexture = null;
         private ImageModifiers _imageModifiers = null;
+
+        private bool _ok = false;
+        private List<string> _transformNames = null;
+        private List<Transform> _transforms = null;
         private BaseTextureInfo _baseTextureInfo = null;
         private TextureEditGUI _gui;
+        private Texture2D _generatedMainTexture = null;
+        private Texture2D _generatedNormalMap = null;
+
+        ~ASPTextureEdit()
+        {
+            if (_generatedMainTexture != null) Destroy(_generatedMainTexture);
+            if (_generatedNormalMap != null) Destroy(_generatedNormalMap);
+        }
 
         [KSPEvent(name = "Edit Texture Event", guiName = "Edit Texture", guiActive = false, guiActiveEditor = true)]
         public void editTextEvent()
@@ -58,6 +70,54 @@ namespace ASP
         public IM.BaseTexture cloneBaseTexture()
         {
             return _baseTexture.cloneBaseTexture();
+        }
+
+        public BoundingBox cloneBoundingBox()
+        {
+            return _boundingBox.clone();
+        }
+
+        public void setBaseTexture(IM.BaseTexture baseTexture)
+        {
+            _baseTexture = baseTexture.cloneBaseTexture();
+        }
+
+        public void setImageModifiers(ImageModifiers imageModifiers)
+        {
+            _imageModifiers = imageModifiers.clone();
+        }
+
+        public void setBoundingBox(BoundingBox boundingBox)
+        {
+            _boundingBox = boundingBox.clone();
+        }
+
+        public void writeTexture()
+        {
+            if (Global.Debug2) Utils.Log("writeTexture start");
+
+            Image image = new Image();
+
+            _baseTexture.drawOnImage(ref image);
+            _imageModifiers.drawOnImage(ref image, _boundingBox);
+
+            Texture2D mainTexture = new Texture2D(image.width, image.height, TextureFormat.ARGB32, true);
+            mainTexture.SetPixels32(image.pixels);
+            mainTexture.Apply(true);
+            mainTexture.Compress(true);
+
+            foreach (Transform transform in _transforms)
+            {
+                if (Global.Debug3) Utils.Log("setting texture in transform {0}", transform.name);
+                transform.gameObject.renderer.material.mainTexture = mainTexture;
+            }
+
+            if (_generatedMainTexture != null) Destroy(_generatedMainTexture);
+            _generatedMainTexture = mainTexture;
+
+            // clean up memory usage
+            _baseTexture.cleanUp();
+            _imageModifiers.cleanUp();
         }
 
         private string findTransformName(Transform[] transforms, bool validTexture, bool validNormalMap)
@@ -224,6 +284,18 @@ namespace ASP
         {
             if (Global.Debug2) Utils.Log("OnLoad start");
 
+            // save the original config
+            if (originalConfig == null)
+            {
+                originalConfig = new ConfigNode();
+                node.CopyTo(originalConfig);
+            }
+
+            loadConfig(node);
+        }
+
+        private void loadConfig(ConfigNode node)
+        {
             _ok = false;
             _transformNames = null;
             _transforms = null;
@@ -266,6 +338,13 @@ namespace ASP
             if (Global.Debug2) Utils.Log("OnStart start");
             base.OnStart(state);
 
+            // side step serialization issues and use the saved config
+            if (state == StartState.Editor)
+            {
+                if (originalConfig == null) if (Global.Debug1) Utils.Log("originalConfig is null");
+                else loadConfig(originalConfig);
+            }
+
             _ok = false;
             try
             {
@@ -287,6 +366,8 @@ namespace ASP
                 if (_baseTexture == null) _baseTexture = new IM.BaseTexture();
 
                 _baseTexture.set(_baseTextureInfo.mainUrl, false);
+
+                if (_imageModifiers.modifiers.Count > 0) writeTexture();
 
                 _ok = true;
             }
