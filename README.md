@@ -6,7 +6,7 @@ by CmdrThyte (aka Andrew Pickford)
 TheWriteStuff is a mod for Kerbal Space Program which allows text to be written to part textures both in the VAB and
 during eva.
 
-github page: https://github.com/AndrewPickford/ASPTextWriter
+github page: https://github.com/AndrewPickford/TheWriteStuff
 
 ### License
 
