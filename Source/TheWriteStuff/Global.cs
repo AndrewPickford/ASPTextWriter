@@ -21,6 +21,9 @@ namespace ASP
         public static Color32 Black32;
         public static Color32 White32;
         public static Color32 Gray32;
+        public static Color SelectedColor;
+        public static Color NotSelectedColor;
+        public static Color BackgroundColor;
 
         public void Awake()
         {
@@ -51,7 +54,10 @@ namespace ASP
             Black32 = new Color32(0, 0, 0, 255);
             White32 = new Color32(255, 255, 255, 255);
             Gray32 = new Color32(127, 127, 127, 255);
-        }
 
+            SelectedColor = new Color(1.0f, 1.0f, 1.0f);
+            NotSelectedColor = new Color(0.7f, 0.7f, 0.7f);
+            BackgroundColor = new Color(0.5f, 0.5f, 0.5f);
+        }
     }
 }

@@ -32,12 +32,8 @@ namespace ASP
         private ValueSelector<int, IntField> _bbWselector;
         private ValueSelector<int, IntField> _bbHselector;
 
-        internal Color _selectedColor;
-        internal Color _notSelectedColor;
-        internal Color _backgroundColor;
         internal int speedSelection;
         internal GUIStyle largeHeader;
-        internal bool hasNormalMap = false;
 
         ~TextureEditGUI()
         {
@@ -48,15 +44,23 @@ namespace ASP
         {
             IntVector2 position = new IntVector2();
 
-            if (_previewImage == null)
+            if (_boundingBox.valid && _boundingBox.use)
             {
-                position.x = 0;
-                position.y = 0;
+                position.x = _boundingBox.w / 2 + _boundingBox.x;
+                position.y = _boundingBox.h / 2 + _boundingBox.y;
             }
             else
             {
-                position.x = _previewImage.width / 2;
-                position.y = _previewImage.height / 2;
+                if (_previewImage == null)
+                {
+                    position.x = 0;
+                    position.y = 0;
+                }
+                else
+                {
+                    position.x = _previewImage.width / 2;
+                    position.y = _previewImage.height / 2;
+                }
             }
 
             return position;
@@ -72,10 +76,6 @@ namespace ASP
             _windowID = _nextID;
             ++_nextID;
 
-            _selectedColor = new Color(1.0f, 1.0f, 1.0f);
-            _notSelectedColor = new Color(0.7f, 0.7f, 0.7f);
-            _backgroundColor = new Color(0.5f, 0.5f, 0.5f);
-
             _textureEdit = textureEdit;
             _windowPosition = new Rect(700, 100, 400, 400);
             _locked = false;
@@ -83,8 +83,8 @@ namespace ASP
 
             _imageModifiers = _textureEdit.cloneImageModifiers();
             _baseTexture = _textureEdit.cloneBaseTexture();
-            _baseTexture.gui().initialise();
-            _imageModifiers.guiInit();
+            _baseTexture.gui().initialise(this);
+            _imageModifiers.guiInit(this);
 
             _boundingBox = _textureEdit.cloneBoundingBox();
             _bbXselector = new ValueSelector<int, IntField>(_boundingBox.x, 0, 999999, 1, "Bottom Left X", Color.white);
@@ -93,10 +93,14 @@ namespace ASP
             _bbHselector = new ValueSelector<int, IntField>(_boundingBox.h, 0, 999999, 1, "Height", Color.white);
 
             _selectedModifier = -2;
-            hasNormalMap = _baseTexture._hasNormalMap;
 
             Global.LastButtonPress = 0f;
             Global.AutoRepeatGap = 0.4f;
+        }
+
+        public KSPTextureInfo kspTextureInfo()
+        {
+            return _textureEdit.kspTextureInfo;
         }
 
         private void OnVesselChange(Vessel vesselChange)
@@ -137,7 +141,7 @@ namespace ASP
                 largeHeader.normal.textColor = Color.black;
             }
 
-            GUI.backgroundColor = _backgroundColor;
+            GUI.backgroundColor = Global.BackgroundColor;
 
             if(Event.current.type == EventType.Layout)
             {
@@ -275,7 +279,7 @@ namespace ASP
 
             if (_previewTexture.width > 520 || _previewTexture.height > 520)
             {
-                _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(520), GUILayout.MinHeight(520));
+                _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(550), GUILayout.MinHeight(550));
                 GUILayout.Box(_previewTexture, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
                 GUILayout.EndScrollView();
             }
@@ -286,13 +290,13 @@ namespace ASP
         {
             Color contentColor = GUI.contentColor;
 
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Layers", GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 
-            _modifiersScrollPos = GUILayout.BeginScrollView(_modifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(450));
+            _modifiersScrollPos = GUILayout.BeginScrollView(_modifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(400), GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
             int oldSelectedModifier = _selectedModifier;
             int raiseModifier = -1;
@@ -304,15 +308,15 @@ namespace ASP
             {
                 GUILayout.BeginHorizontal();
 
-                if (i == _selectedModifier) GUI.contentColor = _selectedColor;
-                else GUI.contentColor = _notSelectedColor;
+                if (i == _selectedModifier) GUI.contentColor = Global.SelectedColor;
+                else GUI.contentColor = Global.NotSelectedColor;
 
                 if (GUILayout.Button(_imageModifiers.modifiers[i].gui().buttonText(), GUILayout.ExpandWidth(true), GUILayout.MinWidth(80)))
                 {
                     _selectedModifier = i;
                 }
                
-                GUI.contentColor = _selectedColor;
+                GUI.contentColor = Global.SelectedColor;
                 GUILayout.Space(5);
                 if (GUILayout.Button("+")) raiseModifier = i;
                 if (GUILayout.Button("-")) lowerModifier = i;
@@ -322,10 +326,10 @@ namespace ASP
                 GUILayout.EndHorizontal();
             }
 
-            GUI.contentColor = (_selectedModifier == -1) ? _selectedColor : _notSelectedColor;
+            GUI.contentColor = (_selectedModifier == -1) ? Global.SelectedColor : Global.NotSelectedColor;
             if (GUILayout.Button("Bounding Box", GUILayout.ExpandWidth(true), GUILayout.MinWidth(80))) _selectedModifier = -1;
 
-            GUI.contentColor = (_selectedModifier == -2) ? _selectedColor : _notSelectedColor;
+            GUI.contentColor = (_selectedModifier == -2) ? Global.SelectedColor : Global.NotSelectedColor;
             if (GUILayout.Button(_baseTexture.gui().buttonText(), GUILayout.ExpandWidth(true), GUILayout.MinWidth(80))) _selectedModifier = -2;
 
             GUILayout.EndScrollView();
@@ -363,19 +367,19 @@ namespace ASP
 
         private void drawAvailableModifiers()
         {
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Add Layer", GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 
-            _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.MinHeight(450));
+            _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.MinHeight(400), GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
             if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
             {
                 IM.Text im = new IM.Text();
                 im.setPosition(centrePosition());
-                im.gui().initialise();
+                im.gui().initialise(this);
                 _imageModifiers.add(im);
             }
 
@@ -454,7 +458,7 @@ namespace ASP
                     if (_baseTexture == null) _boundingBox.valid = true;
                     else
                     {
-                        if (_boundingBox.x < _baseTexture._main.texture.width && _boundingBox.y < _baseTexture._main.texture.height) _boundingBox.valid = true;
+                        if (_boundingBox.x < _baseTexture.width() && _boundingBox.y < _baseTexture.height()) _boundingBox.valid = true;
                     }
                 }
                 _remakePreview = true;

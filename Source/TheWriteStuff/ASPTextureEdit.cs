@@ -21,8 +21,10 @@ namespace ASP
         public string baseTextureDirUrl = string.Empty;
 
         // originialConfig is serialized (copied) when the part is duplicated in the editor
-        // must be public
+        [SerializeField]
         public ConfigNode originalConfig;
+
+        public KSPTextureInfo kspTextureInfo { get; private set; }
 
         private TransformOption _transformsOption = TransformOption.USE_FIRST;
         private BoundingBox _boundingBox = null;
@@ -32,7 +34,6 @@ namespace ASP
         private bool _ok = false;
         private List<string> _transformNames = null;
         private List<Transform> _transforms = null;
-        private BaseTextureInfo _baseTextureInfo = null;
         private TextureEditGUI _gui;
         private Texture2D _generatedMainTexture = null;
         private Texture2D _generatedNormalMap = null;
@@ -99,7 +100,7 @@ namespace ASP
             Image textureImage = new Image();
             Image normalMapImage = new Image();
 
-            if (_baseTexture._hasNormalMap)
+            if (_baseTexture.hasNormalMap())
             {
                 _baseTexture.drawOnImage(ref textureImage, ref normalMapImage);
                 _imageModifiers.drawOnImage(ref textureImage, ref normalMapImage, _boundingBox);
@@ -122,7 +123,7 @@ namespace ASP
             }
 
             Texture2D normalMapTexture = null;
-            if (_baseTexture._hasNormalMap)
+            if (_baseTexture.hasNormalMap())
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
@@ -249,33 +250,14 @@ namespace ASP
                 Utils.Log("baseNormalMapName: [{0}]", baseNormalMapName);
             }
 
-            if (baseTextureName == string.Empty) _baseTextureInfo = BaseTextureInfo.CreateTextureInfo(_transforms[0]);
-            else
-            {
-                string url = baseTextureDirUrl;
-                if (url == string.Empty)
-                {
-                    Texture2D texture = _transforms[0].gameObject.renderer.material.mainTexture as Texture2D;
-                    url = System.IO.Path.GetDirectoryName(texture.name);
-                }
-
-                _baseTextureInfo = new BaseTextureInfo();
-                _baseTextureInfo.mainUrl = url + "/" + baseTextureName;
-                _baseTextureInfo.displayName = baseTextureName;
-
-                if (baseNormalMapName == string.Empty) _baseTextureInfo.hasNormalMap = false;
-                else
-                {
-                    _baseTextureInfo.normalMapUrl = url + "/" + baseNormalMapName;
-                    _baseTextureInfo.hasNormalMap = true;
-                }
-            }
+            if (baseTextureName == string.Empty) kspTextureInfo = new KSPTextureInfo(_transforms[0]);
+            else kspTextureInfo = new KSPTextureInfo(baseTextureDirUrl, baseTextureName, baseNormalMapName, _transforms[0]);
 
             if (Global.Debug1)
             {
-                Utils.Log("_baseTextureInfo.mainUrl: {0}", _baseTextureInfo.mainUrl);
-                Utils.Log("_baseTextureInfo.normalMapUrl: {0}", _baseTextureInfo.normalMapUrl);
-                Utils.Log("_baseTextureInfo.displayName: {0}", _baseTextureInfo.displayName);
+                Utils.Log("_baseTextureInfo.mainUrl: {0}", kspTextureInfo.mainUrl);
+                Utils.Log("_baseTextureInfo.normalMapUrl: {0}", kspTextureInfo.normalMapUrl);
+                Utils.Log("_baseTextureInfo.displayName: {0}", kspTextureInfo.displayName);
             }
         }
 
@@ -323,10 +305,12 @@ namespace ASP
 
         private void loadConfig(ConfigNode node)
         {
+            if (Global.Debug3) Utils.Log("node {0}", node.ToString());
+
             _ok = false;
             _transformNames = null;
             _transforms = null;
-            _baseTextureInfo = null;
+            kspTextureInfo = null;
             if (_gui != null) Destroy(_gui);
             _gui = null;
             _boundingBox = null;
@@ -362,13 +346,16 @@ namespace ASP
 
         public override void OnStart(StartState state)
         {
-            if (Global.Debug2) Utils.Log("OnStart start");
+            if (Global.Debug2) Utils.Log("state {0}", state.ToString());
             base.OnStart(state);
 
             // side step serialization issues and use the saved config
             if (state == StartState.Editor)
             {
-                if (originalConfig == null) if (Global.Debug1) Utils.Log("originalConfig is null");
+                if (originalConfig == null)
+                {
+                    if (Global.Debug1) Utils.Log("originalConfig is null");
+                }
                 else loadConfig(originalConfig);
             }
 
@@ -392,7 +379,7 @@ namespace ASP
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
                 if (_baseTexture == null) _baseTexture = new IM.BaseTexture();
 
-                _baseTexture.set(_baseTextureInfo);
+                _baseTexture.set(kspTextureInfo);
 
                 if (_imageModifiers.modifiers.Count > 0) writeTexture();
 

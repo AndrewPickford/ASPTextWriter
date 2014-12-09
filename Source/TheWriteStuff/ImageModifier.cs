@@ -53,7 +53,7 @@ namespace ASP
         public abstract void drawBottom(TextureEditGUI gui);
         public abstract void drawRight(TextureEditGUI gui);
         public abstract string buttonText();
-        public abstract void initialise();
+        public abstract void initialise(TextureEditGUI gui);
 
         public void positionSelector(TextureEditGUI gui, ref IntVector2 position)
         {

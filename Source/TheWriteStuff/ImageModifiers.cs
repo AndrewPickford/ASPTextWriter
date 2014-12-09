@@ -105,11 +105,11 @@ namespace ASP
                 im.cleanUp();
         }
 
-        public void guiInit()
+        public void guiInit(TextureEditGUI gui)
         {
             foreach (ImageModifier im in modifiers)
             {
-                im.gui().initialise();
+                im.gui().initialise(gui);
             }
         }
 

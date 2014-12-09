@@ -59,7 +59,7 @@ namespace ASP
 
         private IEnumerator loadFonts()
         {
-            UrlDir.UrlConfig[] fontConfigs = GameDatabase.Instance.GetConfigs("ASPFONT");
+            UrlDir.UrlConfig[] fontConfigs = GameDatabase.Instance.GetConfigs("ASP_FONT");
             _totalFonts = fontConfigs.Length;
             _loadedFonts = 0;
 

@@ -237,6 +237,10 @@ namespace ASP
             _lastButtonPress = _lastRepeat;
         }
 
+        public void setLabel(string label)
+        {
+            _label = label;
+        }
 
         public bool draw()
         {

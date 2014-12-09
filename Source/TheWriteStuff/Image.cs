@@ -78,7 +78,7 @@ namespace ASP
             }
         }
 
-        public void recolor(Color32 from, Color32 to, bool checkAlpha)
+        public void recolor(Color32 from, Color32 to, bool checkAlpha, bool replaceAlpha)
         {
             for (int i = 0; i < length; ++i)
             {
@@ -93,7 +93,11 @@ namespace ASP
                     pixels[i].r = to.r;
                     pixels[i].g = to.g;
                     pixels[i].b = to.b;
-                    if (checkAlpha) pixels[i].a = to.a;
+                    if (replaceAlpha)
+                    {
+                        int a = (int)pixels[i].a * (int)to.a / 255;
+                        pixels[i].a = (byte)Math.Min(a, 255);
+                    }
                 }
             }
         }
@@ -221,7 +225,7 @@ namespace ASP
             {
                 for (int j = minY; j <= maxY; ++j)
                 {
-                    if (mask.pixels[i + j * width].a >= min)
+                    if (mask.pixels[i + j * width].a >= 10)
                     {
                         pixels[i + j * width].r = overlay.pixels[i + j * width].r;
                         pixels[i + j * width].g = overlay.pixels[i + j * width].g;
@@ -232,7 +236,7 @@ namespace ASP
             }
         }
 
-        public void overlay(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
+        public void overlay(Image overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
         {
             int minX, minY, maxX, maxY;
             setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
@@ -245,20 +249,20 @@ namespace ASP
                     int py = position.y + j;
                     if (px >= minX && px <= maxX && py >= minY && py <= maxY)
                     {
-                        if (overlay.pixels[i + j * overlay.width].a > 20)
+                        if (overlay.pixels[i + j * overlay.width].a > 127)
                         {
                             pixels[px + py * width].r = overlay.pixels[i + j * overlay.width].r;
                             pixels[px + py * width].g = overlay.pixels[i + j * overlay.width].g;
                             pixels[px + py * width].b = overlay.pixels[i + j * overlay.width].b;
 
-                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
                         }
                     }
                 }
             }
         }
 
-        public void blendRGB(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
+        public void blendRGB(Image overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
         {
             int minX, minY, maxX, maxY;
             setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
@@ -282,14 +286,14 @@ namespace ASP
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
 
-                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
                         }
                     }
                 }
             }
         }
 
-        public void blendHSV(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
+        public void blendHSV(Image overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
         {
             int minX, minY, maxX, maxY;
             setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
@@ -320,14 +324,15 @@ namespace ASP
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
 
-                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
                         }
                     }
                 }
             }
         }
 
-        public void drawCharacter(char c, MappedFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
+        public void drawCharacter(char c, MappedFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
+                                  byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug3) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
 
@@ -341,7 +346,7 @@ namespace ASP
             }
 
             Image charImage = font.texture.GetImage(charMap.uv);
-            charImage.recolor(Global.Black32, color, false);
+            charImage.recolor(Global.Black32, color, false, true);
  
             if (charMap.flipped) charImage.flipXY(false);
             else charImage.flipVertically();
@@ -382,29 +387,31 @@ namespace ASP
             switch (blendMethod)
             {
                 case ASP.BlendMethod.HSV:
-                    blendHSV(charImage, cPos, alphaOption, color, boundingBox);
+                    blendHSV(charImage, cPos, alphaOption, textureAlpha, boundingBox);
                     break;
 
                 case ASP.BlendMethod.RGB:
-                    blendRGB(charImage, cPos, alphaOption, color, boundingBox);
+                    blendRGB(charImage, cPos, alphaOption, textureAlpha, boundingBox);
                     break;
 
                 case ASP.BlendMethod.PIXEL:
                 default:
-                    overlay(charImage, cPos, alphaOption, color, boundingBox);
+                    overlay(charImage, cPos, alphaOption, textureAlpha, boundingBox);
                     break;
             }
         }
 
-        public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
+        public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
+                             byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             MappedFont font = FontCache.Instance.getFontByNameSize(fontName, fontSize);
             if (font == null) font = FontCache.Instance.mappedList.First();
 
-            drawText(text, font, position, rotation, color, mirror, alphaOption, blendMethod, boundingBox);
+            drawText(text, font, position, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
         }
 
-        public void drawText(string text, MappedFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption, BlendMethod blendMethod, BoundingBox boundingBox = null)
+        public void drawText(string text, MappedFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
+                             byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);
 
@@ -444,7 +451,7 @@ namespace ASP
                     }
                     if (c != '\\') escapeMode = false;
                 }
-                else drawCharacter(c, font, ref charPos, rotation, color, mirror, alphaOption, blendMethod, boundingBox);
+                else drawCharacter(c, font, ref charPos, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
             }
         }
 

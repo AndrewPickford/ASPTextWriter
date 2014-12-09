@@ -60,11 +60,10 @@ namespace ASP
         {
             static string _displayName = "Base Texture";
 
-            internal TextureInfo _main;
-            internal TextureInfo _normalMap;
-            internal string _name = string.Empty;
-            internal bool _hasNormalMap = false;
-
+            private IM.TextureInfo _main = null;
+            private IM.TextureInfo _normalMap = null;
+            private string _name = string.Empty;
+            private bool _hasNormalMap = false;
             private BaseTextureGui _gui;
 
             ~BaseTexture()
@@ -86,7 +85,7 @@ namespace ASP
                 return im;
             }
 
-            public void set(BaseTextureInfo info)
+            public void set(KSPTextureInfo info)
             {
                 _main = new IM.TextureInfo();
                 _main.url = info.mainUrl;
@@ -123,6 +122,11 @@ namespace ASP
             {
                 if (_main != null && _main.texture != null) return _main.texture.height;
                 else return 0;
+            }
+
+            public bool hasNormalMap()
+            {
+                return _hasNormalMap;
             }
 
             public override void save(ConfigNode node)
@@ -193,70 +197,79 @@ namespace ASP
                 if (_gui == null) _gui = new BaseTextureGui(this);
                 return _gui;
             }
-        }
 
-        public class BaseTextureGui : ImageModifierGui
-        {
-            private BaseTexture _baseTexture;
-            private Vector2 _scrollPos;
 
-            public BaseTextureGui(BaseTexture baseTexture)
+
+
+            public class BaseTextureGui : ImageModifierGui
             {
-                _baseTexture = baseTexture;
-            }
+                private BaseTexture _baseTexture;
+                private Vector2 _scrollPos;
+                private Vector2 _scrollPosNM;
 
-            public override void drawBottom(TextureEditGUI gui)
-            {
-                GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-
-                header(gui, "BASE TEXTURE");
-
-                GUILayout.BeginHorizontal();
-
-                GUILayout.BeginVertical();
-                GUILayout.Label("Main Texture: " + _baseTexture._main.url);
-                if (_baseTexture._main.texture.width > 520 || _baseTexture._main.texture.height > 520)
+                public BaseTextureGui(BaseTexture baseTexture)
                 {
-                    _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
-                    GUILayout.Box(_baseTexture._main.texture, GUI.skin.box, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
-                    GUILayout.EndScrollView();
+                    _baseTexture = baseTexture;
                 }
-                else GUILayout.Box(_baseTexture._main.texture, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
-                GUILayout.EndVertical();
 
-                if (_baseTexture._hasNormalMap)
+                public override void drawBottom(TextureEditGUI gui)
                 {
-                    GUILayout.Space(5);
+                    GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+                    header(gui, "BASE TEXTURE");
+
+                    GUILayout.Label("Name: " + gui.kspTextureInfo().displayName);
+                    GUILayout.Space(3);
+                    GUILayout.Label("Shader: " + gui.kspTextureInfo().shader);
+                    GUILayout.Space(3);
+
+                    GUILayout.BeginHorizontal();
 
                     GUILayout.BeginVertical();
-                    GUILayout.Label("Normal Map: " + _baseTexture._normalMap.url);
-                    if (_baseTexture._normalMap.texture.width > 520 || _baseTexture._normalMap.texture.height > 520)
+                    GUILayout.Label("Main Texture: " + _baseTexture._main.url);
+                    if (_baseTexture._main.texture.width > 430 || _baseTexture._main.texture.height > 270)
                     {
-                        _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
-                        GUILayout.Box(_baseTexture._normalMap.texture, GUI.skin.box, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                        _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(450), GUILayout.MinHeight(290));
+                        GUILayout.Box(_baseTexture._main.texture, GUI.skin.box, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
                         GUILayout.EndScrollView();
                     }
-                    else GUILayout.Box(_baseTexture._normalMap.texture, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                    else GUILayout.Box(_baseTexture._main.texture, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
+                    GUILayout.EndVertical();
+
+                    if (_baseTexture._hasNormalMap)
+                    {
+                        GUILayout.Space(5);
+
+                        GUILayout.BeginVertical();
+                        GUILayout.Label("Normal Map: " + _baseTexture._normalMap.url);
+                        if (_baseTexture._normalMap.texture.width > 430 || _baseTexture._normalMap.texture.height > 270)
+                        {
+                            _scrollPosNM = GUILayout.BeginScrollView(_scrollPosNM, GUI.skin.box, GUILayout.MinWidth(450), GUILayout.MinHeight(290));
+                            GUILayout.Box(_baseTexture._normalMap.texture, GUI.skin.box, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                            GUILayout.EndScrollView();
+                        }
+                        else GUILayout.Box(_baseTexture._normalMap.texture, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                        GUILayout.EndVertical();
+                    }
+
+                    GUILayout.EndHorizontal();
+
                     GUILayout.EndVertical();
                 }
 
-                GUILayout.EndHorizontal();
+                public override void drawRight(TextureEditGUI gui)
+                {
+                }
 
-                GUILayout.EndVertical();
-            }
+                public override void initialise(TextureEditGUI gui)
+                {
+                    _baseTexture.setupTextures();
+                }
 
-            public override void drawRight(TextureEditGUI gui)
-            {
-            }
-
-            public override void initialise()
-            {
-                _baseTexture.setupTextures();
-            }
-
-            public override string buttonText()
-            {
-                return "Base Texture";
+                public override string buttonText()
+                {
+                    return "Base Texture";
+                }
             }
         }
     }
