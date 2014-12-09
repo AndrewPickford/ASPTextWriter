@@ -10,6 +10,7 @@ namespace ASP
     public enum BlendMethod { PIXEL, RGB, HSV };
     public enum TransformOption { USE_FIRST, USE_ALL };
     public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
+    public enum AlphaOption { USE_TEXTURE, OVERWRITE };
 
     public abstract class ImageModifier
     {

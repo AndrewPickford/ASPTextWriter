@@ -58,13 +58,11 @@
     <Compile Include="Image.cs" />
     <Compile Include="ImageModifier.cs" />
     <Compile Include="ImageModifiers.cs" />
-    <Compile Include="ImageUtils.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
     <Compile Include="IM_Text.cs" />
     <Compile Include="IntVector2.cs" />
     <Compile Include="MappedFontLoader.cs" />
-    <Compile Include="NormalMap.cs" />
     <Compile Include="PaintPointer.cs" />
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
@@ -73,9 +71,7 @@
     <Compile Include="Utils.cs" />
     <Compile Include="MappedFont.cs" />
     <Compile Include="FontCache.cs" />
-    <Compile Include="ASPTextWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TextEntryGUI.cs" />
     <Compile Include="ASP_Texture2D_Extension.cs" />
     <Compile Include="ValueSelector.cs" />
   </ItemGroup>

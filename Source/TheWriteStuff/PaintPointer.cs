@@ -16,7 +16,7 @@ namespace ASP
         private ASPPainter _painter;
         private GameObject _pointer = null;
         private MeshRenderer[] _meshRenderers;
-        private ASPTextWriter _textWriter;
+        private ASPTextureEdit _textureEdit;
 
         public void initialise(ASPPainter painter)
         {
@@ -73,8 +73,8 @@ namespace ASP
 
                 if (rayCastHit.rigidbody && dist < _maxDist)
                 {
-                    _textWriter = rayCastHit.rigidbody.GetComponentInChildren<ASPTextWriter>() as ASPTextWriter;
-                    if (_textWriter == null) color = Color.red;
+                    _textureEdit = rayCastHit.rigidbody.GetComponentInChildren<ASPTextureEdit>() as ASPTextureEdit;
+                    if (_textureEdit == null) color = Color.red;
                     else color = Color.green;
 
                     Vector3 direction = rayCastHit.rigidbody.transform.position - _pointer.transform.position;
@@ -92,9 +92,9 @@ namespace ASP
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (hit && rayCastHit.rigidbody && dist < _maxDist && _textWriter != null)
+                if (hit && rayCastHit.rigidbody && dist < _maxDist && _textureEdit != null)
                 {
-                    _textWriter.editTextEvent();
+                    _textureEdit.editTextureEvent();
                     Destroy(_pointer);
                     Destroy(this);
                 }

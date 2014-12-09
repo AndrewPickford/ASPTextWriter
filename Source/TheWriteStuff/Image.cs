@@ -251,7 +251,7 @@ namespace ASP
                             pixels[px + py * width].g = overlay.pixels[i + j * overlay.width].g;
                             pixels[px + py * width].b = overlay.pixels[i + j * overlay.width].b;
 
-                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
                         }
                     }
                 }
@@ -282,7 +282,7 @@ namespace ASP
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
 
-                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
                         }
                     }
                 }
@@ -320,7 +320,7 @@ namespace ASP
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
 
-                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = color.a;
                         }
                     }
                 }

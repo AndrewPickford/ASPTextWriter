@@ -18,7 +18,8 @@ namespace ASP
             internal IntVector2 _position;
             internal bool _mirror = false;
             internal Color32 _color = new Color32(0, 0, 0, 255);
-            internal AlphaOption _alphaOption = AlphaOption.TEXT_ONLY;
+            internal byte _textureAlpha = 0;
+            internal AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
             internal float _normalScale = 2.0f;
             internal NormalOption _normalOption = NormalOption.USE_BACKGROUND;
             internal BlendMethod _blendMethod = BlendMethod.RGB;
@@ -45,7 +46,8 @@ namespace ASP
                 _position = new IntVector2();
                 _mirror = false;
                 _color = new Color32(0, 0, 0, 255);
-                _alphaOption = AlphaOption.TEXT_ONLY;
+                _textureAlpha = 0;
+                _alphaOption = AlphaOption.USE_TEXTURE;
                 _normalScale = 2.0f;
                 _normalOption = NormalOption.USE_BACKGROUND;
                 _blendMethod = BlendMethod.RGB;
@@ -61,6 +63,7 @@ namespace ASP
                 if (node.HasValue("green")) _color.g = byte.Parse(node.GetValue("green"));
                 if (node.HasValue("blue")) _color.b = byte.Parse(node.GetValue("blue"));
                 if (node.HasValue("alpha")) _color.a = byte.Parse(node.GetValue("alpha"));
+                if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
                 if (node.HasValue("normalScale")) _normalScale = int.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
@@ -81,6 +84,7 @@ namespace ASP
                 node.AddValue("green", _color.g);
                 node.AddValue("blue", _color.b);
                 node.AddValue("alpha", _color.a);
+                node.AddValue("textureAlpha", _textureAlpha);
                 node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
                 node.AddValue("normalScale", _normalScale);
                 node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
@@ -107,7 +111,7 @@ namespace ASP
                     if (_normalOption == NormalOption.RAISE_TEXT) color = Color.black;
                     if (_normalOption == NormalOption.LOWER_TEXT) color = Color.white;
 
-                    textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.TEXT_ONLY, BlendMethod.PIXEL);
+                    textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, BlendMethod.PIXEL);
 
                     Image normalMapImage = textImage.createNormalMap(_normalScale);
 
@@ -126,6 +130,7 @@ namespace ASP
                 im._position = new IntVector2(_position);
                 im._mirror = _mirror;
                 im._color = new Color32(_color.r, _color.g, _color.b, _color.a);
+                im._textureAlpha = _textureAlpha;
                 im._alphaOption = _alphaOption;
                 im._normalScale = _normalScale;
                 im._normalOption = _normalOption;
@@ -160,6 +165,7 @@ namespace ASP
             private ValueSelector<byte, ByteField> _blueSelector;
             private ValueSelector<byte, ByteField> _alphaSelector;
             private ValueSelector<float, FloatField> _normalScaleSelector;
+            private ValueSelector<byte, ByteField> _textureAlphaSelector;
             private int _selectedFont = 0;
             private string[] _fontSizeGrid = null;
             private int _fontSizeSelection = 0;
@@ -201,14 +207,16 @@ namespace ASP
                 GUILayout.BeginHorizontal();
                 colorSelector(gui, ref _redSelector, ref _greenSelector, ref _blueSelector, ref _alphaSelector);
                 GUILayout.Space(10f);
-                alphaOptionSelector(gui, ref _imText._alphaOption);
+                rotationSelector(gui, ref _imText._rotation, ref _imText._mirror);
                 GUILayout.Space(10f);
                 blendMethodSelector(gui, ref _imText._blendMethod);
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal();
-                rotationSelector(gui, ref _imText._rotation, ref _imText._mirror);
+                _textureAlphaSelector.draw();
+                GUILayout.Space(10f);
+                alphaOptionSelector(gui, ref _imText._alphaOption);
                 if (gui.hasNormalMap)
                 {
                     GUILayout.Space(10f);
@@ -229,6 +237,7 @@ namespace ASP
 
                 setColor(gui);
                 if (_imText._normalScale != _normalScaleSelector.value()) _imText._normalScale = _normalScaleSelector.value();
+                if (_imText._textureAlpha != _textureAlphaSelector.value()) _imText._textureAlpha = _textureAlphaSelector.value();
             }
 
             public override void drawRight(TextureEditGUI gui)
@@ -347,6 +356,7 @@ namespace ASP
                 _fontSizeSelection = FontCache.Instance.getFontSizeIndex(_imText._fontName, _imText._fontSize);
                 if (_fontSizeSelection < 0) _fontSizeSelection = 0;
 
+                _textureAlphaSelector = new ValueSelector<byte, ByteField>(_imText._textureAlpha, 0, 255, 1, "Texture Alpha", Color.white);
                 _normalScaleSelector = new ValueSelector<float, FloatField>(_imText._normalScale, 0, 5.0f, 0.1f, "Normal Scale", Color.white);
             }
 

@@ -44,7 +44,7 @@ namespace ASP
         }
 
         [KSPEvent(name = "Edit Texture Event", guiName = "Edit Texture", guiActive = false, guiActiveEditor = true)]
-        public void editTextEvent()
+        public void editTextureEvent()
         {
             if (_ok == false)
             {

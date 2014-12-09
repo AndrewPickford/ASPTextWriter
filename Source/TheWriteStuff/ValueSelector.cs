@@ -308,6 +308,8 @@ namespace ASP
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
+            GUILayout.Space(3);
+
             GUILayout.EndVertical();
 
             if (_changed)
