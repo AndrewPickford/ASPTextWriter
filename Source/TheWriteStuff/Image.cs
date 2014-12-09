@@ -67,6 +67,17 @@ namespace ASP
                 pixels[i].a = alpha;
         }
 
+        public void fill(Color32 color)
+        {
+            for (int i = 0; i < length; ++i)
+            {
+                pixels[i].r = color.r;
+                pixels[i].g = color.g;
+                pixels[i].b = color.b;
+                pixels[i].a = color.a;
+            }
+        }
+
         public void recolor(Color32 from, Color32 to, bool checkAlpha)
         {
             for (int i = 0; i < length; ++i)
@@ -103,6 +114,12 @@ namespace ASP
             pixels[p].g = color.g;
             pixels[p].b = color.b;
             pixels[p].a = color.a;
+        }
+
+        public byte getGrayscale(int x, int y)
+        {
+            int gray = (pixels[x + y * width].r + pixels[x + y * width].g + pixels[x + y * width].b)/3;
+            return (byte) gray;
         }
 
         public void swapWH()
@@ -181,13 +198,44 @@ namespace ASP
             pixels = newPixels;
         }
 
-        public void overlay(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
+        public void setMinMax(out int minX, out int minY, out int maxX, out int maxY, BoundingBox boundingBox)
         {
-            int minX = 0;
-            int maxX = width - 1;
-            int minY = 0;
-            int maxY = height - 1;
-            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+            minX = 0;
+            maxX = width - 1;
+            minY = 0;
+            maxY = height - 1;
+            if (boundingBox != null && boundingBox.valid && boundingBox.use)
+            {
+                boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+                if (maxX >= width) maxX = width - 1;
+                if (maxY >= height) maxY = height - 1;
+            }
+        }
+
+        public void overlay(Image overlay, Image mask, byte min, BoundingBox boundingBox)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
+            
+            for (int i = minX; i <= maxX; ++i)
+            {
+                for (int j = minY; j <= maxY; ++j)
+                {
+                    if (mask.pixels[i + j * width].a >= min)
+                    {
+                        pixels[i + j * width].r = overlay.pixels[i + j * width].r;
+                        pixels[i + j * width].g = overlay.pixels[i + j * width].g;
+                        pixels[i + j * width].b = overlay.pixels[i + j * width].b;
+                        pixels[i + j * width].a = overlay.pixels[i + j * width].a;
+                    }
+                }
+            }
+        }
+
+        public void overlay(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
 
             for (int i = 0; i < overlay.width; ++i)
             {
@@ -195,27 +243,25 @@ namespace ASP
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= minX && px < maxX && py >= minY && py < maxY)
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
                     {
                         if (overlay.pixels[i + j * overlay.width].a > 20)
                         {
                             pixels[px + py * width].r = overlay.pixels[i + j * overlay.width].r;
                             pixels[px + py * width].g = overlay.pixels[i + j * overlay.width].g;
                             pixels[px + py * width].b = overlay.pixels[i + j * overlay.width].b;
-                            if (!keepAlpha) pixels[px + py * width].a = overlay.pixels[i + j * overlay.width].a;
+
+                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
                         }
                     }
                 }
             }
         }
 
-        public void blendRGB(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
+        public void blendRGB(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
         {
-            int minX = 0;
-            int maxX = width - 1;
-            int minY = 0;
-            int maxY = height - 1;
-            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
 
             for (int i = 0; i < overlay.width; ++i)
             {
@@ -223,32 +269,30 @@ namespace ASP
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= minX && px < maxX && py >= minY && py < maxY)
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
                     {
                         Color32 overlayColor = Utils.GetElement2D(overlay.pixels, i, j, overlay.width);
 
                         if (overlayColor.a > 0)
                         {
-                            Color32 color = Utils.GetElement2D(pixels, px, py, width);
-                            Color32 newColor = Color32.Lerp(color, overlayColor, (float) overlayColor.a / 255f);
+                            Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
+                            Color32 newColor = Color32.Lerp(oldColor, overlayColor, (float) overlayColor.a / 255f);
 
                             pixels[px + py * width].r = newColor.r;
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
-                            if (!keepAlpha) pixels[px + py * width].a = newColor.a;
+
+                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
                         }
                     }
                 }
             }
         }
 
-        public void blendHSV(Image overlay, IntVector2 position, bool keepAlpha, BoundingBox boundingBox = null)
+        public void blendHSV(Image overlay, IntVector2 position, AlphaOption alphaOption, Color32 color, BoundingBox boundingBox = null)
         {
-            int minX = 0;
-            int maxX = width - 1;
-            int minY = 0;
-            int maxY = height - 1;
-            if (boundingBox != null && boundingBox.valid && boundingBox.use) boundingBox.fillLimits(ref minX, ref minY, ref maxX, ref maxY);
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
 
             for (int i = 0; i < overlay.width; ++i)
             {
@@ -256,14 +300,14 @@ namespace ASP
                 {
                     int px = position.x + i;
                     int py = position.y + j;
-                    if (px >= minX && px < maxX && py >= minY && py < maxY)
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
                     {
                         Color32 overlayColor = Utils.GetElement2D(overlay.pixels, i, j, overlay.width);
                         if (overlayColor.a > 0)
                         {
-                            Color32 color = Utils.GetElement2D(pixels, px, py, width);
+                            Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
 
-                            RGB rgb1 = new RGB(color);
+                            RGB rgb1 = new RGB(oldColor);
                             RGB rgb2 = new RGB(overlayColor);
                             HSV hsv1 = rgb1.toHSV();
                             HSV hsv2 = rgb2.toHSV();
@@ -275,7 +319,8 @@ namespace ASP
                             pixels[px + py * width].r = newColor.r;
                             pixels[px + py * width].g = newColor.g;
                             pixels[px + py * width].b = newColor.b;
-                            if (!keepAlpha) pixels[px + py * width].a = newColor.a;
+
+                            if (alphaOption == AlphaOption.TEXT_ONLY) pixels[px + py * width].a = color.a;
                         }
                     }
                 }
@@ -334,21 +379,19 @@ namespace ASP
                     break;
             }
 
-            bool keepAlpha = false;
-            if (alphaOption == AlphaOption.USE_TEXTURE) keepAlpha = true;
             switch (blendMethod)
             {
                 case ASP.BlendMethod.HSV:
-                    blendHSV(charImage, cPos, keepAlpha, boundingBox);
+                    blendHSV(charImage, cPos, alphaOption, color, boundingBox);
                     break;
 
                 case ASP.BlendMethod.RGB:
-                    blendRGB(charImage, cPos, keepAlpha, boundingBox);
+                    blendRGB(charImage, cPos, alphaOption, color, boundingBox);
                     break;
 
                 case ASP.BlendMethod.PIXEL:
                 default:
-                    overlay(charImage, cPos, keepAlpha, boundingBox);
+                    overlay(charImage, cPos, alphaOption, color, boundingBox);
                     break;
             }
         }
@@ -426,6 +469,148 @@ namespace ASP
             width = boundingBox.w;
             height = boundingBox.h;
             length = width * height;
+        }
+
+        public Image createNormalMap(float scale)
+        {
+            if (Global.Debug2) Utils.Log("create normalMap {0},{1}", width, height);
+            Image normalMap = new Image(width, height);
+
+            int topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight;
+            for (int i = 0; i < width; ++i)
+            {
+                for (int j = 0; j < height; ++j)
+                {
+                    if (i == 0 || j == (height - 1)) topLeft = 127;
+                    else topLeft = getGrayscale(i - 1, j + 1);
+
+                    if (j == (height - 1)) top = 127;
+                    else top = getGrayscale(i, j + 1);
+
+                    if (i == (width - 1) || j == (height - 1)) topRight = 127;
+                    else topRight = getGrayscale(i + 1, j + 1);
+
+                    if (i == 0) left = 127;
+                    else left = getGrayscale(i - 1, j);
+
+                    if (i == (width - 1)) right = 127;
+                    else right = getGrayscale(i + 1, j);
+
+                    if (i == 0 || j == 0) bottomLeft = 127;
+                    else bottomLeft = getGrayscale(i - 1, j - 1);
+
+                    if (j == 0) bottom = 127;
+                    else bottom = getGrayscale(i, j - 1);
+
+                    if (i == (width - 1) || j == 0) bottomRight = 127;
+                    else bottomRight = getGrayscale(i + 1, j - 1);
+
+                    // sobel filter
+                    int dX = (topRight + 2 * right + bottomRight) - (topLeft + 2 * left + bottomLeft);
+                    int dY = (bottomLeft + 2 * bottom + bottomRight) - (topLeft + 2 * top + topRight);
+                    int dZ = (int) (255f / scale);
+
+                    Vector3 normal = new Vector3(dX, dY, dZ);
+                    normal.Normalize();
+
+                    // change range from -1,+1 to 0,+1
+                    normal = normal + new Vector3(1f, 1f, 1f);
+                    normal = normal / 2f;
+
+                    // change to unity normal format
+                    normalMap.pixels[i + j * width].r = (byte)(Math.Min(normal.y * 255f, 255f));
+                    normalMap.pixels[i + j * width].g = (byte)(Math.Min(normal.y * 255f, 255f));
+                    normalMap.pixels[i + j * width].b = (byte)(Math.Min(normal.y * 255f, 255f));
+                    normalMap.pixels[i + j * width].a = (byte)(Math.Min(normal.x * 255f, 255f));
+                }
+            }
+            return normalMap;
+        }
+
+        public Color32 getPixelBilinear(float x, float y, float w, float h)
+        {
+            float red = 0f;
+            float green = 0f;
+            float blue = 0f;
+            float alpha = 0f;
+            float totalArea = 0f;
+
+            float minX = x - w/2f;
+            float minY = y - w/2f;
+            float maxX = x + w/2f;
+            float maxY = y + w/2f;
+            int minPX = (int) minX;
+            int minPY = (int) minY;
+            int maxPX = (int) maxX;
+            int maxPY = (int) maxY;
+
+            for (int i = minPX; i <= maxPX; ++i)
+            {
+                for (int j = minPY; j <=maxPY; ++j)
+                {
+                    if (i >= 0 && i < width && j >= 0 && j < height)
+                    {
+                        float area = 1f;
+                        if (i == minPX || j == minPY || (i + 1) > maxPX || (j + 1) > maxPY)
+                        {
+                            float pxMin = Math.Max(i, minX);
+                            float pxMax = Math.Min(i + 1, maxX);
+                            float pyMin = Math.Max(j, minY);
+                            float pyMax = Math.Min(j + 1, maxY);
+                            area = (pxMax - pxMin) * (pyMax - pyMin);
+                        }
+
+                        red = pixels[i + j * width].r * area;
+                        green = pixels[i + j * width].g * area;
+                        blue = pixels[i + j * width].b * area;
+                        alpha = pixels[i + j * width].a * area;
+                        totalArea += area;
+                    }
+                }
+            }
+
+            if (totalArea > 0f)
+            {
+                red /= totalArea;
+                green /= totalArea;
+                blue /= totalArea;
+                alpha /= totalArea;
+            }
+
+            byte r = (byte)(Math.Max((int)(red / 255f), 255));
+            byte g = (byte)(Math.Max((int)(green / 255f), 255));
+            byte b = (byte)(Math.Max((int)(blue / 255f), 255));
+            byte a = (byte)(Math.Max((int)(alpha / 255f), 255));
+
+            return new Color32(r, g, b, a);
+        }
+
+        public void rescale(int newWidth, int newHeight)
+        {
+            if (Global.Debug2) Utils.Log("rescale from ({0},{1}) to ({2},{3})", width, height, newWidth, newHeight);
+
+            if (newWidth == width && newHeight == height) return;
+
+            Color32[] newPixels = new Color32[width * height];
+
+            float widthRatio = (float) width / (float) newWidth;
+            float heightRatio = (float) height / (float) newHeight;
+
+            for (int i = 0; i < width; ++i)
+            {
+                for (int j = 0; j < height; ++j)
+                {
+                    float x = 0.5f + ((float)i / (float)width);
+                    float y = 0.5f + ((float)j / (float)height);
+
+                    newPixels[i + j * width] = getPixelBilinear(x, y, widthRatio, heightRatio);
+                }
+            }
+
+            width = newWidth;
+            height = newHeight;
+            length = width * height;
+            pixels = newPixels;
         }
     }
 }

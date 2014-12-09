@@ -96,24 +96,51 @@ namespace ASP
         {
             if (Global.Debug2) Utils.Log("writeTexture start");
 
-            Image image = new Image();
+            Image textureImage = new Image();
+            Image normalMapImage = new Image();
 
-            _baseTexture.drawOnImage(ref image);
-            _imageModifiers.drawOnImage(ref image, _boundingBox);
+            if (_baseTexture._hasNormalMap)
+            {
+                _baseTexture.drawOnImage(ref textureImage, ref normalMapImage);
+                _imageModifiers.drawOnImage(ref textureImage, ref normalMapImage, _boundingBox);
+            }
+            else
+            {
+                _baseTexture.drawOnImage(ref textureImage);
+                _imageModifiers.drawOnImage(ref textureImage, _boundingBox);
+            }
 
-            Texture2D mainTexture = new Texture2D(image.width, image.height, TextureFormat.ARGB32, true);
-            mainTexture.SetPixels32(image.pixels);
+            Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
+            mainTexture.SetPixels32(textureImage.pixels);
             mainTexture.Apply(true);
             mainTexture.Compress(true);
 
             foreach (Transform transform in _transforms)
             {
                 if (Global.Debug3) Utils.Log("setting texture in transform {0}", transform.name);
-                transform.gameObject.renderer.material.mainTexture = mainTexture;
+                transform.gameObject.renderer.material.SetTexture("_MainTex", mainTexture);
+            }
+
+            Texture2D normalMapTexture = null;
+            if (_baseTexture._hasNormalMap)
+            {
+                normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
+                normalMapTexture.SetPixels32(normalMapImage.pixels);
+                normalMapTexture.Apply(true);
+
+                foreach (Transform transform in _transforms)
+                {
+                    if (Global.Debug3) Utils.Log("setting normalMap in transform {0}", transform.name);
+                    transform.gameObject.renderer.material.SetTexture("_BumpMap", normalMapTexture);
+                }
             }
 
             if (_generatedMainTexture != null) Destroy(_generatedMainTexture);
             _generatedMainTexture = mainTexture;
+
+            if (_generatedNormalMap != null) Destroy(_generatedNormalMap);
+            if (normalMapTexture != null) _generatedNormalMap = normalMapTexture;
+            else _generatedNormalMap = null;
 
             // clean up memory usage
             _baseTexture.cleanUp();
@@ -365,7 +392,7 @@ namespace ASP
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
                 if (_baseTexture == null) _baseTexture = new IM.BaseTexture();
 
-                _baseTexture.set(_baseTextureInfo.mainUrl, false);
+                _baseTexture.set(_baseTextureInfo);
 
                 if (_imageModifiers.modifiers.Count > 0) writeTexture();
 

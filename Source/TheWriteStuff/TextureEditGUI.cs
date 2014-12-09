@@ -37,6 +37,7 @@ namespace ASP
         internal Color _backgroundColor;
         internal int speedSelection;
         internal GUIStyle largeHeader;
+        internal bool hasNormalMap = false;
 
         ~TextureEditGUI()
         {
@@ -92,6 +93,7 @@ namespace ASP
             _bbHselector = new ValueSelector<int, IntField>(_boundingBox.h, 0, 999999, 1, "Height", Color.white);
 
             _selectedModifier = -2;
+            hasNormalMap = _baseTexture._hasNormalMap;
 
             Global.LastButtonPress = 0f;
             Global.AutoRepeatGap = 0.4f;
@@ -309,20 +311,13 @@ namespace ASP
                 {
                     _selectedModifier = i;
                 }
-
-                if (!_imageModifiers.modifiers[i].locked())
-                {
-                    GUI.contentColor = _selectedColor;
-                    GUILayout.Space(5);
-                    if (GUILayout.Button("+")) raiseModifier = i;
-                    if (GUILayout.Button("-")) lowerModifier = i;
-                    GUILayout.Space(5);
-                    if (GUILayout.Button("X")) deleteModifier = i;
-                }
-                else
-                {
-                    if (i > lowLimit) lowLimit = i;
-                }
+               
+                GUI.contentColor = _selectedColor;
+                GUILayout.Space(5);
+                if (GUILayout.Button("+")) raiseModifier = i;
+                if (GUILayout.Button("-")) lowerModifier = i;
+                GUILayout.Space(5);
+                if (GUILayout.Button("X")) deleteModifier = i;
 
                 GUILayout.EndHorizontal();
             }
@@ -339,13 +334,13 @@ namespace ASP
 
             GUI.contentColor = contentColor;
 
-            if (deleteModifier >= 0 && !_imageModifiers.modifiers[deleteModifier].locked())
+            if (deleteModifier >= 0)
             {
                 _imageModifiers.removeAt(deleteModifier);
                 _remakePreview = true;
             }
 
-            if (raiseModifier >= 0 && !_imageModifiers.modifiers[raiseModifier].locked())
+            if (raiseModifier >= 0)
             {
                 if (raiseModifier <= (_imageModifiers.modifiers.Count - 1))
                 {
@@ -354,7 +349,7 @@ namespace ASP
                 }
             }
 
-            if (lowerModifier >= 1 && !_imageModifiers.modifiers[lowerModifier].locked())
+            if (lowerModifier >= 1)
             {
                 if (lowerModifier >= (lowLimit + 2))
                 {
@@ -431,7 +426,7 @@ namespace ASP
 
             if (_bbWselector.draw())
             {
-                if (_bbWselector.value() > _baseTexture._width) _bbWselector.set(_baseTexture._width);
+                if (_bbWselector.value() > _baseTexture.width()) _bbWselector.set(_baseTexture.width());
                 _boundingBox.w = _bbWselector.value();
                 bbChanged = true;
             }
@@ -440,7 +435,7 @@ namespace ASP
 
             if (_bbHselector.draw())
             {
-                if (_bbHselector.value() > _baseTexture._height) _bbHselector.set(_baseTexture._height);
+                if (_bbHselector.value() > _baseTexture.height()) _bbHselector.set(_baseTexture.height());
                 _boundingBox.h = _bbHselector.value();
                 bbChanged = true;
             }
@@ -459,7 +454,7 @@ namespace ASP
                     if (_baseTexture == null) _boundingBox.valid = true;
                     else
                     {
-                        if (_boundingBox.x < _baseTexture._width && _boundingBox.y < _baseTexture._height) _boundingBox.valid = true;
+                        if (_boundingBox.x < _baseTexture._main.texture.width && _boundingBox.y < _baseTexture._main.texture.height) _boundingBox.valid = true;
                     }
                 }
                 _remakePreview = true;

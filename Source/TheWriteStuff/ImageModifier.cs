@@ -9,17 +9,17 @@ namespace ASP
     public enum Rotation { R0, R90, R180, R270 };
     public enum BlendMethod { PIXEL, RGB, HSV };
     public enum TransformOption { USE_FIRST, USE_ALL };
+    public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
 
     public abstract class ImageModifier
     {
         public abstract void save(ConfigNode node);
         public abstract void load(ConfigNode node);
-        public abstract void drawOnImage(ref Image image);
         public abstract void drawOnImage(ref Image image, BoundingBox boundingBox);
+        public abstract void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox);
         public abstract ImageModifier clone();
         public abstract void cleanUp();
         public abstract string displayName();
-        public abstract bool locked();
         public abstract ImageModifierGui gui();
 
         public static ImageModifier CreateFromConfig(ConfigNode node)
@@ -47,6 +47,7 @@ namespace ASP
         private static string[] _rotationGrid = { "0", "90", "180", "270" };
         private static string[] _blendMethodGrid = { "Pixel", "RGB", "HSV" };
         private static string[] _alphaOptionGrid = { "Use Texture", "Overwrite" };
+        private static string[] _normalOptionGrid = { "Flat", "Raise", "Lower", "Background" };
 
         public abstract void drawBottom(TextureEditGUI gui);
         public abstract void drawRight(TextureEditGUI gui);
@@ -68,7 +69,7 @@ namespace ASP
                 delta = 10;
             }
 
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(120), GUILayout.Height(120));
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(120));
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -148,7 +149,7 @@ namespace ASP
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(10);
+            GUILayout.FlexibleSpace();
 
             GUILayout.EndVertical();
 
@@ -237,6 +238,25 @@ namespace ASP
             if (oldSelection != selection)
             {
                 alphaOption = (AlphaOption) selection;
+                gui.setRemakePreview();
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        public void normalMapOptionSelector(TextureEditGUI gui, ref NormalOption normalOption)
+        {
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+
+            GUILayout.Label("Normal Option");
+
+            int selection = (int)normalOption;
+            int oldSelection = selection;
+            selection = GUILayout.SelectionGrid(selection, _normalOptionGrid, 2);
+
+            if (oldSelection != selection)
+            {
+                normalOption = (NormalOption)selection;
                 gui.setRemakePreview();
             }
 

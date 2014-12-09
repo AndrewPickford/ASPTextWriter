@@ -19,6 +19,8 @@ namespace ASP
         public static float AutoRepeatGap;
         public static Texture2D WhiteBackground;
         public static Color32 Black32;
+        public static Color32 White32;
+        public static Color32 Gray32;
 
         public void Awake()
         {
@@ -47,6 +49,8 @@ namespace ASP
             WhiteBackground.Apply();
 
             Black32 = new Color32(0, 0, 0, 255);
+            White32 = new Color32(255, 255, 255, 255);
+            Gray32 = new Color32(127, 127, 127, 255);
         }
 
     }

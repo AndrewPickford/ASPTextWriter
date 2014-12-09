@@ -6,177 +6,258 @@ using UnityEngine;
 
 namespace ASP
 {
-   namespace IM
-   {
-       public class BaseTexture : ImageModifier
-       {
-           static string _displayName = "Base Texture";
+    namespace IM
+    {
+        public class TextureInfo
+        {
+            public string url { get; set; }
+            public Texture2D texture { get; set; }
+            public Color32[] pixels { get; set; }
+            public bool normalMap { get; set; }
 
-           internal string _url = string.Empty;
-           internal string _name = string.Empty;
-           internal Texture2D _texture = null;
-           internal Color32[] _pixels = null;
-           internal int _width = 0;
-           internal int _height = 0;
-           internal bool _normalMap = false;
+            public TextureInfo()
+            {
+                url = string.Empty;
+                texture = null;
+                pixels = null;
+                normalMap = false;
+            }
 
-           private BaseTextureGui _gui;
+            ~TextureInfo()
+            {
+                cleanUp();
+            }
 
-           ~BaseTexture()
-           {
-               cleanUp();
-           }
+            public TextureInfo clone()
+            {
+                IM.TextureInfo info = new IM.TextureInfo();
+                info.url = url;
+                info.normalMap = normalMap;
 
-           public IM.BaseTexture cloneBaseTexture()
-           {
-               IM.BaseTexture im = new IM.BaseTexture();
-               im._url = _url;
-               im._name = _name;
-               im._texture = null;
-               im._pixels = null;
-               im._width = 0;
-               im._height = 0;
+                return info;
+            }
 
-               return im;
-           }
+            public void loadTexture()
+            {
+                texture = Utils.LoadTextureFromUrl(url, normalMap);
+                pixels = null;
+            }
 
-           public void set(string url, bool normalMap)
-           {
-               _url = url;
-               _name = System.IO.Path.GetFileNameWithoutExtension(_url);
-               _pixels = null;
-               _normalMap = normalMap;
+            public void getPixels()
+            {
+                if (texture == null) loadTexture();
+                pixels = texture.GetPixels32();
+            }
 
-               if (_texture != null)
-               {
-                   UnityEngine.Object.Destroy(_texture);
-                   _texture = null;
-               }
-           }
+            public void cleanUp()
+            {
+                if (texture != null) UnityEngine.Object.Destroy(texture);
+                pixels = null;
+            }
+        }
 
-           public void setupImage()
-           {
-               if (_texture == null)
-               {
-                   _texture = Utils.LoadTextureFromUrl(_url, _normalMap);
-                   _width = _texture.width;
-                   _height = _texture.height;
-                   _pixels = null;
-               }
+        public class BaseTexture : ImageModifier
+        {
+            static string _displayName = "Base Texture";
 
-               if (_pixels == null) _pixels = _texture.GetPixels32();
-           }
+            internal TextureInfo _main;
+            internal TextureInfo _normalMap;
+            internal string _name = string.Empty;
+            internal bool _hasNormalMap = false;
 
-           public override void save(ConfigNode node)
-           {
-               node.AddValue("type", "base_texture");
-           }
+            private BaseTextureGui _gui;
 
-           public override void load(ConfigNode node)
-           {
-           }
+            ~BaseTexture()
+            {
+                cleanUp();
+            }
 
-           public override void drawOnImage(ref Image image)
-           {
-               if (Global.Debug3) Utils.Log("draw base texture");
+            public IM.BaseTexture cloneBaseTexture()
+            {
+                IM.BaseTexture im = new IM.BaseTexture();
 
-               setupImage();
+                if (_main != null) im._main = _main.clone();
 
-               image.resizeAndFill(_width, _height, _pixels);
-           }
+                im._name = _name;
+                im._hasNormalMap = _hasNormalMap;
 
-           public override void drawOnImage(ref Image image, BoundingBox boundingBox)
-           {
-               if (Global.Debug3) Utils.Log("draw base texture");
+                if (_hasNormalMap) im._normalMap = _normalMap.clone();
 
-               setupImage();
+                return im;
+            }
 
-               image.resizeAndFill(_width, _height, _pixels, boundingBox);
-           }
+            public void set(BaseTextureInfo info)
+            {
+                _main = new IM.TextureInfo();
+                _main.url = info.mainUrl;
 
-           public override ImageModifier clone()
-           {
-               IM.BaseTexture im = new IM.BaseTexture();
-               im._url = _url;
-               im._texture = null;
-               im._pixels = null;
-               im._width = 0;
-               im._height = 0;
+                if (info.hasNormalMap)
+                {
+                    _normalMap = new IM.TextureInfo();
+                    _normalMap.url = info.normalMapUrl;
+                    _normalMap.normalMap = true;
+                    _hasNormalMap = true;
+                }
+                else
+                {
+                    _normalMap = null;
+                    _hasNormalMap = false;
+                }
 
-               return im;
-           }
+                _name = System.IO.Path.GetFileNameWithoutExtension(_main.url);
+            }
 
-           public override void cleanUp()
-           {
-               if (_texture != null) UnityEngine.Object.Destroy(_texture);
+            public void setupTextures()
+            {
+                if (_main.pixels == null) _main.getPixels();
+                if (_normalMap.pixels == null) _normalMap.getPixels();
+            }
 
-               _pixels = null;
-               _texture = null;
-               _gui = null;
-           }
+            public int width()
+            {
+                if (_main != null && _main.texture != null) return _main.texture.width;
+                else return 0;
+            }
 
-           public override string displayName()
-           {
-               return _displayName;
-           }
+            public int height()
+            {
+                if (_main != null && _main.texture != null) return _main.texture.height;
+                else return 0;
+            }
 
-           public override bool locked()
-           {
-               return true;
-           }
+            public override void save(ConfigNode node)
+            {
+                node.AddValue("type", "base_texture");
+            }
 
-           public override ImageModifierGui gui()
-           {
-               if (_gui == null) _gui = new BaseTextureGui(this);
-               return _gui;
-           }
-       }
+            public override void load(ConfigNode node)
+            {
+            }
 
-       public class BaseTextureGui : ImageModifierGui
-       {
-           private BaseTexture _baseTexture;
-           private Vector2 _scrollPos;
+            public void drawOnImage(ref Image image)
+            {
+                if (Global.Debug3) Utils.Log("draw base texture");
 
-           public BaseTextureGui(BaseTexture baseTexture)
-           {
-               _baseTexture = baseTexture;
-           }
+                setupTextures();
+                image.resizeAndFill(_main.texture.width, _main.texture.height, _main.pixels);
+            }
 
-           public override void drawBottom(TextureEditGUI gui)
-           {
-               GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            {
+                if (Global.Debug3) Utils.Log("draw base texture with bounding box");
 
-               header(gui, "BASE TEXTURE");
+                setupTextures();
+                image.resizeAndFill(_main.texture.width, _main.texture.height, _main.pixels, boundingBox);
+            }
 
-               GUILayout.Label("Texture: " + _baseTexture._name);
-               GUILayout.Label("URL: " + _baseTexture._url);
+            public void drawOnImage(ref Image image, ref Image normalMap)
+            {
+                if (Global.Debug3) Utils.Log("draw base texture with normal map, bounding box");
 
-               GUILayout.Space(5);
+                setupTextures();
 
-               if (_baseTexture._texture.width > 520 || _baseTexture._texture.height > 520)
-               {
-                   _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
-                   GUILayout.Box(_baseTexture._texture, GUI.skin.box, GUILayout.Width(_baseTexture._texture.width), GUILayout.Height(_baseTexture._texture.height));
-                   GUILayout.EndScrollView();
-               }
-               else GUILayout.Box(_baseTexture._texture, GUILayout.Width(_baseTexture._texture.width), GUILayout.Height(_baseTexture._texture.height));
+                image.resizeAndFill(_main.texture.width, _main.texture.height, _main.pixels);
+                normalMap.resizeAndFill(_normalMap.texture.width, _normalMap.texture.height, _normalMap.pixels);
+            }
 
-               GUILayout.EndVertical();
-           }
+            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
+            {
+                if (Global.Debug3) Utils.Log("draw base texture with normal map, bounding box");
 
-           public override void drawRight(TextureEditGUI gui)
-           {
-           }
+                setupTextures();
 
-           public override void initialise()
-           {
-               _baseTexture.setupImage();
-           }
+                image.resizeAndFill(_main.texture.width, _main.texture.height, _main.pixels, boundingBox);
+                normalMap.resizeAndFill(_normalMap.texture.width, _normalMap.texture.height, _normalMap.pixels, boundingBox);
+            }
 
-           public override string buttonText()
-           {
-               return "Base Texture";
-           }
-       }
-   }
+            public override ImageModifier clone()
+            {
+                IM.BaseTexture im = this.cloneBaseTexture();
+                return im;
+            }
+
+            public override void cleanUp()
+            {
+                if (_main != null) _main.cleanUp();
+                if (_normalMap != null) _normalMap.cleanUp();
+                _gui = null;
+            }
+
+            public override string displayName()
+            {
+                return _displayName;
+            }
+
+            public override ImageModifierGui gui()
+            {
+                if (_gui == null) _gui = new BaseTextureGui(this);
+                return _gui;
+            }
+        }
+
+        public class BaseTextureGui : ImageModifierGui
+        {
+            private BaseTexture _baseTexture;
+            private Vector2 _scrollPos;
+
+            public BaseTextureGui(BaseTexture baseTexture)
+            {
+                _baseTexture = baseTexture;
+            }
+
+            public override void drawBottom(TextureEditGUI gui)
+            {
+                GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+                header(gui, "BASE TEXTURE");
+
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical();
+                GUILayout.Label("Main Texture: " + _baseTexture._main.url);
+                if (_baseTexture._main.texture.width > 520 || _baseTexture._main.texture.height > 520)
+                {
+                    _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
+                    GUILayout.Box(_baseTexture._main.texture, GUI.skin.box, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
+                    GUILayout.EndScrollView();
+                }
+                else GUILayout.Box(_baseTexture._main.texture, GUILayout.Width(_baseTexture._main.texture.width), GUILayout.Height(_baseTexture._main.texture.height));
+                GUILayout.EndVertical();
+
+                if (_baseTexture._hasNormalMap)
+                {
+                    GUILayout.Space(5);
+
+                    GUILayout.BeginVertical();
+                    GUILayout.Label("Normal Map: " + _baseTexture._normalMap.url);
+                    if (_baseTexture._normalMap.texture.width > 520 || _baseTexture._normalMap.texture.height > 520)
+                    {
+                        _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.Width(520), GUILayout.MaxHeight(520), GUILayout.ExpandWidth(true));
+                        GUILayout.Box(_baseTexture._normalMap.texture, GUI.skin.box, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                        GUILayout.EndScrollView();
+                    }
+                    else GUILayout.Box(_baseTexture._normalMap.texture, GUILayout.Width(_baseTexture._normalMap.texture.width), GUILayout.Height(_baseTexture._normalMap.texture.height));
+                    GUILayout.EndVertical();
+                }
+
+                GUILayout.EndHorizontal();
+
+                GUILayout.EndVertical();
+            }
+
+            public override void drawRight(TextureEditGUI gui)
+            {
+            }
+
+            public override void initialise()
+            {
+                _baseTexture.setupTextures();
+            }
+
+            public override string buttonText()
+            {
+                return "Base Texture";
+            }
+        }
+    }
 }

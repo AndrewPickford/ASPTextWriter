@@ -88,14 +88,32 @@ namespace ASP
                 node.AddValue("rotation", ConfigNode.WriteEnum(_rotation));
             }
 
-            public override void drawOnImage(ref Image image)
-            {
-                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _blendMethod);
-            }
-
             public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
                 image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _blendMethod, boundingBox);
+            }
+
+            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
+            {
+                drawOnImage(ref image, boundingBox);
+
+                if (_normalOption != NormalOption.USE_BACKGROUND)
+                {
+                    Image textImage = new Image(normalMap.width, normalMap.height);
+                    Color32 backgroudColor = new Color32(127, 127, 127, 0);
+                    textImage.fill(backgroudColor);
+
+                    Color32 color = Global.Gray32;
+                    if (_normalOption == NormalOption.RAISE_TEXT) color = Color.black;
+                    if (_normalOption == NormalOption.LOWER_TEXT) color = Color.white;
+
+                    textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.TEXT_ONLY, BlendMethod.PIXEL);
+
+                    Image normalMapImage = textImage.createNormalMap(_normalScale);
+
+                    if (image.width == normalMap.width && image.height == normalMap.height) normalMap.rescale(image.width, image.height);
+                    normalMap.overlay(normalMapImage, textImage, 128, boundingBox);
+                }
             }
 
             public override ImageModifier clone()
@@ -127,11 +145,6 @@ namespace ASP
                 return _displayName;
             }
 
-            public override bool locked()
-            {
-                return false;
-            }
-
             public override ImageModifierGui gui()
             {
                 if (_gui == null) _gui = new TextGui(this);
@@ -146,6 +159,7 @@ namespace ASP
             private ValueSelector<byte, ByteField> _greenSelector;
             private ValueSelector<byte, ByteField> _blueSelector;
             private ValueSelector<byte, ByteField> _alphaSelector;
+            private ValueSelector<float, FloatField> _normalScaleSelector;
             private int _selectedFont = 0;
             private string[] _fontSizeGrid = null;
             private int _fontSizeSelection = 0;
@@ -187,11 +201,21 @@ namespace ASP
                 GUILayout.BeginHorizontal();
                 colorSelector(gui, ref _redSelector, ref _greenSelector, ref _blueSelector, ref _alphaSelector);
                 GUILayout.Space(10f);
-                rotationSelector(gui,  ref _imText._rotation, ref _imText._mirror);
+                alphaOptionSelector(gui, ref _imText._alphaOption);
                 GUILayout.Space(10f);
                 blendMethodSelector(gui, ref _imText._blendMethod);
-                GUILayout.Space(10f);
-                alphaOptionSelector(gui, ref _imText._alphaOption);
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                rotationSelector(gui, ref _imText._rotation, ref _imText._mirror);
+                if (gui.hasNormalMap)
+                {
+                    GUILayout.Space(10f);
+                    normalMapOptionSelector(gui, ref _imText._normalOption);
+                    GUILayout.Space(10f);
+                    _normalScaleSelector.draw();
+                }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
@@ -204,6 +228,7 @@ namespace ASP
                 GUILayout.EndVertical();
 
                 setColor(gui);
+                if (_imText._normalScale != _normalScaleSelector.value()) _imText._normalScale = _normalScaleSelector.value();
             }
 
             public override void drawRight(TextureEditGUI gui)
@@ -321,6 +346,8 @@ namespace ASP
                 if (_selectedFont < 0) _selectedFont = 0;
                 _fontSizeSelection = FontCache.Instance.getFontSizeIndex(_imText._fontName, _imText._fontSize);
                 if (_fontSizeSelection < 0) _fontSizeSelection = 0;
+
+                _normalScaleSelector = new ValueSelector<float, FloatField>(_imText._normalScale, 0, 5.0f, 0.1f, "Normal Scale", Color.white);
             }
 
             public override string buttonText()

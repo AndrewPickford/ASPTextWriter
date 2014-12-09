@@ -70,19 +70,19 @@ namespace ASP
             }
         }
 
-        public void drawOnImage(ref Image image)
-        {
-            foreach (ImageModifier im in modifiers)
-            {
-                im.drawOnImage(ref image);
-            }
-        }
-
         public void drawOnImage(ref Image image, BoundingBox boundingBox)
         {
             foreach (ImageModifier im in modifiers)
             {
                 im.drawOnImage(ref image, boundingBox);
+            }
+        }
+
+        public void drawOnImage(ref Image image, ref Image normalMapImage, BoundingBox boundingBox)
+        {
+            foreach (ImageModifier im in modifiers)
+            {
+                im.drawOnImage(ref image, ref normalMapImage, boundingBox);
             }
         }
 

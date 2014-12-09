@@ -8,7 +8,6 @@ using System.IO;
 namespace ASP
 {
     public enum AlphaOption { USE_TEXTURE, TEXT_ONLY, WHOLE_TEXTURE };
-    public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
     public enum TextDirection { LEFT_RIGHT, RIGHT_LEFT, UP_DOWN, DOWN_UP };
 
     public class ASPTextWriter : PartModule

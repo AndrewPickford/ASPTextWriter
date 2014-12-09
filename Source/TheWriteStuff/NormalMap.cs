@@ -24,14 +24,14 @@ namespace ASP
                     if (j == (heightMap.height - 1)) top = 0.5f;
                     else top = heightMap.GetPixel(i, j + 1).grayscale;
 
-                    if (i == (heightMap.width-1) || j == (heightMap.height - 1)) topRight = 0.5f;
+                    if (i == (heightMap.width - 1) || j == (heightMap.height - 1)) topRight = 0.5f;
                     else topRight = heightMap.GetPixel(i + 1, j + 1).grayscale;
 
                     if (i == 0) left = 0.5f;
                     else left = heightMap.GetPixel(i - 1, j).grayscale;
 
                     if (i == (heightMap.width - 1)) right = 0.5f;
-                    else right = heightMap.GetPixel(i + 1, j + 1).grayscale;
+                    else right = heightMap.GetPixel(i + 1, j).grayscale;
 
                     if (i == 0 || j == 0) bottomLeft = 0.5f;
                     else bottomLeft = heightMap.GetPixel(i - 1, j - 1).grayscale;
