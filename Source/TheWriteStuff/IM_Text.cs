@@ -154,10 +154,10 @@ namespace ASP
 
                     if (_fontSizeGrid == null)
                     {
-                        _fontSizeGrid = new string[FontCache.Instance.fontInfoArray[_selectedFont].sizes.Length];
+                        _fontSizeGrid = new string[BitmapFontCache.Instance.fontInfoArray[_selectedFont].sizes.Length];
                         for (int i = 0; i < _fontSizeGrid.Length; ++i)
                         {
-                            _fontSizeGrid[i] = FontCache.Instance.fontInfoArray[_selectedFont].sizes[i].ToString();
+                            _fontSizeGrid[i] = BitmapFontCache.Instance.fontInfoArray[_selectedFont].sizes[i].ToString();
                         }
                     }
 
@@ -180,20 +180,20 @@ namespace ASP
                     _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
                     int oldSelectedFont = _selectedFont;
-                    for (int i = 0; i < FontCache.Instance.fontInfoArray.Length; ++i)
+                    for (int i = 0; i < BitmapFontCache.Instance.fontInfoArray.Length; ++i)
                     {
                         GUILayout.BeginHorizontal();
 
                         if (i == _selectedFont) GUI.contentColor = Global.SelectedColor;
                         else GUI.contentColor = Global.NotSelectedColor;
 
-                        if (GUILayout.Button(FontCache.Instance.fontInfoArray[i].displayName, GUILayout.ExpandWidth(true)))
+                        if (GUILayout.Button(BitmapFontCache.Instance.fontInfoArray[i].displayName, GUILayout.ExpandWidth(true)))
                         {
                             _selectedFont = i;
                             _fontSizeGrid = null;
 
-                            int _lastFontSize = FontCache.Instance.fontInfoArray[oldSelectedFont].sizes[_fontSizeSelection];
-                            _fontSizeSelection = FontCache.Instance.getFontSizeIndex(FontCache.Instance.fontInfoArray[_selectedFont].name, _lastFontSize);
+                            int _lastFontSize = BitmapFontCache.Instance.fontInfoArray[oldSelectedFont].sizes[_fontSizeSelection];
+                            _fontSizeSelection = BitmapFontCache.Instance.getFontSizeIndex(BitmapFontCache.Instance.fontInfoArray[_selectedFont].name, _lastFontSize);
                             if (_fontSizeSelection < 0) _fontSizeSelection = 0;
 
                             newFontSelection = true;
@@ -211,8 +211,8 @@ namespace ASP
                     if (newFontSelection)
                     {
                         gui.setRemakePreview();
-                        _imText._fontName = FontCache.Instance.fontInfoArray[_selectedFont].name;
-                        _imText._fontSize = FontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
+                        _imText._fontName = BitmapFontCache.Instance.fontInfoArray[_selectedFont].name;
+                        _imText._fontSize = BitmapFontCache.Instance.fontInfoArray[_selectedFont].sizes[_fontSizeSelection];
                     }
                 }
 
@@ -220,9 +220,9 @@ namespace ASP
                 {
                     initialiseMonoOverlay(gui);
 
-                    _selectedFont = FontCache.Instance.getFontIndexByName(_imText._fontName);
+                    _selectedFont = BitmapFontCache.Instance.getFontIndexByName(_imText._fontName);
                     if (_selectedFont < 0) _selectedFont = 0;
-                    _fontSizeSelection = FontCache.Instance.getFontSizeIndex(_imText._fontName, _imText._fontSize);
+                    _fontSizeSelection = BitmapFontCache.Instance.getFontSizeIndex(_imText._fontName, _imText._fontSize);
                     if (_fontSizeSelection < 0) _fontSizeSelection = 0;
                 }
 

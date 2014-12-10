@@ -5,30 +5,29 @@ using System.Text;
 
 namespace ASP
 {
-    public class MappedFont
+    public class BitmapFont
     {
         public string id { get; private set; }
         public string name { get; private set; }
         public string displayName { get; private set; }
         public int size { get; private set; }
-        public UnityEngine.Texture2D texture { get; private set; }
-        public Dictionary<char, CharacterMap> characterMap { get; private set; }
+        public Dictionary<char, BitmapChar> characterMap { get; private set; }
         public int height { get; private set; }
 
-        public MappedFont(ConfigNode node, string nodeUrl)
+        public BitmapFont(ConfigNode node, string nodeUrl)
         {
             id = node.GetValue("id");
             name = node.GetValue("name");
             displayName = node.GetValue("displayName");
             size = int.Parse(node.GetValue("size"));
 
-            texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
+            UnityEngine.Texture2D texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
 
-            characterMap = new Dictionary<char, CharacterMap>();
+            characterMap = new Dictionary<char, BitmapChar>();
             float h = 0;
             foreach(ConfigNode n in node.GetNodes("ASP_CHAR"))
             {
-                CharacterMap cMap = new CharacterMap(n, texture);
+                BitmapChar cMap = new BitmapChar(n, texture);
 
                 characterMap[cMap.character] = cMap;
 
@@ -38,6 +37,7 @@ namespace ASP
 
             height = (int) Math.Abs(h);
 
+            UnityEngine.Object.Destroy(texture);
         }
     }
 }

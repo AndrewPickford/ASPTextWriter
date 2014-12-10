@@ -7,12 +7,12 @@ using UnityEngine;
 
 namespace ASP
 {
-    public class MappedFontLoader : LoadingSystem
+    public class BitmapFontLoader : LoadingSystem
     {
-        private static MappedFontLoader Instance = null;
+        private static BitmapFontLoader Instance = null;
 
         private bool _ready = false;
-        private FontCache _fontCache = null;
+        private BitmapFontCache _fontCache = null;
         private int _totalFonts = 0;
         private int _loadedFonts = 0;
         private string _statusText;
@@ -21,7 +21,7 @@ namespace ASP
         {
             if (Instance != null)
             {
-                Utils.LogError("Another instance of the MappedFontLoader is running exiting.");
+                Utils.LogError("Another instance of the BitmapFontLoader is running exiting.");
                 Destroy(this.gameObject);
                 return;
             }
@@ -52,7 +52,7 @@ namespace ASP
             StartCoroutine(loadFonts());
         }
 
-        public void setFontCache(FontCache fontCache)
+        public void setFontCache(BitmapFontCache fontCache)
         {
             _fontCache = fontCache;
         }
@@ -67,12 +67,12 @@ namespace ASP
             {
                 if (!url.config.HasValue("name"))
                 {
-                    Utils.Log("loadFonts: missing font name in {0}", url);
+                    Utils.Log("missing font name in {0}", url);
                 }
 
                 _statusText = url.config.GetValue("displayName") + "-" + url.config.GetValue("size");
                 Utils.Log("FontCache: Loading font {0}", _statusText);
-                MappedFont font = new MappedFont(url.config, url.parent.url);
+                BitmapFont font = new BitmapFont(url.config, url.parent.url);
                 _fontCache.addFont(font);
                 ++_loadedFonts;
                 

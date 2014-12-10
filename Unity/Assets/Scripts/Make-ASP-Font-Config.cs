@@ -40,6 +40,9 @@ public class MakeASPFontConfig :  MonoBehaviour
 		string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";		
 		font.RequestCharactersInTexture(chars, 0);
 
+		Texture2D texture = new Texture2D (1, 1);
+		texture.LoadImage (System.IO.File.ReadAllBytes (texturePath));
+
 		StreamWriter swriter = File.CreateText (configPath);
 
 		swriter.WriteLine ("ASP_FONT");
@@ -62,18 +65,18 @@ public class MakeASPFontConfig :  MonoBehaviour
 			else if (c == '}') swriter.WriteLine ("        character = _close_brace_");
 			else swriter.WriteLine ("        character = {0}", c);
 
-			swriter.WriteLine ("        x = {0}", cInfo.uv.x);
-			swriter.WriteLine ("        y = {0}", cInfo.uv.y);
-			swriter.WriteLine ("        w = {0}", cInfo.uv.width);
-			swriter.WriteLine ("        h = {0}", cInfo.uv.height);
+			swriter.WriteLine ("        x = {0}", cInfo.uv.x * texture.width);
+			swriter.WriteLine ("        y = {0}", (cInfo.uv.y + cInfo.uv.height) * texture.height);
+			swriter.WriteLine ("        w = {0}", cInfo.uv.width * texture.width);
+			swriter.WriteLine ("        h = {0}", -cInfo.uv.height * texture.height);
 			swriter.WriteLine ("        vx = {0}", cInfo.vert.x);
 			swriter.WriteLine ("        vy = {0}", cInfo.vert.y);
 			swriter.WriteLine ("        vw = {0}", cInfo.vert.width);
 			swriter.WriteLine ("        vh = {0}", cInfo.vert.height);
 			swriter.WriteLine ("        cw = {0}", cInfo.width);
 
-			if (cInfo.flipped) swriter.WriteLine ("        flipped = true");
-			else swriter.WriteLine ("        flipped = false");
+			if (cInfo.flipped) swriter.WriteLine ("        orientation = FLIPPED_XY");
+			else swriter.WriteLine ("        orientation = INVERTED");
 
 			swriter.WriteLine ("    }");
 			swriter.WriteLine ("");

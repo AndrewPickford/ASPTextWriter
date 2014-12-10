@@ -7,29 +7,29 @@ using UnityEngine;
 namespace ASP
 {
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
-    public class FontCache : MonoBehaviour
+    public class BitmapFontCache : MonoBehaviour
     {
-        public struct FontInfo
+        public struct BitmapFontInfo
         {
             public string name;
             public string displayName;
             public int[] sizes;
         }
 
-        public static FontCache Instance { get; private set; }
+        public static BitmapFontCache Instance { get; private set; }
 
-        public List<MappedFont> mappedList { get; private set; }
-        public FontInfo[] fontInfoArray { get; private set; }
+        public List<BitmapFont> mappedList { get; private set; }
+        public BitmapFontInfo[] fontInfoArray { get; private set; }
 
-        private Dictionary<string, MappedFont> _dictionary;
+        private Dictionary<string, BitmapFont> _dictionary;
 
-        public MappedFont getFontByID(string id)
+        public BitmapFont getFontByID(string id)
         {
             if (_dictionary.ContainsKey(id)) return _dictionary[id];
             else return null;
         }
 
-        public MappedFont getFontByNameSize(string name, int size)
+        public BitmapFont getFontByNameSize(string name, int size)
         {
             string id = name + "-" + size.ToString();
             return getFontByID(id);
@@ -74,8 +74,8 @@ namespace ASP
             Instance = this;
             DontDestroyOnLoad(this);
 
-            _dictionary = new Dictionary<string, MappedFont>();
-            mappedList = new List<MappedFont>(); 
+            _dictionary = new Dictionary<string, BitmapFont>();
+            mappedList = new List<BitmapFont>(); 
         }
 
         public void Start()
@@ -95,27 +95,27 @@ namespace ASP
             }
 
             Utils.Log("FontCache: adding fontcache to loading list");
-            MappedFontLoader mappedFontLoader = this.gameObject.AddComponent<MappedFontLoader>();
-            mappedFontLoader.setFontCache(this);
-            loadersList.Add(mappedFontLoader);       
+            BitmapFontLoader bitmapFontLoader = this.gameObject.AddComponent<BitmapFontLoader>();
+            bitmapFontLoader.setFontCache(this);
+            loadersList.Add(bitmapFontLoader);       
         }
 
-        public void addFont(MappedFont font)
+        public void addFont(BitmapFont font)
         {
             _dictionary[font.id] = font;
         }
 
         public void updateCache()
         {
-            Dictionary<string, FontInfo> infoDictionary = new Dictionary<string, FontInfo>();
+            Dictionary<string, BitmapFontInfo> infoDictionary = new Dictionary<string, BitmapFontInfo>();
             Dictionary<string, List<int>> infoSizes = new Dictionary<string, List<int>>();
-            foreach (KeyValuePair<string, MappedFont> entry in _dictionary)
+            foreach (KeyValuePair<string, BitmapFont> entry in _dictionary)
             {
                 mappedList.Add(entry.Value);
 
                 if (!infoDictionary.ContainsKey(entry.Value.name))
                 {
-                    FontInfo fontInfo = new FontInfo();
+                    BitmapFontInfo fontInfo = new BitmapFontInfo();
 
                     fontInfo.name = entry.Value.name;
                     fontInfo.displayName = entry.Value.displayName;
@@ -138,9 +138,9 @@ namespace ASP
                 entry.Value.Sort();
             }
 
-            fontInfoArray = new FontInfo[infoDictionary.Count];
+            fontInfoArray = new BitmapFontInfo[infoDictionary.Count];
             int i = 0;
-            foreach (KeyValuePair<string, FontInfo> entry in infoDictionary)
+            foreach (KeyValuePair<string, BitmapFontInfo> entry in infoDictionary)
             {
                 fontInfoArray[i] = entry.Value;
                 fontInfoArray[i].sizes = new int[infoSizes[entry.Key].Count];

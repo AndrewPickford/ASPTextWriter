@@ -25,6 +25,13 @@ namespace ASP
             resize(w, h);
         }
 
+        public Image(Image image)
+        {
+            resize(image.width, image.height);
+            for (int i = 0; i < image.length; ++i)
+                pixels[i] = image.pixels[i];
+        }
+
         public void resize(int w, int h)
         {
             width = w;
@@ -331,12 +338,12 @@ namespace ASP
             }
         }
 
-        public void drawCharacter(char c, MappedFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
+        public void drawCharacter(char c, BitmapFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
                                   byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug3) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
 
-            ASP.CharacterMap charMap;
+            ASP.BitmapChar charMap;
             IntVector2 cPos = new IntVector2();
 
             if (font.characterMap.TryGetValue(c, out charMap) == false)
@@ -345,11 +352,8 @@ namespace ASP
                 if (font.characterMap.TryGetValue(c, out charMap) == false) return;
             }
 
-            Image charImage = font.texture.GetImage(charMap.uv);
+            Image charImage = new Image(charMap.image);
             charImage.recolor(Global.Black32, color, false, true);
- 
-            if (charMap.flipped) charImage.flipXY(false);
-            else charImage.flipVertically();
 
             if (mirror) charImage.flipHorizontally();
 
@@ -404,13 +408,13 @@ namespace ASP
         public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
                              byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
-            MappedFont font = FontCache.Instance.getFontByNameSize(fontName, fontSize);
-            if (font == null) font = FontCache.Instance.mappedList.First();
+            BitmapFont font = BitmapFontCache.Instance.getFontByNameSize(fontName, fontSize);
+            if (font == null) font = BitmapFontCache.Instance.mappedList.First();
 
             drawText(text, font, position, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
         }
 
-        public void drawText(string text, MappedFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
+        public void drawText(string text, BitmapFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
                              byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);

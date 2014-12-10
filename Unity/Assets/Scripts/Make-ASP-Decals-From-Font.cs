@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-public class MakeASPFontConfig :  MonoBehaviour
+public class MakeASPDecalsFromFont :  MonoBehaviour
 {
-	[MenuItem( "Assets/Make Decal From Font" )]
-	static void func_MakeASPFontConfig ()
+	[MenuItem( "Assets/Make Decals From Font" )]
+	static void func_MakeASPDecals ()
 	{
 		if (Selection.objects.Length == 0) {
 			Debug.LogError ("Please select the Font first (left click it once in the Project Panel)");
@@ -39,15 +39,16 @@ public class MakeASPFontConfig :  MonoBehaviour
 		
 		string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";		
 		font.RequestCharactersInTexture(chars, 0);
-		
+
+		Texture2D texture = new Texture2D (1, 1);
+		texture.LoadImage (System.IO.File.ReadAllBytes (texturePath));
+
 		StreamWriter swriter = File.CreateText (configPath);
 		
 		swriter.WriteLine ("ASP_DECAL_LIST");
 		swriter.WriteLine ("{");
 		swriter.WriteLine ("    id = {0}-{1}", assetFileName, fontImporter.fontSize);
-		swriter.WriteLine ("    name = {0}", assetFileName);
-		swriter.WriteLine ("    size = {0}", fontImporter.fontSize);
-		swriter.WriteLine ("    displayName = {0}", fontImporter.fontTTFName);
+		swriter.WriteLine ("    displayName = {0} ({1}pt)", fontImporter.fontTTFName, fontImporter.fontSize);
 		swriter.WriteLine ("");
 		
 		CharacterInfo cInfo;
@@ -61,14 +62,15 @@ public class MakeASPFontConfig :  MonoBehaviour
 			else if (c == '{') swriter.WriteLine ("        name = _open_brace_");
 			else if (c == '}') swriter.WriteLine ("        name = _close_brace_");
 			else swriter.WriteLine ("        name = {0}", c);
+
+			swriter.WriteLine ("        type = mono");
+			swriter.WriteLine ("        x = {0}", cInfo.uv.x * texture.width);
+			swriter.WriteLine ("        y = {0}", (cInfo.uv.y + cInfo.uv.height) * texture.height);
+			swriter.WriteLine ("        w = {0}", cInfo.uv.width * texture.width);
+			swriter.WriteLine ("        h = {0}", -cInfo.uv.height * texture.height);
 			
-			swriter.WriteLine ("        x = {0}", cInfo.uv.x);
-			swriter.WriteLine ("        y = {0}", cInfo.uv.y);
-			swriter.WriteLine ("        w = {0}", cInfo.uv.width);
-			swriter.WriteLine ("        h = {0}", cInfo.uv.height);
-			
-			if (cInfo.flipped) swriter.WriteLine ("        flipped = true");
-			else swriter.WriteLine ("        flipped = false");
+			if (cInfo.flipped) swriter.WriteLine ("        orientation = FLIPPED_XY");
+			else swriter.WriteLine ("        orientation = INVERTED");
 			
 			swriter.WriteLine ("    }");
 			swriter.WriteLine ("");
