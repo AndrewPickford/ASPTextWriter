@@ -20,6 +20,9 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public string baseTextureDirUrl = string.Empty;
 
+        [KSPField(isPersistant = true)]
+        public bool outputReadable = false;
+
         // originialConfig is serialized (copied) when the part is duplicated in the editor
         [SerializeField]
         public ConfigNode originalConfig;
@@ -113,8 +116,14 @@ namespace ASP
 
             Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
             mainTexture.SetPixels32(textureImage.pixels);
-            mainTexture.Apply(true);
-            mainTexture.Compress(true);
+
+            if (outputReadable) mainTexture.Apply(true);
+            else
+            {
+                mainTexture.Apply(true);
+                mainTexture.Compress(true);
+                mainTexture.Apply(false, true);
+            }
 
             foreach (Transform transform in _transforms)
             {
@@ -127,7 +136,9 @@ namespace ASP
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
-                normalMapTexture.Apply(true);
+
+                if (outputReadable) normalMapTexture.Apply(false);
+                else normalMapTexture.Apply(false, true);
 
                 foreach (Transform transform in _transforms)
                 {
@@ -294,11 +305,8 @@ namespace ASP
             if (Global.Debug2) Utils.Log("OnLoad start");
 
             // save the original config
-            if (originalConfig == null)
-            {
-                originalConfig = new ConfigNode();
-                node.CopyTo(originalConfig);
-            }
+            originalConfig = new ConfigNode();
+            node.CopyTo(originalConfig);
 
             loadConfig(node);
         }

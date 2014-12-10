@@ -13,7 +13,7 @@ namespace ASP
         {
             public string url;
             public string displayName;
-            public List<string> decalUrls;
+            public List<BitmapDecal> decals;
         }
 
         public static BitmapDecalCache Instance { get; private set; }
@@ -34,6 +34,7 @@ namespace ASP
             DontDestroyOnLoad(this);
 
             decals = new Dictionary<string, BitmapDecal>();
+            sheets = new List<BitmapDecalSheet>();
         }
 
         public void Start()
@@ -64,20 +65,23 @@ namespace ASP
 
             sheet.url = nodeUrl + "/" + node.GetValue("id");
             sheet.displayName = node.GetValue("displayName");
-            sheet.decalUrls = new List<string>();
+            sheet.decals = new List<BitmapDecal>();
+
             Texture2D texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
 
-            foreach (ConfigNode n in node.GetNodes("ASP_DECAL_LIST"))
+            foreach (ConfigNode n in node.GetNodes("ASP_DECAL"))
             {
                 BitmapDecal decal = new BitmapDecal(n, sheet.url, texture);
-                decals[decal.url] = decal;
-                sheet.decalUrls.Add(decal.url);
+
+                if (decal.image != null && decal.image.width > 0 && decal.image.height > 0)
+                {
+                    decals[decal.url] = decal;
+                    sheet.decals.Add(decal);
+                }
             }
 
-            if (sheets == null) sheets = new List<BitmapDecalSheet>();
-            sheets.Add(sheet);
-
             Destroy(texture);
+            sheets.Add(sheet);
         }
     }
 }

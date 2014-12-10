@@ -72,8 +72,16 @@ namespace ASP
                 {
                     _statusText = url.config.GetValue("displayName");
                     Utils.Log("DecalCache: Loading decal sheet {0}", _statusText);
-                    _decalCache.addSheet(url.config, url.parent.url);
-                    ++_loadedSheets;
+
+                    try
+                    {
+                        _decalCache.addSheet(url.config, url.parent.url);
+                        ++_loadedSheets;
+                    }
+                    catch
+                    {
+                        Utils.LogError("error loading decal sheet {0}", _statusText);
+                    }
                 }
 
                 yield return null;

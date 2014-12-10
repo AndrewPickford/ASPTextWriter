@@ -27,6 +27,8 @@ namespace ASP
             rect.w = int.Parse(node.GetValue("w"));
             rect.h = int.Parse(node.GetValue("h"));
 
+            if (rect.w == 0 || rect.h == 0) return;
+
             Orientation orientation = Orientation.UPRIGHT;
             if (node.HasValue("orientation")) orientation = (Orientation)ConfigNode.ParseEnum(typeof(Orientation), node.GetValue("orientation"));
 

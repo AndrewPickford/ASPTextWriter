@@ -72,9 +72,17 @@ namespace ASP
 
                 _statusText = url.config.GetValue("displayName") + "-" + url.config.GetValue("size");
                 Utils.Log("FontCache: Loading font {0}", _statusText);
-                BitmapFont font = new BitmapFont(url.config, url.parent.url);
-                _fontCache.addFont(font);
-                ++_loadedFonts;
+
+                try
+                {
+                    BitmapFont font = new BitmapFont(url.config, url.parent.url);
+                    _fontCache.addFont(font);
+                    ++_loadedFonts;
+                }
+                catch
+                {
+                    Utils.LogError("error loading font {0}", _statusText);
+                }
                 
                 yield return null;
             }

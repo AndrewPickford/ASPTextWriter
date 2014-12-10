@@ -409,7 +409,7 @@ namespace ASP
                              byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
             BitmapFont font = BitmapFontCache.Instance.getFontByNameSize(fontName, fontSize);
-            if (font == null) font = BitmapFontCache.Instance.mappedList.First();
+            if (font == null) font = BitmapFontCache.Instance.fonts.First();
 
             drawText(text, font, position, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
         }
@@ -440,16 +440,22 @@ namespace ASP
                         switch (rotation)
                         {
                             case Rotation.R90:
-                            case Rotation.R270:
                                 charPos.x += font.size;
-                                charPos.y = 0;
+                                charPos.y = position.y;
+                                break;
+                            case Rotation.R270:
+                                charPos.x -= font.size;
+                                charPos.y = position.y;
                                 break;
 
                             case Rotation.R0:
+                                charPos.y -= font.size;
+                                charPos.x = position.x;
+                                break;
                             case Rotation.R180:
                             default:
                                 charPos.y += font.size;
-                                charPos.x = 0;
+                                charPos.x = position.x;
                                 break;
                         }
                     }

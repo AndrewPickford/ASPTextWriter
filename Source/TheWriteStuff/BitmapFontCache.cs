@@ -13,13 +13,13 @@ namespace ASP
         {
             public string name;
             public string displayName;
-            public int[] sizes;
+            public List<int> sizes;
         }
 
         public static BitmapFontCache Instance { get; private set; }
 
-        public List<BitmapFont> mappedList { get; private set; }
-        public BitmapFontInfo[] fontInfoArray { get; private set; }
+        public List<BitmapFont> fonts { get; private set; }
+        public List<BitmapFontInfo> fontInfo { get; private set; }
 
         private Dictionary<string, BitmapFont> _dictionary;
 
@@ -37,9 +37,9 @@ namespace ASP
 
         public int getFontIndexByName(string name)
         {
-            for (int i = 0; i < fontInfoArray.Length; ++i)
+            for (int i = 0; i < fontInfo.Count; ++i)
             {
-                if (fontInfoArray[i].name == name) return i;
+                if (fontInfo[i].name == name) return i;
             }
 
             return -1;
@@ -47,13 +47,13 @@ namespace ASP
 
         public int getFontSizeIndex(string name, int size)
         {
-            for (int i = 0; i < fontInfoArray.Length; ++i)
+            for (int i = 0; i < fontInfo.Count; ++i)
             {
-                if (fontInfoArray[i].name == name)
+                if (fontInfo[i].name == name)
                 {
-                    for (int j = 0; j < fontInfoArray[i].sizes.Length; ++j)
+                    for (int j = 0; j < fontInfo[i].sizes.Count; ++j)
                     {
-                        if (fontInfoArray[i].sizes[j] == size) return j;
+                        if (fontInfo[i].sizes[j] == size) return j;
                     }
                     return -1;
                 }
@@ -75,7 +75,8 @@ namespace ASP
             DontDestroyOnLoad(this);
 
             _dictionary = new Dictionary<string, BitmapFont>();
-            mappedList = new List<BitmapFont>(); 
+            fonts = new List<BitmapFont>();
+            fontInfo = new List<BitmapFontInfo>();
         }
 
         public void Start()
@@ -107,48 +108,29 @@ namespace ASP
 
         public void updateCache()
         {
-            Dictionary<string, BitmapFontInfo> infoDictionary = new Dictionary<string, BitmapFontInfo>();
-            Dictionary<string, List<int>> infoSizes = new Dictionary<string, List<int>>();
             foreach (KeyValuePair<string, BitmapFont> entry in _dictionary)
             {
-                mappedList.Add(entry.Value);
+                fonts.Add(entry.Value);
 
-                if (!infoDictionary.ContainsKey(entry.Value.name))
+                int index = fontInfo.FindIndex(x => x.name == entry.Value.name);
+                if (index == -1)
                 {
-                    BitmapFontInfo fontInfo = new BitmapFontInfo();
+                    BitmapFontInfo info = new BitmapFontInfo();
+                    info.sizes = new List<int>();
 
-                    fontInfo.name = entry.Value.name;
-                    fontInfo.displayName = entry.Value.displayName;
+                    info.name = entry.Value.name;
+                    info.displayName = entry.Value.displayName;
 
-                    infoDictionary.Add(entry.Value.name, fontInfo);
-
-                    List<int> sizeList = new List<int>();
-                    sizeList.Add(entry.Value.size);
-
-                    infoSizes.Add(entry.Value.name, sizeList);
+                    fontInfo.Add(info);
+                    index = fontInfo.FindIndex(x => x.name == entry.Value.name);
                 }
-                else
-                {
-                    infoSizes[entry.Value.name].Add(entry.Value.size);
-                }
+                
+                fontInfo[index].sizes.Add(entry.Value.size);
             }
 
-            foreach (KeyValuePair<string, List<int>> entry in infoSizes)
+            for (int i = 0; i < fontInfo.Count; ++i)
             {
-                entry.Value.Sort();
-            }
-
-            fontInfoArray = new BitmapFontInfo[infoDictionary.Count];
-            int i = 0;
-            foreach (KeyValuePair<string, BitmapFontInfo> entry in infoDictionary)
-            {
-                fontInfoArray[i] = entry.Value;
-                fontInfoArray[i].sizes = new int[infoSizes[entry.Key].Count];
-                for (int j = 0; j < infoSizes[entry.Key].Count; ++j)
-                {
-                    fontInfoArray[i].sizes[j] = infoSizes[entry.Key][j];
-                }
-                ++i;
+                fontInfo[i].sizes.Sort();
             }
         }
     }

@@ -383,6 +383,14 @@ namespace ASP
                 _imageModifiers.add(im);
             }
 
+            if (GUILayout.Button("Mono Decal", GUILayout.ExpandWidth(true)))
+            {
+                IM.MonoDecal im = new IM.MonoDecal();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+            }
+
             GUILayout.EndScrollView();
 
             GUILayout.EndVertical();
