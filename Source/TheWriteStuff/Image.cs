@@ -74,6 +74,15 @@ namespace ASP
                 pixels[i].a = alpha;
         }
 
+        public void scaleAlpha(byte alpha)
+        {
+            for (int i = 0; i < length; ++i)
+            {
+                int newAlpha = Math.Min(((int)pixels[i].a * (int)alpha) / 255, 255);
+                pixels[i].a = (byte) newAlpha;
+            }
+        }
+
         public void fill(Color32 color)
         {
             for (int i = 0; i < length; ++i)
@@ -338,6 +347,47 @@ namespace ASP
             }
         }
 
+        public void blendImage(Image image, BlendMethod blendMethod, IntVector2 position, AlphaOption alphaOption, byte alpha, BoundingBox boundingBox = null)
+        {
+            switch (blendMethod)
+            {
+                case ASP.BlendMethod.HSV:
+                    blendHSV(image, position, alphaOption, alpha, boundingBox);
+                    break;
+
+                case ASP.BlendMethod.RGB:
+                    blendRGB(image, position, alphaOption, alpha, boundingBox);
+                    break;
+
+                case ASP.BlendMethod.PIXEL:
+                default:
+                    overlay(image, position, alphaOption, alpha, boundingBox);
+                    break;
+            }
+        }
+
+        public void rotateImage(Rotation rotation)
+        {
+            switch (rotation)
+            {
+                case Rotation.R180:
+                    rotate180();
+                    break;
+
+                case Rotation.R270:
+                    flipXY(false);
+                    break;
+
+                case Rotation.R90:
+                    flipXY(true);
+                    break;
+
+                case Rotation.R0:
+                default:
+                    break;
+            }
+        }
+
         public void drawCharacter(char c, BitmapFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
                                   byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
@@ -366,14 +416,14 @@ namespace ASP
                     position.x -= (int) charMap.cw;
                     break;
 
-                case Rotation.R270:
+                case Rotation.R90:
                     charImage.flipXY(true);
                     cPos.x = position.x + (font.size + (int)charMap.vy + (int)charMap.vh);
                     cPos.y = position.y - ((int)charMap.vx + (int)charMap.vw);
                     position.y -= (int)charMap.cw;
                     break;
 
-                case Rotation.R90:
+                case Rotation.R270:
                     charImage.flipXY(false);
                     cPos.x = position.x - (font.size + (int)charMap.vy);
                     cPos.y = position.y + (int)charMap.vx;
@@ -388,21 +438,7 @@ namespace ASP
                     break;
             }
 
-            switch (blendMethod)
-            {
-                case ASP.BlendMethod.HSV:
-                    blendHSV(charImage, cPos, alphaOption, textureAlpha, boundingBox);
-                    break;
-
-                case ASP.BlendMethod.RGB:
-                    blendRGB(charImage, cPos, alphaOption, textureAlpha, boundingBox);
-                    break;
-
-                case ASP.BlendMethod.PIXEL:
-                default:
-                    overlay(charImage, cPos, alphaOption, textureAlpha, boundingBox);
-                    break;
-            }
+            blendImage(charImage, blendMethod, cPos, alphaOption, textureAlpha, boundingBox);
         }
 
         public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,

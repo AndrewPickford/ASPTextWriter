@@ -54,16 +54,19 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 		CharacterInfo cInfo;
 		foreach (char c in chars) {
 			font.GetCharacterInfo (c, out cInfo, 0);
-			
+
+			if (cInfo.uv.width == 0f || cInfo.uv.height == 0f) continue;
+
 			swriter.WriteLine ("    ASP_DECAL");
 			swriter.WriteLine ("    {");
 			
 			if (c == ' ') swriter.WriteLine ("        name = _space_");
 			else if (c == '{') swriter.WriteLine ("        name = _open_brace_");
 			else if (c == '}') swriter.WriteLine ("        name = _close_brace_");
+			else if (c == '/') swriter.WriteLine ("        name = _x_");
 			else swriter.WriteLine ("        name = {0}", c);
 
-			swriter.WriteLine ("        type = mono");
+			swriter.WriteLine ("        type = MONO");
 			swriter.WriteLine ("        x = {0}", cInfo.uv.x * texture.width);
 			swriter.WriteLine ("        y = {0}", (cInfo.uv.y + cInfo.uv.height) * texture.height);
 			swriter.WriteLine ("        w = {0}", cInfo.uv.width * texture.width);

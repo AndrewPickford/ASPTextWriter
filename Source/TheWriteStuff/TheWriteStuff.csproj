@@ -54,7 +54,9 @@
     <Compile Include="BitmapDecalCache.cs" />
     <Compile Include="BitmapDecalLoader.cs" />
     <Compile Include="IM_BaseTexture.cs" />
+    <Compile Include="IM_ColorDecal.cs" />
     <Compile Include="IM_MonoOverlay.cs" />
+    <Compile Include="IM_Overlay.cs" />
     <Compile Include="KSPTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="BitmapChar.cs" />

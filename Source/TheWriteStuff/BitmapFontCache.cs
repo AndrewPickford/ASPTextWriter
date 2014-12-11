@@ -20,6 +20,7 @@ namespace ASP
 
         public List<BitmapFont> fonts { get; private set; }
         public List<BitmapFontInfo> fontInfo { get; private set; }
+        public bool hasFonts { get; private set; }
 
         private Dictionary<string, BitmapFont> _dictionary;
 
@@ -75,8 +76,7 @@ namespace ASP
             DontDestroyOnLoad(this);
 
             _dictionary = new Dictionary<string, BitmapFont>();
-            fonts = new List<BitmapFont>();
-            fontInfo = new List<BitmapFontInfo>();
+            hasFonts = false;
         }
 
         public void Start()
@@ -108,6 +108,9 @@ namespace ASP
 
         public void updateCache()
         {
+            fonts = new List<BitmapFont>();
+            fontInfo = new List<BitmapFontInfo>();
+
             foreach (KeyValuePair<string, BitmapFont> entry in _dictionary)
             {
                 fonts.Add(entry.Value);
@@ -132,6 +135,8 @@ namespace ASP
             {
                 fontInfo[i].sizes.Sort();
             }
+
+            if (fonts.Count > 0 && fontInfo.Count > 0) hasFonts = true;
         }
     }
 }

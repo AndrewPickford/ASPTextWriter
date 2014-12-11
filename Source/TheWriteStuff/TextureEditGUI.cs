@@ -375,12 +375,13 @@ namespace ASP
 
             _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.MinHeight(400), GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
-            if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Color Decal", GUILayout.ExpandWidth(true)))
             {
-                IM.Text im = new IM.Text();
+                IM.ColorDecal im = new IM.ColorDecal();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
+                _remakePreview = true;
             }
 
             if (GUILayout.Button("Mono Decal", GUILayout.ExpandWidth(true)))
@@ -389,6 +390,16 @@ namespace ASP
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
+                _remakePreview = true;
+            }
+
+            if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
+            {
+                IM.Text im = new IM.Text();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
             }
 
             GUILayout.EndScrollView();

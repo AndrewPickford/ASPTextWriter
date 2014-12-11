@@ -14,6 +14,8 @@ namespace ASP
 
     public abstract class ImageModifier
     {
+        public enum Type { INVALID, BASE_TEXTURE, TEXT, MONO_DECAL, COLOR_DECAL };
+
         public abstract void save(ConfigNode node);
         public abstract void load(ConfigNode node);
         public abstract void drawOnImage(ref Image image, BoundingBox boundingBox);
@@ -23,21 +25,51 @@ namespace ASP
         public abstract string displayName();
         public abstract ImageModifierGui gui();
 
+        protected Type _type = Type.INVALID;
+
         public static ImageModifier CreateFromConfig(ConfigNode node)
         {
             ImageModifier imageModifier = null;
-            string type = node.GetValue("type");
 
+            Type type = Type.INVALID;
+            if (node.HasValue("type")) type = (Type)ConfigNode.ParseEnum(typeof(Type), node.GetValue("type"));
 
-            if (type == "text") imageModifier = new IM.Text();
-            if (type == "base_texture") imageModifier = new IM.BaseTexture();
+            switch (type)
+            {
+                case Type.BASE_TEXTURE:
+                    imageModifier = new IM.BaseTexture();
+                    break;
 
-            if (imageModifier == null) throw new ArgumentException("unknown image modifier");
+                case Type.TEXT:
+                    imageModifier = new IM.Text();
+                    break;
+
+                case Type.MONO_DECAL:
+                    imageModifier = new IM.MonoDecal();
+                    break;
+
+                case Type.COLOR_DECAL:
+                    imageModifier = new IM.ColorDecal();
+                    break;
+
+                default:
+                case Type.INVALID:
+                    break;
+            }
+
+            if (imageModifier == null)  Utils.LogError("unknown image modifier");
             else
             {
+                imageModifier._type = type;
                 imageModifier.load(node);
-                return imageModifier;
             }
+
+            return imageModifier;
+        }
+
+        protected void saveImageModifier(ConfigNode node)
+        {
+            node.AddValue("type", ConfigNode.WriteEnum(_type));
         }
     }
 

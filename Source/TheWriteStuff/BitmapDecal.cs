@@ -9,17 +9,20 @@ namespace ASP
     public class BitmapDecal
     {
         public enum Orientation { UPRIGHT, FLIPPED_XY, INVERTED };
+        public enum Type { MONO, COLOR };
 
         public string url { get; private set; }
         public string name { get; private set; }
-        public string type { get; private set; }
+        public Type type { get; private set; }
         public Image image { get; private set; }
 
-        public BitmapDecal(ConfigNode node, string nodeUrl, Texture2D texture)
+        public BitmapDecal(ConfigNode node, BitmapDecalCache.Sheet sheet, Texture2D texture)
         {
-            type = node.GetValue("type");
+            type = Type.MONO;
+            if (node.HasValue("type")) type = (Type)ConfigNode.ParseEnum(typeof(Type), node.GetValue("type"));
+
             name = node.GetValue("name");
-            url = nodeUrl + "/" + name;
+            url = sheet.url + "/" + name;
 
             Rectangle rect = new Rectangle();
             rect.x = int.Parse(node.GetValue("x"));
@@ -28,6 +31,11 @@ namespace ASP
             rect.h = int.Parse(node.GetValue("h"));
 
             if (rect.w == 0 || rect.h == 0) return;
+
+            if (sheet.origin == BitmapDecalCache.Origin.TOP_LEFT)
+            {
+                rect.y = texture.height - rect.y - rect.h;
+            }
 
             Orientation orientation = Orientation.UPRIGHT;
             if (node.HasValue("orientation")) orientation = (Orientation)ConfigNode.ParseEnum(typeof(Orientation), node.GetValue("orientation"));

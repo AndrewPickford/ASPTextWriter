@@ -66,7 +66,7 @@ namespace ASP
             foreach (ConfigNode n in nodes)
             {
                 ImageModifier im = ImageModifier.CreateFromConfig(n);
-                modifiers.Add(im);
+                if (im != null) modifiers.Add(im);
             }
         }
 

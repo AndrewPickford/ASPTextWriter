@@ -66,6 +66,11 @@ namespace ASP
             private bool _hasNormalMap = false;
             private BaseTextureGui _gui;
 
+            public BaseTexture()
+            {
+                _type = Type.BASE_TEXTURE;
+            }
+
             ~BaseTexture()
             {
                 cleanUp();
@@ -77,6 +82,7 @@ namespace ASP
 
                 if (_main != null) im._main = _main.clone();
 
+                im._type = _type;
                 im._name = _name;
                 im._hasNormalMap = _hasNormalMap;
 
@@ -129,13 +135,14 @@ namespace ASP
                 return _hasNormalMap;
             }
 
-            public override void save(ConfigNode node)
-            {
-                node.AddValue("type", "base_texture");
-            }
-
             public override void load(ConfigNode node)
             {
+                _type = Type.BASE_TEXTURE;
+            }
+
+            public override void save(ConfigNode node)
+            {
+                saveImageModifier(node);
             }
 
             public void drawOnImage(ref Image image)

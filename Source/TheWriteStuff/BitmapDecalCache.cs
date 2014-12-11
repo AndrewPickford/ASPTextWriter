@@ -9,17 +9,24 @@ namespace ASP
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class BitmapDecalCache : MonoBehaviour
     {
-        public struct BitmapDecalSheet
+        public enum Origin { BOTTOM_LEFT, TOP_LEFT };
+
+        public struct Sheet
         {
             public string url;
+            public Origin origin;
             public string displayName;
             public List<BitmapDecal> decals;
         }
 
         public static BitmapDecalCache Instance { get; private set; }
 
-        public List<BitmapDecalSheet> sheets { get; private set; }
+        public List<Sheet> monoSheets { get; private set; }
+        public List<Sheet> colorSheets { get; private set; }
         public Dictionary<string, BitmapDecal> decals { get; private set; }
+        public bool hasDecals { get; private set; }
+
+        private List<Sheet> _sheets;
 
         public void Awake()
         {
@@ -34,7 +41,10 @@ namespace ASP
             DontDestroyOnLoad(this);
 
             decals = new Dictionary<string, BitmapDecal>();
-            sheets = new List<BitmapDecalSheet>();
+            _sheets = new List<Sheet>();
+            monoSheets = new List<Sheet>();
+            colorSheets = new List<Sheet>();
+            hasDecals = false;
         }
 
         public void Start()
@@ -61,27 +71,50 @@ namespace ASP
 
         public void addSheet(ConfigNode node, string nodeUrl)
         {
-            BitmapDecalSheet sheet = new BitmapDecalSheet();
+            Sheet sheet = new Sheet();
+            Sheet monoSheet = new Sheet();
+            Sheet colorSheet = new Sheet();
 
             sheet.url = nodeUrl + "/" + node.GetValue("id");
             sheet.displayName = node.GetValue("displayName");
             sheet.decals = new List<BitmapDecal>();
 
+            sheet.origin = Origin.BOTTOM_LEFT;
+            if (node.HasValue("origin")) sheet.origin = (Origin)ConfigNode.ParseEnum(typeof(Origin), node.GetValue("origin"));
+
             Texture2D texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
+
+            monoSheet.url = sheet.url;
+            monoSheet.displayName = sheet.displayName;
+            monoSheet.decals = new List<BitmapDecal>();
+            monoSheet.origin = sheet.origin;
+
+            colorSheet.url = sheet.url;
+            colorSheet.displayName = sheet.displayName;
+            colorSheet.decals = new List<BitmapDecal>();
+            colorSheet.origin = sheet.origin;
 
             foreach (ConfigNode n in node.GetNodes("ASP_DECAL"))
             {
-                BitmapDecal decal = new BitmapDecal(n, sheet.url, texture);
+                BitmapDecal decal = new BitmapDecal(n, sheet, texture);
 
                 if (decal.image != null && decal.image.width > 0 && decal.image.height > 0)
                 {
                     decals[decal.url] = decal;
                     sheet.decals.Add(decal);
+
+                    if (decal.type == BitmapDecal.Type.MONO) monoSheet.decals.Add(decal);
+                    else if (decal.type == BitmapDecal.Type.COLOR) colorSheet.decals.Add(decal);
                 }
             }
 
             Destroy(texture);
-            sheets.Add(sheet);
+
+            _sheets.Add(sheet);
+            if (monoSheet.decals.Count > 0) monoSheets.Add(monoSheet);
+            if (colorSheet.decals.Count > 0) colorSheets.Add(colorSheet);
+
+            if (decals.Count > 0) hasDecals = true;
         }
     }
 }

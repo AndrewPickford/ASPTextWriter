@@ -10,9 +10,9 @@ namespace ASP
     public class Global : MonoBehaviour
     {
         public static Global Instance { get; private set; }
-        public static bool Debug1 = true;
-        public static bool Debug2 = true;
-        public static bool Debug3 = true;
+        public static bool Debug1 = false;
+        public static bool Debug2 = false;
+        public static bool Debug3 = false;
         public static int FileCacheSize = 20 * 1024 * 1024; // bytes
         public static float LastButtonPress;
         public static float LastRepeat;

@@ -18,8 +18,14 @@ namespace ASP
 
             private TextGui _gui;
 
+            public Text()
+            {
+                _type = Type.TEXT;
+            }
+
             public override void load(ConfigNode node)
             {
+                _type = Type.TEXT;
                 _text = string.Empty;
                 _fontName = "CAPSMALL_CLEAN";
                 _fontSize = 32;
@@ -33,45 +39,45 @@ namespace ASP
 
             public override void save(ConfigNode node)
             {
-                node.AddValue("type", "text");
+                saveMonoOverlay(node);
                 node.AddValue("text", _text);
                 node.AddValue("fontName", _fontName);
                 node.AddValue("fontSize", _fontSize);
-                saveMonoOverlay(node);
             }
 
             public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
-                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _textureAlpha, _blendMethod, boundingBox);
+                Color32 color = new Color32(_red, _green, _blue, _alpha);
+                image.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, _alphaOption, _textureAlpha, _blendMethod, boundingBox);
             }
 
             public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
             {
                 drawOnImage(ref image, boundingBox);
 
-                if (_normalOption != NormalOption.USE_BACKGROUND)
-                {
-                    Image textImage = new Image(normalMap.width, normalMap.height);
-                    Color32 backgroudColor = new Color32(127, 127, 127, 0);
-                    textImage.fill(backgroudColor);
+                if (_normalOption == NormalOption.USE_BACKGROUND) return;
+               
+                Image textImage = new Image(normalMap.width, normalMap.height);
+                Color32 backgroudColor = new Color32(127, 127, 127, 0);
+                textImage.fill(backgroudColor);
 
-                    Color32 color = Global.Gray32;
-                    if (_normalOption == NormalOption.RAISE_TEXT) color = Color.black;
-                    if (_normalOption == NormalOption.LOWER_TEXT) color = Color.white;
+                Color32 color = Global.Gray32;
+                if (_normalOption == NormalOption.RAISE_TEXT) color = Global.Black32;
+                if (_normalOption == NormalOption.LOWER_TEXT) color = Global.White32;
 
-                    textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, 255, BlendMethod.PIXEL);
+                textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, 255, BlendMethod.PIXEL);
 
-                    Image normalMapImage = textImage.createNormalMap(_normalScale);
+                Image normalMapImage = textImage.createNormalMap(_normalScale);
 
-                    if (image.width == normalMap.width && image.height == normalMap.height) normalMap.rescale(image.width, image.height);
-                    normalMap.overlay(normalMapImage, textImage, 128, boundingBox);
-                }
+                if (image.width == normalMap.width && image.height == normalMap.height) normalMap.rescale(image.width, image.height);
+                normalMap.overlay(normalMapImage, textImage, 128, boundingBox);
             }
 
             public override ImageModifier clone()
             {
                 IM.Text im = new IM.Text();
 
+                im._type = _type;
                 im._text = _text;
                 im._fontName = _fontName;
                 im._fontSize = _fontSize;
