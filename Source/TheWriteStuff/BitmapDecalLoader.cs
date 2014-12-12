@@ -58,7 +58,7 @@ namespace ASP
 
         private IEnumerator loadDecals()
         {
-            UrlDir.UrlConfig[] decalListConfigs = GameDatabase.Instance.GetConfigs("ASP_DECAL_LIST");
+            UrlDir.UrlConfig[] decalListConfigs = GameDatabase.Instance.GetConfigs("ASP_BITMAP_DECAL_LIST");
             _totalSheets = decalListConfigs.Length;
             _loadedSheets = 0;
 

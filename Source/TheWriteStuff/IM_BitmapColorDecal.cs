@@ -8,21 +8,21 @@ namespace ASP
 {
     namespace IM
     {
-        public class ColorDecal : Overlay
+        public class BitmapColorDecal : Overlay
         {
             static string _displayName = "Color Decal";
 
             private string _url = string.Empty;
-            private ColorDecalGui _gui;
+            private BitmapColorDecalGui _gui;
 
-            public ColorDecal()
+            public BitmapColorDecal()
             {
-                _type = Type.COLOR_DECAL;
+                _type = Type.BITMAP_COLOR_DECAL;
             }
 
             public override void load(ConfigNode node)
             {
-                _type = Type.COLOR_DECAL;
+                _type = Type.BITMAP_COLOR_DECAL;
                 _url = string.Empty;
 
                 loadOverlay(node);
@@ -44,6 +44,7 @@ namespace ASP
                 Image decalImage = new Image(decal.image);
                 decalImage.scaleAlpha(_alpha);
                 decalImage.rotateImage(_rotation);
+                if (_mirror) decalImage.flipHorizontally();
 
                 image.blendImage(decalImage, _blendMethod, _position, _alphaOption, _textureAlpha, boundingBox);
             }
@@ -55,7 +56,7 @@ namespace ASP
 
             public override ImageModifier clone()
             {
-                IM.ColorDecal im = new IM.ColorDecal();
+                IM.BitmapColorDecal im = new IM.BitmapColorDecal();
 
                 im._type = _type;
                 im._url = _url;
@@ -77,29 +78,29 @@ namespace ASP
 
             public override ImageModifierGui gui()
             {
-                if (_gui == null) _gui = new ColorDecalGui(this);
+                if (_gui == null) _gui = new BitmapColorDecalGui(this);
                 return _gui;
             }
 
 
 
 
-            public class ColorDecalGui : OverlayGui
+            public class BitmapColorDecalGui : OverlayGui
             {
-                private IM.ColorDecal _imColorDecal;
+                private IM.BitmapColorDecal _imBitmapColorDecal;
                 private int _selectedSheet = 0;
                 private int _selectedDecal = 0;
                 private Vector2 _scrollPos;
                 private List<Texture2D> _textures = null;
 
-                public ColorDecalGui(IM.ColorDecal colorDecal)
-                    : base(colorDecal)
+                public BitmapColorDecalGui(IM.BitmapColorDecal bitmapColorDecal)
+                    : base(bitmapColorDecal)
                 {
-                    _imColorDecal = colorDecal;
+                    _imBitmapColorDecal = bitmapColorDecal;
                     _textures = null;
                 }
 
-                ~ColorDecalGui()
+                ~BitmapColorDecalGui()
                 {
                     if (_textures != null)
                     {
@@ -114,7 +115,7 @@ namespace ASP
 
                     header(gui, "COLOR DECAL");
 
-                    GUILayout.Label("Url: " + _imColorDecal._url, GUILayout.ExpandWidth(false));
+                    GUILayout.Label("Url: " + _imBitmapColorDecal._url, GUILayout.ExpandWidth(false));
                     GUILayout.Space(5);
 
                     drawBottomOverlay(gui);
@@ -212,7 +213,7 @@ namespace ASP
 
                     if (oldSelectedSheet != _selectedSheet || oldSelectedDecal != _selectedDecal)
                     {
-                        _imColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
+                        _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
                         gui.setRemakePreview();
                     }
                 }
@@ -223,14 +224,14 @@ namespace ASP
                     _selectedSheet = 0;
                     _selectedDecal = 0;
 
-                    if (BitmapDecalCache.Instance.colorSheets.Count > 0) _imColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
+                    if (BitmapDecalCache.Instance.colorSheets.Count > 0) _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
                 }
 
                 public override string buttonText()
                 {
-                    if (_imColorDecal._url == string.Empty) return "Color Decal";
-                    else if (_imColorDecal._url.Length < 8) return _imColorDecal._url;
-                    else return ".." + _imColorDecal._url.Substring(_imColorDecal._url.Length - 7, 7);
+                    if (_imBitmapColorDecal._url == string.Empty) return "Color Decal";
+                    else if (_imBitmapColorDecal._url.Length < 8) return _imBitmapColorDecal._url;
+                    else return ".." + _imBitmapColorDecal._url.Substring(_imBitmapColorDecal._url.Length - 7, 7);
                 }
             }
         }

@@ -45,7 +45,7 @@ public class MakeASPFontConfig :  MonoBehaviour
 
 		StreamWriter swriter = File.CreateText (configPath);
 
-		swriter.WriteLine ("ASP_FONT");
+		swriter.WriteLine ("ASP_BITMAP_FONT");
 		swriter.WriteLine ("{");
 		swriter.WriteLine ("    id = {0}-{1}", assetFileName, fontImporter.fontSize);
 		swriter.WriteLine ("    name = {0}", assetFileName);
@@ -57,7 +57,7 @@ public class MakeASPFontConfig :  MonoBehaviour
 		foreach (char c in chars) {
 			font.GetCharacterInfo (c, out cInfo, 0);
 
-			swriter.WriteLine ("    ASP_CHAR");
+			swriter.WriteLine ("    ASP_BITMAP_CHAR");
 			swriter.WriteLine ("    {");
 
 			if (c == ' ') swriter.WriteLine ("        character = _space_");

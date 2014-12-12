@@ -94,7 +94,7 @@ namespace ASP
             colorSheet.decals = new List<BitmapDecal>();
             colorSheet.origin = sheet.origin;
 
-            foreach (ConfigNode n in node.GetNodes("ASP_DECAL"))
+            foreach (ConfigNode n in node.GetNodes("ASP_BITMAP_DECAL"))
             {
                 BitmapDecal decal = new BitmapDecal(n, sheet, texture);
 

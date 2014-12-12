@@ -25,7 +25,7 @@ namespace ASP
 
             characterMap = new Dictionary<char, BitmapChar>();
             float h = 0;
-            foreach(ConfigNode n in node.GetNodes("ASP_CHAR"))
+            foreach(ConfigNode n in node.GetNodes("ASP_BITMAP_CHAR"))
             {
                 BitmapChar cMap = new BitmapChar(n, texture);
 

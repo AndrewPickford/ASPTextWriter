@@ -20,12 +20,12 @@ namespace ASP
 
             public Text()
             {
-                _type = Type.TEXT;
+                _type = Type.BITMAP_TEXT;
             }
 
             public override void load(ConfigNode node)
             {
-                _type = Type.TEXT;
+                _type = Type.BITMAP_TEXT;
                 _text = string.Empty;
                 _fontName = "CAPSMALL_CLEAN";
                 _fontSize = 32;

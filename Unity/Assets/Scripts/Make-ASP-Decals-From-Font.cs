@@ -45,7 +45,7 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 
 		StreamWriter swriter = File.CreateText (configPath);
 		
-		swriter.WriteLine ("ASP_DECAL_LIST");
+		swriter.WriteLine ("ASP_BITMAP_DECAL_LIST");
 		swriter.WriteLine ("{");
 		swriter.WriteLine ("    id = {0}-{1}", assetFileName, fontImporter.fontSize);
 		swriter.WriteLine ("    displayName = {0} ({1}pt)", fontImporter.fontTTFName, fontImporter.fontSize);
@@ -57,7 +57,7 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 
 			if (cInfo.uv.width == 0f || cInfo.uv.height == 0f) continue;
 
-			swriter.WriteLine ("    ASP_DECAL");
+			swriter.WriteLine ("    ASP_BITMAP_DECAL");
 			swriter.WriteLine ("    {");
 			
 			if (c == ' ') swriter.WriteLine ("        name = _space_");
