@@ -72,6 +72,7 @@ namespace ASP
 
             protected void copyFromOverlay(Overlay overlay)
             {
+                copyFromImageModifer(overlay);
                 _position = new IntVector2(overlay._position);
                 _mirror = overlay._mirror;
                 _alpha = overlay._alpha;
@@ -103,6 +104,7 @@ namespace ASP
                 Image decalImage = new Image(decal.image);
                 decalImage.recolor(Global.Black32, color, false, true);
                 decalImage.rotateImage(_rotation);
+                if (_mirror) decalImage.flipHorizontally();
 
                 backgroundImage.blendImage(decalImage, BlendMethod.PIXEL, _position, AlphaOption.OVERWRITE, 255, boundingBox);
 

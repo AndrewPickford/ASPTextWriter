@@ -289,14 +289,12 @@ namespace ASP
         private void drawImageModifiersList()
         {
             Color contentColor = GUI.contentColor;
-
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+           
+            _modifiersScrollPos = GUILayout.BeginScrollView(_modifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Layers", GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
-
-            _modifiersScrollPos = GUILayout.BeginScrollView(_modifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.MinHeight(400), GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
             int oldSelectedModifier = _selectedModifier;
             int raiseModifier = -1;
@@ -334,8 +332,6 @@ namespace ASP
 
             GUILayout.EndScrollView();
 
-            GUILayout.EndVertical();
-
             GUI.contentColor = contentColor;
 
             if (deleteModifier >= 0)
@@ -367,17 +363,15 @@ namespace ASP
 
         private void drawAvailableModifiers()
         {
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+            _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Add Layer", GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 
-            _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.MinHeight(400), GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-
             if (GUILayout.Button("Color Decal", GUILayout.ExpandWidth(true)))
             {
-                IM.ColorDecal im = new IM.ColorDecal();
+                IM.BitmapColorDecal im = new IM.BitmapColorDecal();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
@@ -386,7 +380,7 @@ namespace ASP
 
             if (GUILayout.Button("Mono Decal", GUILayout.ExpandWidth(true)))
             {
-                IM.MonoDecal im = new IM.MonoDecal();
+                IM.BitmapMonoDecal im = new IM.BitmapMonoDecal();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
@@ -403,8 +397,6 @@ namespace ASP
             }
 
             GUILayout.EndScrollView();
-
-            GUILayout.EndVertical();
         }
 
         private void drawGlobalBoundingBoxSelector()
@@ -449,7 +441,12 @@ namespace ASP
 
             if (_bbWselector.draw())
             {
-                if (_bbWselector.value() > _baseTexture.width()) _bbWselector.set(_baseTexture.width());
+                _boundingBox.w = _bbWselector.value();
+                bbChanged = true;
+            }
+            if (_bbWselector.value() > _baseTexture.width())
+            {
+                _bbWselector.set(_baseTexture.width());
                 _boundingBox.w = _bbWselector.value();
                 bbChanged = true;
             }
@@ -460,6 +457,12 @@ namespace ASP
             {
                 if (_bbHselector.value() > _baseTexture.height()) _bbHselector.set(_baseTexture.height());
                 _boundingBox.h = _bbHselector.value();
+                bbChanged = true;
+            }
+            if (_bbHselector.value() > _baseTexture.height())
+            {
+                _bbHselector.set(_baseTexture.height());
+                _boundingBox.w = _bbWselector.value();
                 bbChanged = true;
             }
 

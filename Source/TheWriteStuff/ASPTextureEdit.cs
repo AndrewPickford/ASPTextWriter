@@ -10,7 +10,7 @@ namespace ASP
     {
         [KSPField(isPersistant = true)]
         public string transformNames = string.Empty;
-
+        /*
         [KSPField(isPersistant = true)]
         public string baseTextureName = string.Empty;
 
@@ -19,7 +19,7 @@ namespace ASP
 
         [KSPField(isPersistant = true)]
         public string baseTextureDirUrl = string.Empty;
-
+        */
         [KSPField(isPersistant = true)]
         public bool outputReadable = false;
 
@@ -116,6 +116,7 @@ namespace ASP
 
             Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
             mainTexture.SetPixels32(textureImage.pixels);
+            mainTexture.name = _baseTexture.mainUrl() + "_TWS";
 
             if (outputReadable) mainTexture.Apply(true);
             else
@@ -136,6 +137,7 @@ namespace ASP
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
+                normalMapTexture.name = _baseTexture.normalMapUrl() + "_TWS";
 
                 if (outputReadable) normalMapTexture.Apply(false);
                 else normalMapTexture.Apply(false, true);
@@ -255,16 +257,9 @@ namespace ASP
 
         private void findTextures()
         {
+            kspTextureInfo = new KSPTextureInfo(_transforms[0]);
+
             if (Global.Debug2)
-            {
-                Utils.Log("baseTextureName: [{0}]", baseTextureName);
-                Utils.Log("baseNormalMapName: [{0}]", baseNormalMapName);
-            }
-
-            if (baseTextureName == string.Empty) kspTextureInfo = new KSPTextureInfo(_transforms[0]);
-            else kspTextureInfo = new KSPTextureInfo(baseTextureDirUrl, baseTextureName, baseNormalMapName, _transforms[0]);
-
-            if (Global.Debug1)
             {
                 Utils.Log("_baseTextureInfo.mainUrl: {0}", kspTextureInfo.mainUrl);
                 Utils.Log("_baseTextureInfo.normalMapUrl: {0}", kspTextureInfo.normalMapUrl);
@@ -337,10 +332,10 @@ namespace ASP
 
             if (node.HasValue("transformsOption")) _transformsOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformsOption"));
 
-            if (node.HasValue("ASP_BASETEXTURE"))
+            if (node.HasNode("ASP_BASETEXTURE"))
             {
-                _baseTexture = new IM.BaseTexture();
                 ConfigNode n = node.GetNode("ASP_BASETEXTURE");
+                _baseTexture = IM.BaseTexture.CreateBaseTexture(n);
                 _baseTexture.load(n);
             }
 
@@ -385,13 +380,22 @@ namespace ASP
 
                 if (_imageModifiers == null) _imageModifiers = new ImageModifiers();
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
-                if (_baseTexture == null) _baseTexture = new IM.BaseTexture();
+                if (_baseTexture == null) _baseTexture = new IM.AutoBaseTexture();
 
                 _baseTexture.set(kspTextureInfo);
 
-                if (_imageModifiers.modifiers.Count > 0) writeTexture();
+                if (!_baseTexture.valid)
+                {
+                    Utils.LogError("invalid base texture trying auto");
+                    _baseTexture = new IM.AutoBaseTexture();
+                    _baseTexture.set(kspTextureInfo);
+                }
 
-                _ok = true;
+                if (_baseTexture.valid)
+                {
+                    if (_imageModifiers.modifiers.Count > 0) writeTexture();
+                    _ok = true;
+                }
             }
             catch
             {

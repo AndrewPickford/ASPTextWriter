@@ -334,11 +334,9 @@ namespace ASP
                             HSV hsv3 = hsv1.blend(hsv2, (float) overlayColor.a / 255f);
                             RGB rgb3 = hsv3.toRGB();
 
-                            Color32 newColor = new Color(rgb3.r, rgb3.g, rgb3.b, (float) overlayColor.a / 255f);
-
-                            pixels[px + py * width].r = newColor.r;
-                            pixels[px + py * width].g = newColor.g;
-                            pixels[px + py * width].b = newColor.b;
+                            pixels[px + py * width].r = Math.Min((byte) (rgb3.r * 255f), (byte) 255);
+                            pixels[px + py * width].g = Math.Min((byte) (rgb3.g * 255f), (byte) 255);
+                            pixels[px + py * width].b = Math.Min((byte) (rgb3.b * 255f), (byte) 255);
 
                             if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
                         }

@@ -13,6 +13,9 @@ namespace ASP
         public string mainUrl = string.Empty;
         public string normalMapUrl = string.Empty;
         public string displayName = string.Empty;
+        public string dirUrl = string.Empty;
+        public Texture2D mainTexture = null;
+        public Texture2D normalMapTexture = null;
         public string shader = string.Empty;
         public bool hasNormalMap = false;
         public bool isSpecular = false;
@@ -32,46 +35,63 @@ namespace ASP
             if (knownShader == false) Utils.LogError("Unknown shader: {0}", shader);
         }
 
+        private string getUrl(Texture2D texture)
+        {
+            string url = string.Empty;
+            GameDatabase.TextureInfo info = GameDatabase.Instance.databaseTexture.Find(x => x.texture == texture);
+
+            if (info == null)
+            {
+                url = texture.name;
+                if (Global.Debug3) Utils.Log("texture {0} using texture.name, info null", url);
+            }
+
+            if (info.name != string.Empty && texture.name != string.Empty)
+            {
+                if (info.name == texture.name)
+                {
+                    url = texture.name;
+                    if (Global.Debug3) Utils.Log("texture {0} info.name == texture.name", url);
+                }
+                else
+                {
+                    url = info.name;
+                    if (Global.Debug3) Utils.Log("texture {0} info.name != texture.name, using info.name", url);
+                }
+            }
+            else if(info.name != string.Empty && texture.name == string.Empty)
+            {
+                url = info.name;
+                if (Global.Debug3) Utils.Log("texture {0} using info.name, texture.name empty", url);
+            }
+            else if (info.name == string.Empty && texture.name != string.Empty)
+            {
+                url = texture.name;
+                if (Global.Debug3) Utils.Log("texture {0} using texture.name, info.name empty", url);
+            }
+
+            return url;
+        }
+
         public KSPTextureInfo(Transform transform)
         {
             if (Global.Debug2) Utils.Log("create texture infos from transform");
 
             setShader(transform);
            
-            Texture2D texture = transform.gameObject.renderer.material.mainTexture as Texture2D;
-            mainUrl = texture.name;
+            mainTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
+            mainUrl = getUrl(mainTexture);
+            dirUrl = System.IO.Path.GetDirectoryName(mainUrl);
 
-            texture = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
-            if (texture != null && texture.name != string.Empty)
+            normalMapTexture = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+            if (normalMapTexture != null)
             {
-                normalMapUrl = texture.name;
+                normalMapUrl = getUrl(normalMapTexture);
                 hasNormalMap = true;
             }
             else hasNormalMap = false;
 
             displayName = System.IO.Path.GetFileName(mainUrl);
-        }
-
-        public KSPTextureInfo(string baseTextureDirUrl, string textureName, string normalMapName, Transform transform)
-        {
-            setShader(transform);
-
-            string url = baseTextureDirUrl;
-            if (url == string.Empty)
-            {
-                Texture2D texture = transform.gameObject.renderer.material.mainTexture as Texture2D;
-                url = System.IO.Path.GetDirectoryName(texture.name);
-            }
-
-            mainUrl = url + "/" + textureName;
-            displayName = textureName;
-
-            if (normalMapName == string.Empty) hasNormalMap = false;
-            else
-            {
-                normalMapUrl = url + "/" + normalMapName;
-                hasNormalMap = true;
-            }
         }
     }
 }

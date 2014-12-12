@@ -14,7 +14,7 @@ namespace ASP
 
     public abstract class ImageModifier
     {
-        public enum Type { INVALID, BASE_TEXTURE, TEXT, MONO_DECAL, COLOR_DECAL };
+        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL };
 
         public abstract void save(ConfigNode node);
         public abstract void load(ConfigNode node);
@@ -37,19 +37,19 @@ namespace ASP
             switch (type)
             {
                 case Type.BASE_TEXTURE:
-                    imageModifier = new IM.BaseTexture();
+                    imageModifier = IM.BaseTexture.CreateBaseTexture(node);
                     break;
 
-                case Type.TEXT:
+                case Type.BITMAP_TEXT:
                     imageModifier = new IM.Text();
                     break;
 
-                case Type.MONO_DECAL:
-                    imageModifier = new IM.MonoDecal();
+                case Type.BITMAP_MONO_DECAL:
+                    imageModifier = new IM.BitmapMonoDecal();
                     break;
 
-                case Type.COLOR_DECAL:
-                    imageModifier = new IM.ColorDecal();
+                case Type.BITMAP_COLOR_DECAL:
+                    imageModifier = new IM.BitmapColorDecal();
                     break;
 
                 default:
@@ -70,6 +70,11 @@ namespace ASP
         protected void saveImageModifier(ConfigNode node)
         {
             node.AddValue("type", ConfigNode.WriteEnum(_type));
+        }
+
+        protected void copyFromImageModifer(ImageModifier imageModifier)
+        {
+            _type = imageModifier._type;
         }
     }
 

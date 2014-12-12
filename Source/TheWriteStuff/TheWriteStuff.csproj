@@ -53,10 +53,14 @@
     <Compile Include="BitmapDecal.cs" />
     <Compile Include="BitmapDecalCache.cs" />
     <Compile Include="BitmapDecalLoader.cs" />
+    <Compile Include="IM_AutoBaseTexture.cs" />
     <Compile Include="IM_BaseTexture.cs" />
-    <Compile Include="IM_ColorDecal.cs" />
+    <Compile Include="IM_BitmapColorDecal.cs" />
+    <Compile Include="IM_CurrentBaseTexture.cs" />
     <Compile Include="IM_MonoOverlay.cs" />
+    <Compile Include="IM_MultipleBaseTexture.cs" />
     <Compile Include="IM_Overlay.cs" />
+    <Compile Include="IM_SingleBaseTexture.cs" />
     <Compile Include="KSPTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="BitmapChar.cs" />
@@ -69,7 +73,7 @@
     <Compile Include="IM_Text.cs" />
     <Compile Include="IntVector2.cs" />
     <Compile Include="BitmapFontLoader.cs" />
-    <Compile Include="IM_MonoDecal.cs" />
+    <Compile Include="IM_BitmapMonoDecal.cs" />
     <Compile Include="PaintPointer.cs" />
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />

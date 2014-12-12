@@ -15,7 +15,7 @@ namespace ASP
         public static string[] SplitString(string text)
         {
             string[] splitText = text.Split(_delimiters, StringSplitOptions.RemoveEmptyEntries);
-          
+
             for (int i = 0; i < splitText.Length; ++i)
             {
                 string str = splitText[i];
