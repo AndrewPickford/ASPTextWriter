@@ -25,9 +25,6 @@ namespace ASP
             public override void load(ConfigNode node)
             {
                 _type = Type.BITMAP_TEXT;
-                _text = string.Empty;
-                _fontName = "CAPSMALL_CLEAN";
-                _fontSize = 32;
 
                 loadText(node);
             }
@@ -179,6 +176,7 @@ namespace ASP
 
                     _selectedFont = BitmapFontCache.Instance.getFontIndexByName(_imBitmapText._fontName);
                     if (_selectedFont < 0) _selectedFont = 0;
+
                     _fontSizeSelection = BitmapFontCache.Instance.getFontSizeIndex(_imBitmapText._fontName, _imBitmapText._fontSize);
                     if (_fontSizeSelection < 0) _fontSizeSelection = 0;
                 }
