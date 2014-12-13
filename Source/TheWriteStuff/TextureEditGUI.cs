@@ -201,6 +201,9 @@ namespace ASP
             drawAvailableModifiers();
             GUILayout.FlexibleSpace();
             GUILayout.Label("", largeHeader, GUILayout.Width(20), GUILayout.ExpandHeight(true));
+            GUILayout.BeginVertical();
+            GUILayout.Space(300);
+            GUILayout.EndVertical();
             GUILayout.Space(5);
             GUILayout.EndHorizontal();
 
