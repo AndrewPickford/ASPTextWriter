@@ -195,11 +195,11 @@ namespace ASP
 
             GUILayout.BeginHorizontal();
             drawTexture();
-            GUILayout.Space(5);
+            GUILayout.FlexibleSpace();
             drawImageModifiersList();
-            GUILayout.Space(5);
+            GUILayout.FlexibleSpace();
             drawAvailableModifiers();
-            GUILayout.Space(5);
+            GUILayout.FlexibleSpace();
             GUILayout.Label("", largeHeader, GUILayout.Width(20), GUILayout.ExpandHeight(true));
             GUILayout.Space(5);
             GUILayout.EndHorizontal();
