@@ -46,7 +46,7 @@ namespace ASP
 
                 if (_normalOption == NormalOption.USE_BACKGROUND) return;
                
-                Image textImage = new Image(normalMap.width, normalMap.height);
+                Image textImage = new Image(image.width, image.height);
                 Color32 backgroudColor = new Color32(127, 127, 127, 0);
                 textImage.fill(backgroudColor);
 
@@ -56,10 +56,18 @@ namespace ASP
 
                 textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, 255, BlendMethod.PIXEL);
 
-                Image normalMapImage = textImage.createNormalMap(_normalScale);
+                BoundingBox bBox = new BoundingBox(boundingBox);
+                if (image.width != normalMap.width || image.height != normalMap.height)
+                {
+                    textImage.rescale(normalMap.width, normalMap.height);
+                    bBox.x = (int)((float)bBox.x * (float)normalMap.width / (float)image.width);
+                    bBox.w = (int)((float)bBox.w * (float)normalMap.width / (float)image.width);
+                    bBox.y = (int)((float)bBox.y * (float)normalMap.height / (float)image.height);
+                    bBox.h = (int)((float)bBox.h * (float)normalMap.height / (float)image.height);
+                }
 
-                if (image.width == normalMap.width && image.height == normalMap.height) normalMap.rescale(image.width, image.height);
-                normalMap.overlay(normalMapImage, textImage, 128, boundingBox);
+                Image normalMapImage = textImage.createNormalMap(_normalScale);
+                normalMap.overlay(normalMapImage, textImage, 128, bBox);
             }
 
             public override ImageModifier clone()

@@ -24,6 +24,16 @@ namespace ASP
             use = false;
         }
 
+        public BoundingBox(BoundingBox bBox)
+        {
+            x = bBox.x;
+            y = bBox.y;
+            w = bBox.w;
+            h = bBox.h;
+            valid = bBox.valid;
+            use = bBox.use;
+        }
+
         public BoundingBox(int bottomLeftX, int bottomLeftY, int width, int height, bool validBB = true, bool useBB = true)
         {
             x = bottomLeftX;

@@ -236,12 +236,12 @@ namespace ASP
         {
             int minX, minY, maxX, maxY;
             setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
-            
+
             for (int i = minX; i <= maxX; ++i)
             {
                 for (int j = minY; j <= maxY; ++j)
                 {
-                    if (mask.pixels[i + j * width].a >= 10)
+                    if (mask.pixels[i + j * width].a >= min)
                     {
                         pixels[i + j * width].r = overlay.pixels[i + j * width].r;
                         pixels[i + j * width].g = overlay.pixels[i + j * width].g;
@@ -586,10 +586,10 @@ namespace ASP
             float alpha = 0f;
             float totalArea = 0f;
 
-            float minX = x - w/2f;
-            float minY = y - w/2f;
-            float maxX = x + w/2f;
-            float maxY = y + w/2f;
+            float minX = (x - w / 2f) * width;
+            float minY = (y - w / 2f) * height;
+            float maxX = (x + w / 2f) * width;
+            float maxY = (y + w / 2f) * height;
             int minPX = (int) minX;
             int minPY = (int) minY;
             int maxPX = (int) maxX;
@@ -597,11 +597,11 @@ namespace ASP
 
             for (int i = minPX; i <= maxPX; ++i)
             {
-                for (int j = minPY; j <=maxPY; ++j)
+                for (int j = minPY; j <= maxPY; ++j)
                 {
                     if (i >= 0 && i < width && j >= 0 && j < height)
                     {
-                        float area = 1f;
+                        float area = 0f;
                         if (i == minPX || j == minPY || (i + 1) > maxPX || (j + 1) > maxPY)
                         {
                             float pxMin = Math.Max(i, minX);
@@ -610,11 +610,12 @@ namespace ASP
                             float pyMax = Math.Min(j + 1, maxY);
                             area = (pxMax - pxMin) * (pyMax - pyMin);
                         }
+                        else area = 1f;
 
-                        red = pixels[i + j * width].r * area;
-                        green = pixels[i + j * width].g * area;
-                        blue = pixels[i + j * width].b * area;
-                        alpha = pixels[i + j * width].a * area;
+                        red += pixels[i + j * width].r * area;
+                        green += pixels[i + j * width].g * area;
+                        blue += pixels[i + j * width].b * area;
+                        alpha += pixels[i + j * width].a * area;
                         totalArea += area;
                     }
                 }
@@ -628,10 +629,10 @@ namespace ASP
                 alpha /= totalArea;
             }
 
-            byte r = (byte)(Math.Max((int)(red / 255f), 255));
-            byte g = (byte)(Math.Max((int)(green / 255f), 255));
-            byte b = (byte)(Math.Max((int)(blue / 255f), 255));
-            byte a = (byte)(Math.Max((int)(alpha / 255f), 255));
+            byte r = (byte)(Math.Min((int)red, 255));
+            byte g = (byte)(Math.Min((int)green, 255));
+            byte b = (byte)(Math.Min((int)blue, 255));
+            byte a = (byte)(Math.Min((int)alpha, 255));
 
             return new Color32(r, g, b, a);
         }
@@ -642,19 +643,19 @@ namespace ASP
 
             if (newWidth == width && newHeight == height) return;
 
-            Color32[] newPixels = new Color32[width * height];
+            Color32[] newPixels = new Color32[newWidth * newHeight];
 
-            float widthRatio = (float) width / (float) newWidth;
-            float heightRatio = (float) height / (float) newHeight;
+            float pixelWidth = 1f / (float)newWidth;
+            float pixelHeight = 1f / (float)newHeight;
 
-            for (int i = 0; i < width; ++i)
+            for (int i = 0; i < newWidth; ++i)
             {
-                for (int j = 0; j < height; ++j)
+                for (int j = 0; j < newHeight; ++j)
                 {
-                    float x = 0.5f + ((float)i / (float)width);
-                    float y = 0.5f + ((float)j / (float)height);
+                    float x = (((float)i + 0.5f) / (float)newWidth);
+                    float y = (((float)j + 0.5f) / (float)newHeight);
 
-                    newPixels[i + j * width] = getPixelBilinear(x, y, widthRatio, heightRatio);
+                    newPixels[i + j * newWidth] = getPixelBilinear(x, y, pixelWidth, pixelHeight);
                 }
             }
 
