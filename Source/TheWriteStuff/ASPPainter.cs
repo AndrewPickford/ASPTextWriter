@@ -10,7 +10,7 @@ namespace ASP
     {
         private PaintPointer _pointer;
 
-        [KSPEvent(name = "Paint", guiName = "Paint", guiActive = true, guiActiveEditor = false, externalToEVAOnly = true, guiActiveUnfocused = false)]
+        [KSPEvent(name = "paintEvent", guiName = "Paint", active = false, guiActive = true, guiActiveEditor = false, externalToEVAOnly = true, guiActiveUnfocused = false)]
         public void paintEvent()
         {
             _pointer = gameObject.GetComponent<PaintPointer>();
@@ -19,6 +19,33 @@ namespace ASP
                 _pointer = gameObject.AddComponent<PaintPointer>();
                 _pointer.initialise(this);
             }
+        }
+
+        void OnDestroy()
+        {
+            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+        }
+
+        void OnVesselChange(Vessel vesselChange)
+        {
+            if (FlightGlobals.ActiveVessel.isEVA) Events["paintEvent"].active = true;
+            else Events["paintEvent"].active = true;
+        }
+
+        public override void OnStart(StartState state)
+        {
+            base.OnStart(state);
+
+            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+
+            if (state == StartState.Editor)
+            {
+                Events["paintEvent"].active = false;
+                return;
+            }
+
+            if (part.vessel.isEVA) Events["paintEvent"].active = true;
+            else Events["paintEvent"].active = false;
         }
     }
 }
