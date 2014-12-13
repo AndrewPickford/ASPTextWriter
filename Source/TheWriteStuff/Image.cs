@@ -474,11 +474,11 @@ namespace ASP
                         switch (rotation)
                         {
                             case Rotation.R90:
-                                charPos.x += font.size;
+                                charPos.x -= font.size;
                                 charPos.y = position.y;
                                 break;
                             case Rotation.R270:
-                                charPos.x -= font.size;
+                                charPos.x += font.size;
                                 charPos.y = position.y;
                                 break;
 
