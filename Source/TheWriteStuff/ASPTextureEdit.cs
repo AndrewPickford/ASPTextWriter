@@ -308,7 +308,7 @@ namespace ASP
 
         private void loadConfig(ConfigNode node)
         {
-            if (Global.Debug3) Utils.Log("node {0}", node.ToString());
+            if (Global.Debug3) Utils.Log("loadConfig start");
 
             _ok = false;
             _transformNames = null;
