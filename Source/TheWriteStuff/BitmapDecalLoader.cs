@@ -20,7 +20,7 @@ namespace ASP
         {
             if (Instance != null)
             {
-                Utils.LogError("Another instance of the MappedFontLoader is running exiting.");
+                Utils.LogError("Another instance of the BitmappedDecalLoader is running exiting.");
                 Destroy(this.gameObject);
                 return;
             }

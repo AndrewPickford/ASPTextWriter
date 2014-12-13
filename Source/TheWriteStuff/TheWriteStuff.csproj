@@ -61,6 +61,7 @@
     <Compile Include="IM_MultipleBaseTexture.cs" />
     <Compile Include="IM_Overlay.cs" />
     <Compile Include="IM_SingleBaseTexture.cs" />
+    <Compile Include="IM_Text.cs" />
     <Compile Include="KSPTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="BitmapChar.cs" />
@@ -70,7 +71,7 @@
     <Compile Include="ImageModifiers.cs" />
     <Compile Include="FromATM.cs" />
     <Compile Include="HSV.cs" />
-    <Compile Include="IM_Text.cs" />
+    <Compile Include="IM_BitmapText.cs" />
     <Compile Include="IntVector2.cs" />
     <Compile Include="BitmapFontLoader.cs" />
     <Compile Include="IM_BitmapMonoDecal.cs" />

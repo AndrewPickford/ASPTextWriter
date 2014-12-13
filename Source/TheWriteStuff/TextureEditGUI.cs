@@ -387,9 +387,9 @@ namespace ASP
                 _remakePreview = true;
             }
 
-            if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Bitmap Text", GUILayout.ExpandWidth(true)))
             {
-                IM.Text im = new IM.Text();
+                IM.Text im = new IM.BitmapText();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);

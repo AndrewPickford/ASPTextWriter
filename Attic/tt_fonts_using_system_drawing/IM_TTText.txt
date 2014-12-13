@@ -1,0 +1,170 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace ASP
+{
+    namespace IM
+    {
+        public class TTText : Text
+        {
+            static string _displayName = "TT Text";
+            static string _headerName = "TRUE TYPE TEXT";
+
+            private TTTextGui _gui;
+            private System.Drawing.Font _font = null;
+
+            public TTText()
+            {
+                _type = Type.TT_TEXT;
+                _fontName = TTFontCache.Instance.fontFamily(0).Name;
+                _fontSize = 32;
+                setFont(_fontName);
+            }
+
+            public override void load(ConfigNode node)
+            {
+                _type = Type.TT_TEXT;
+                _text = string.Empty;
+                _fontName = TTFontCache.Instance.fontFamily(0).Name;
+                _fontSize = 32;
+
+                loadText(node);
+            }
+
+            public override void save(ConfigNode node)
+            {
+                saveText(node);
+            }
+
+            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            {
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(image.width, image.height);
+
+                System.Drawing.Color backgroundColor = System.Drawing.Color.FromArgb(0, 0, 0, 0);
+                System.Drawing.Color color = System.Drawing.Color.FromArgb(_alpha, _red, _green, _blue);
+                System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(color);
+
+                using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(bitmap))
+                {
+                    graphics.Clear(backgroundColor);
+
+                    graphics.ScaleTransform(1f, -1f);
+                    graphics.DrawString(_text, _font, brush, _position.x, _position.y);
+
+                    image.blendBitmap(bitmap, _blendMethod, _alphaOption, _alpha, boundingBox);
+                }
+            }
+
+            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
+            {
+            }
+
+            public override ImageModifier clone()
+            {
+                IM.TTText im = new IM.TTText();
+                im.copyFromText(this);
+                return im;
+            }
+
+
+            public override void cleanUp()
+            {
+                _gui = null;
+            }
+
+            public override string displayName()
+            {
+                return _displayName;
+            }
+
+            protected override string headerName()
+            {
+                return _headerName;
+            }
+
+            public void setFont(string fontName)
+            {
+                _font = new System.Drawing.Font(TTFontCache.Instance.fontFamily(_fontName), _fontSize);
+            }
+
+            public override ImageModifierGui gui()
+            {
+                if (_gui == null) _gui = new TTTextGui(this);
+                return _gui;
+            }
+
+
+
+
+            public class TTTextGui : TextGui
+            {
+                private IM.TTText _imttText;
+                private int _selectedFont = 0;
+                private Vector2 _fontScrollPos;
+                private ValueSelector<int, IntField> _sizeSelector;
+
+                public TTTextGui(IM.TTText ttText) :
+                    base(ttText)
+                {
+                    _imttText = ttText;
+                }
+
+                protected override void drawBottomOverlayExtras1(TextureEditGUI gui)
+                {
+                    if (_sizeSelector.draw())
+                    {
+                        _imttText._fontSize = _sizeSelector.value();
+                        gui.setRemakePreview();
+                    }
+                }
+
+                public override void drawRight(TextureEditGUI gui)
+                {
+                    if (BitmapFontCache.Instance.fontInfo.Count == 0) return;
+
+                    Color contentColor = GUI.contentColor;
+
+                    _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
+
+                    GUILayout.Space(3);
+
+                    GUILayout.Label("Font");
+
+                    int oldSelectedFont = _selectedFont;
+                    for (int i = 0; i < TTFontCache.Instance.fontFamilies().Length; ++i)
+                    {
+                        if (i == _selectedFont) GUI.contentColor = Global.SelectedColor;
+                        else GUI.contentColor = Global.NotSelectedColor;
+
+                        if (GUILayout.Button(TTFontCache.Instance.fontFamily(i).Name, GUILayout.ExpandWidth(true))) _selectedFont = i;
+                    }
+
+                    GUILayout.EndScrollView();
+
+                    GUILayout.EndVertical();
+
+                    GUI.contentColor = contentColor;
+
+                    if (oldSelectedFont != _selectedFont)
+                    {
+                        _imttText.setFont(TTFontCache.Instance.fontFamily(_selectedFont).Name);
+                        gui.setRemakePreview();
+                    }
+                }
+
+                public override void initialise(TextureEditGUI gui)
+                {
+                    initialiseText(gui);
+
+                    _selectedFont = TTFontCache.Instance.getFontIndexByName(_imttText._fontName);
+                    if (_selectedFont == -1) _selectedFont = 0;
+
+                    _sizeSelector = new ValueSelector<int, IntField>(_imttText._fontSize, 0, 999, 1, "Font Size", Color.white);
+                }
+            }
+        }
+    }
+}

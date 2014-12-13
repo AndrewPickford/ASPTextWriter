@@ -363,7 +363,7 @@ namespace ASP
                     break;
             }
         }
-
+ 
         public void rotateImage(Rotation rotation)
         {
             switch (rotation)

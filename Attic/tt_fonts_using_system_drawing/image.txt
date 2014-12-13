@@ -1,0 +1,119 @@
+
+        public void blendBitmapRGB(System.Drawing.Bitmap overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
+
+            for (int i = 0; i < overlay.Width; ++i)
+            {
+                for (int j = 0; j < overlay.Height; ++j)
+                {
+                    int px = position.x + i;
+                    int py = position.y + j;
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
+                    {
+                        Color32 overlayColor = new Color32(overlay.GetPixel(i, j).R, overlay.GetPixel(i, j).G, overlay.GetPixel(i, j).B, overlay.GetPixel(i, j).A);
+
+                        if (overlayColor.a > 0)
+                        {
+                            Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
+                            Color32 newColor = Color32.Lerp(oldColor, overlayColor, (float)overlayColor.a / 255f);
+
+                            pixels[px + py * width].r = newColor.r;
+                            pixels[px + py * width].g = newColor.g;
+                            pixels[px + py * width].b = newColor.b;
+
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void blendBitmapHSV(System.Drawing.Bitmap overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
+
+            for (int i = 0; i < overlay.Width; ++i)
+            {
+                for (int j = 0; j < overlay.Height; ++j)
+                {
+                    int px = position.x + i;
+                    int py = position.y + j;
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
+                    {
+                        Color32 overlayColor = new Color32(overlay.GetPixel(i, j).R, overlay.GetPixel(i, j).G, overlay.GetPixel(i, j).B, overlay.GetPixel(i, j).A);
+                        if (overlayColor.a > 0)
+                        {
+                            Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
+
+                            RGB rgb1 = new RGB(oldColor);
+                            RGB rgb2 = new RGB(overlayColor);
+                            HSV hsv1 = rgb1.toHSV();
+                            HSV hsv2 = rgb2.toHSV();
+                            HSV hsv3 = hsv1.blend(hsv2, (float)overlayColor.a / 255f);
+                            RGB rgb3 = hsv3.toRGB();
+
+                            pixels[px + py * width].r = Math.Min((byte)(rgb3.r * 255f), (byte)255);
+                            pixels[px + py * width].g = Math.Min((byte)(rgb3.g * 255f), (byte)255);
+                            pixels[px + py * width].b = Math.Min((byte)(rgb3.b * 255f), (byte)255);
+
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public void overlayBitmap(System.Drawing.Bitmap overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
+
+            for (int i = 0; i < overlay.Width; ++i)
+            {
+                for (int j = 0; j < overlay.Height; ++j)
+                {
+                    int px = position.x + i;
+                    int py = position.y + j;
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
+                    {
+                        if (overlay.GetPixel(i, j).A > 127)
+                        {
+                            pixels[px + py * width].r = overlay.GetPixel(i, j).R;
+                            pixels[px + py * width].g = overlay.GetPixel(i, j).G;
+                            pixels[px + py * width].b = overlay.GetPixel(i, j).B;
+
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void blendBitmap(System.Drawing.Bitmap bitmap, BlendMethod blendMethod, AlphaOption alphaOption, byte alpha, BoundingBox boundingBox = null)
+        {
+            IntVector2 position = new IntVector2(0, 0);
+            blendBitmap(bitmap, blendMethod, position, alphaOption, alpha, boundingBox);
+        }
+
+        public void blendBitmap(System.Drawing.Bitmap bitmap, BlendMethod blendMethod, IntVector2 position, AlphaOption alphaOption, byte alpha, BoundingBox boundingBox = null)
+        {
+            switch (blendMethod)
+            {
+                case ASP.BlendMethod.HSV:
+                    blendBitmapHSV(bitmap, position, alphaOption, alpha, boundingBox);
+                    break;
+
+                case ASP.BlendMethod.RGB:
+                    blendBitmapRGB(bitmap, position, alphaOption, alpha, boundingBox);
+                    break;
+
+                case ASP.BlendMethod.PIXEL:
+                default:
+                    overlayBitmap(bitmap, position, alphaOption, alpha, boundingBox);
+                    break;
+            }
+        }

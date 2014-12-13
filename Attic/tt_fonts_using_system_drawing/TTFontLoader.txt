@@ -1,0 +1,100 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ASP
+{
+    public class TTFontLoader : LoadingSystem
+    {
+        private static TTFontLoader Instance = null;
+
+        private bool _ready = false;
+        private TTFontCache _ttFontCache = null;
+        private int _totalFonts = 0;
+        private int _loadedFonts = 0;
+        private string _statusText;
+
+        public void Awake()
+        {
+            if (Instance != null)
+            {
+                Utils.LogError("Another instance of the TTFontLoader is running exiting.");
+                Destroy(this.gameObject);
+                return;
+            }
+        }
+
+        public override bool IsReady()
+        {
+            return _ready;
+        }
+
+        public override float ProgressFraction()
+        {
+            float fraction = 0f;
+
+            if (_totalFonts > 0)
+                fraction = (float)_loadedFonts / (float)_totalFonts;
+
+            return fraction;
+        }
+
+        public override string ProgressTitle()
+        {
+            return _statusText;
+        }
+
+        public override void StartLoad()
+        {
+            StartCoroutine(loadTTFonts());
+        }
+
+        public void setTTFontCache(TTFontCache ttFontCache)
+        {
+            _ttFontCache = ttFontCache;
+        }
+
+        private IEnumerator loadTTFonts()
+        {
+            UrlDir.UrlConfig[] ttFontConfigs = GameDatabase.Instance.GetConfigs("ASP_TT_FONTS");
+            _totalFonts = 0;
+            _loadedFonts = 0;
+
+            for (int i = 0; i < ttFontConfigs.Length; ++i)
+            {
+                _totalFonts += ttFontConfigs[i].config.CountValues;
+            }
+
+            foreach (UrlDir.UrlConfig url in ttFontConfigs)
+            {
+                string[] fileNames = url.config.GetValues("font");
+
+                foreach (string fileName in fileNames)
+                {
+                    string fullPath = url.parent.url + "/" + fileName;
+                    _statusText = fileName;
+                    Utils.Log("TTFontCache: Loading TT Font {0}", _statusText);
+
+                    try
+                    {
+                        _ttFontCache.addFont(fullPath);
+                        ++_loadedFonts;
+                    }
+                    catch
+                    {
+                        Utils.LogError("error loading TT font {0}", _statusText);
+                    }
+
+                    yield return null;
+                }
+
+                yield return null;
+            }
+
+            _loadedFonts = _totalFonts;
+            _ready = true;
+        }
+    }
+}

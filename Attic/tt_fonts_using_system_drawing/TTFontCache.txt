@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ASP
+{
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
+    public class TTFontCache : UnityEngine.MonoBehaviour
+    {
+        public static TTFontCache Instance { get; private set; }
+
+        private System.Drawing.Text.PrivateFontCollection _ttFontCollection = null;
+
+        public void Awake()
+        {
+            if (Instance != null)
+            {
+                Utils.LogError("Another instance of the TTFontCache is running exiting.");
+                Destroy(this.gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(this);
+
+            _ttFontCollection = new System.Drawing.Text.PrivateFontCollection();
+        }
+
+        public void Start()
+        {
+            LoadingScreen loadingScreen = FindObjectOfType<LoadingScreen>();
+            if (loadingScreen == null)
+            {
+                Utils.LogError("unable to find loading screen, exiting");
+                return;
+            }
+
+            List<LoadingSystem> loadersList = LoadingScreen.Instance.loaders;
+            if (loadersList == null)
+            {
+                Utils.LogError("empty loading list, exiting.");
+                return;
+            }
+
+            Utils.Log("adding ttfontcache to loading list");
+            TTFontLoader ttFontLoader = this.gameObject.AddComponent<TTFontLoader>();
+            ttFontLoader.setTTFontCache(this);
+            loadersList.Add(ttFontLoader);
+        }
+
+        public void addFont(string fileName)
+        {
+            _ttFontCollection.AddFontFile(fileName);
+        }
+
+        public System.Drawing.FontFamily[] fontFamilies()
+        {
+            return _ttFontCollection.Families;
+        }
+
+        public System.Drawing.FontFamily fontFamily(int index)
+        {
+            if (index >= 0 && index < _ttFontCollection.Families.Length) return _ttFontCollection.Families[index];
+            else return null;
+        }
+
+        public System.Drawing.FontFamily fontFamily(string fontName)
+        {
+            for (int i = 0; i < _ttFontCollection.Families.Length; ++i)
+            {
+                if (_ttFontCollection.Families[i].Name == name) return _ttFontCollection.Families[i];
+            }
+
+            return null;
+        }
+
+
+        public int getFontIndexByName(string name)
+        {
+            for (int i = 0; i < _ttFontCollection.Families.Length; ++i)
+            {
+                if (_ttFontCollection.Families[i].Name == name) return i;
+            }
+
+            return -1;
+        }
+    }
+}

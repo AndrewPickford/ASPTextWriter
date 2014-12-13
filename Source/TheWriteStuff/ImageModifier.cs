@@ -41,7 +41,7 @@ namespace ASP
                     break;
 
                 case Type.BITMAP_TEXT:
-                    imageModifier = new IM.Text();
+                    imageModifier = new IM.BitmapText();
                     break;
 
                 case Type.BITMAP_MONO_DECAL:
