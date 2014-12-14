@@ -1,3 +1,11 @@
+0.7.0
+ * add multi purpose texture editor
+ * add layering of effects to texture
+ * multiple text strings
+ * add mono decals
+ * add color decals
+ * rewrite gui
+
 0.6.0
  * change for single transformName to transformNames list of transforms
  * add option to use first or all transforms of a given name
