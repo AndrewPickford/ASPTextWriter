@@ -75,7 +75,7 @@ namespace ASP
             Sheet monoSheet = new Sheet();
             Sheet colorSheet = new Sheet();
 
-            sheet.url = nodeUrl + "/" + node.GetValue("id");
+            sheet.url = System.IO.Path.GetDirectoryName(nodeUrl) + "/" + node.GetValue("id");
             sheet.displayName = node.GetValue("displayName");
             sheet.decals = new List<BitmapDecal>();
 
