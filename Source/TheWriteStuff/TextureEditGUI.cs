@@ -379,6 +379,7 @@ namespace ASP
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
                 _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
             if (GUILayout.Button("Mono Decal", GUILayout.ExpandWidth(true)))
@@ -388,6 +389,7 @@ namespace ASP
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
                 _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
             if (GUILayout.Button("Bitmap Text", GUILayout.ExpandWidth(true)))
@@ -397,6 +399,7 @@ namespace ASP
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
                 _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
             GUILayout.EndScrollView();

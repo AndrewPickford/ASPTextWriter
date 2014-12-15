@@ -1,3 +1,7 @@
+0.7.1
+ * fix decal names urls
+ * auto select new layer in gui
+
 0.7.0
  * add multi purpose texture editor
  * add layering of effects to texture
