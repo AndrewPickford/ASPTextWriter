@@ -98,8 +98,8 @@ namespace ASP
                 backgroundImage.fill(backgroudColor);
 
                 Color32 color = Global.Gray32;
-                if (_normalOption == NormalOption.RAISE_TEXT) color = Global.Black32;
-                if (_normalOption == NormalOption.LOWER_TEXT) color = Global.White32;
+                if (_normalOption == NormalOption.RAISE_TEXT) color = Global.White32;
+                if (_normalOption == NormalOption.LOWER_TEXT) color = Global.Black32;
 
                 Image decalImage = new Image(decal.image);
                 decalImage.recolor(Global.Black32, color, false, true);

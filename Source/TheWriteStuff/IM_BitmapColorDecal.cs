@@ -221,10 +221,9 @@ namespace ASP
                 public override void initialise(TextureEditGUI gui)
                 {
                     initialiseOverlay(gui);
-                    _selectedSheet = 0;
-                    _selectedDecal = 0;
 
-                    if (BitmapDecalCache.Instance.colorSheets.Count > 0) _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
+                    if (_imBitmapColorDecal._url == string.Empty) _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
+                    BitmapDecalCache.Instance.getColorDecalIndex(_imBitmapColorDecal._url, out _selectedSheet, out _selectedDecal);
                 }
 
                 public override string buttonText()

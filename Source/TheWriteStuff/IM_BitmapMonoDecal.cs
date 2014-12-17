@@ -225,11 +225,11 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
+                    initialiseOverlay(gui);
                     initialiseMonoOverlay(gui);
-                    _selectedSheet = 0;
-                    _selectedDecal = 0;
-
-                    if (BitmapDecalCache.Instance.monoSheets.Count > 0) _imBitmapMonoDecal._url = BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[_selectedDecal].url;
+                    
+                    if (_imBitmapMonoDecal._url == string.Empty) _imBitmapMonoDecal._url = BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[_selectedDecal].url;
+                    BitmapDecalCache.Instance.getMonoDecalIndex(_imBitmapMonoDecal._url, out _selectedSheet, out _selectedDecal);
                 }
 
                 public override string buttonText()

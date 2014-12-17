@@ -28,6 +28,58 @@ namespace ASP
 
         private List<Sheet> _sheets;
 
+        public void getMonoDecalIndex(string url, out int sheetIndex, out int decalIndex)
+        {
+            string sheetUrl = System.IO.Path.GetDirectoryName(url);
+            sheetIndex = -1;
+            decalIndex = -1;
+
+            for (int i = 0; i < monoSheets.Count; ++i)
+            {
+                if (monoSheets[i].url == sheetUrl)
+                {
+                    sheetIndex = i;
+
+                    for (int j = 0; j < monoSheets[i].decals.Count; ++j)
+                    {
+                        if (monoSheets[i].decals[j].url == url)
+                        {
+                            decalIndex = j;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            return;
+        }
+
+        public void getColorDecalIndex(string url, out int sheetIndex, out int decalIndex)
+        {
+            string sheetUrl = System.IO.Path.GetDirectoryName(url);
+            sheetIndex = -1;
+            decalIndex = -1;
+
+            for (int i = 0; i < colorSheets.Count; ++i)
+            {
+                if (colorSheets[i].url == sheetUrl)
+                {
+                    sheetIndex = i;
+
+                    for (int j = 0; j < colorSheets[i].decals.Count; ++j)
+                    {
+                        if (colorSheets[i].decals[j].url == url)
+                        {
+                            decalIndex = j;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            return;
+        }
+
         public void Awake()
         {
             if (Instance != null)
