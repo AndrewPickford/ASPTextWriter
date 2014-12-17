@@ -9,19 +9,13 @@ namespace ASP
     public class ASPTextureEdit : PartModule
     {
         [KSPField(isPersistant = true)]
-        public string transformNames = string.Empty;
-        /*
-        [KSPField(isPersistant = true)]
-        public string baseTextureName = string.Empty;
-
-        [KSPField(isPersistant = true)]
-        public string baseNormalMapName = string.Empty;
-
-        [KSPField(isPersistant = true)]
-        public string baseTextureDirUrl = string.Empty;
-        */
+        public string transforms = string.Empty;
+     
         [KSPField(isPersistant = true)]
         public bool outputReadable = false;
+
+        [KSPField(isPersistant = true)]
+        public string label = string.Empty;
 
         // originialConfig is serialized (copied) when the part is duplicated in the editor
         [SerializeField]
@@ -40,6 +34,9 @@ namespace ASP
         private TextureEditGUI _gui;
         private Texture2D _generatedMainTexture = null;
         private Texture2D _generatedNormalMap = null;
+        private ASPPainter _painter = null;
+        private bool _usedPaint = false;
+        private StartState _startState;
 
         ~ASPTextureEdit()
         {
@@ -47,7 +44,7 @@ namespace ASP
             if (_generatedNormalMap != null) Destroy(_generatedNormalMap);
         }
 
-        [KSPEvent(name = "Edit Texture Event", guiName = "Edit Texture", guiActive = false, guiActiveEditor = true)]
+        [KSPEvent(name = "editTextureEvent", guiName = "Edit Texture", guiActive = false, guiActiveEditor = true)]
         public void editTextureEvent()
         {
             if (_ok == false)
@@ -63,6 +60,7 @@ namespace ASP
             {
                 _gui = gameObject.AddComponent<TextureEditGUI>();
                 _gui.initialise(this);
+                _usedPaint = false;
             }
         }
 
@@ -94,6 +92,25 @@ namespace ASP
         public void setBoundingBox(BoundingBox boundingBox)
         {
             _boundingBox = boundingBox.clone();
+        }
+
+        public void setPainter(ASPPainter painter)
+        {
+            _painter = painter;
+        }
+
+        public void finalisePainting()
+        {
+            if (_usedPaint == true && _startState != StartState.Editor)
+            {
+                if (_painter != null)
+                {
+                    _painter.usePaint();
+                    _gui = null;
+                    _painter = null;
+                }
+                _usedPaint = false;
+            }
         }
 
         public void writeTexture()
@@ -159,6 +176,8 @@ namespace ASP
             // clean up memory usage
             _baseTexture.cleanUp();
             _imageModifiers.cleanUp();
+
+            _usedPaint = true;
         }
 
         private string findTransformName(Transform[] transforms, bool validTexture, bool validNormalMap)
@@ -210,14 +229,14 @@ namespace ASP
 
         private void fillTransformNamesList()
         {
-            if (transformNames == string.Empty) transformNames = findFirstUseableTransform();
-            if (transformNames == string.Empty)
+            if (transforms == string.Empty) transforms = findFirstUseableTransform();
+            if (transforms == string.Empty)
             {
                 Utils.LogError("unable to find transform with material, part {0}.", this.part.name);
                 throw new ArgumentException("unable to find transform");
             }
 
-            _transformNames = new List<string>(Utils.SplitString(transformNames));
+            _transformNames = new List<string>(Utils.SplitString(transforms));
             if (_transformNames == null || _transformNames.Count == 0 || _transformNames[0] == string.Empty)
             {
                 Utils.LogError("transformNames empty, part {0}.", this.part.name);
@@ -345,6 +364,8 @@ namespace ASP
                 ConfigNode n = node.GetNode("ASP_IMAGEMODIFIERS");
                 _imageModifiers.load(n);
             }
+
+            if (label != string.Empty) Events["editTextureEvent"].guiName = label;
         }
 
         public override void OnStart(StartState state)
@@ -353,6 +374,7 @@ namespace ASP
             base.OnStart(state);
 
             // side step serialization issues and use the saved config
+            _startState = state;
             if (state == StartState.Editor)
             {
                 if (originalConfig == null)
@@ -361,6 +383,8 @@ namespace ASP
                 }
                 else loadConfig(originalConfig);
             }
+
+            if (label != string.Empty) Events["editTextureEvent"].guiName = label;
 
             _ok = false;
             try

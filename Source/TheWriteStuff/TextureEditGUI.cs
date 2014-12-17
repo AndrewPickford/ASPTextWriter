@@ -124,6 +124,7 @@ namespace ASP
         {
             EditorLogic.fetch.Unlock(_lockText);
 
+            if (_textureEdit != null) _textureEdit.finalisePainting();
             if (_previewTexture != null) Destroy(_previewTexture);
 
             GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));

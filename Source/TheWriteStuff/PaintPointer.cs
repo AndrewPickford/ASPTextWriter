@@ -16,7 +16,6 @@ namespace ASP
         private ASPPainter _painter;
         private GameObject _pointer = null;
         private MeshRenderer[] _meshRenderers;
-        private ASPTextureEdit _textureEdit;
 
         public void initialise(ASPPainter painter)
         {
@@ -65,6 +64,7 @@ namespace ASP
             bool hit = Physics.Raycast(ray, out rayCastHit, 50);
             Color color = Color.yellow;
             float dist = 99f;
+            ASPTextureEdit[] textureEditors = null;
 
             if (hit)
             {
@@ -73,9 +73,17 @@ namespace ASP
 
                 if (rayCastHit.rigidbody && dist < _maxDist)
                 {
-                    _textureEdit = rayCastHit.rigidbody.GetComponentInChildren<ASPTextureEdit>() as ASPTextureEdit;
-                    if (_textureEdit == null) color = Color.red;
-                    else color = Color.green;
+                    textureEditors = rayCastHit.rigidbody.GetComponentsInChildren<ASPTextureEdit>() as ASPTextureEdit[];
+                    if (textureEditors == null) color = Color.red;
+                    else
+                    {
+                        if (textureEditors.Length == 0) color = Color.red;
+                        else
+                        {
+                            if (textureEditors[0] == null) color = Color.red;
+                            else color = Color.green;
+                        }
+                    }
 
                     Vector3 direction = rayCastHit.rigidbody.transform.position - _pointer.transform.position;
                     Quaternion rotation = Quaternion.LookRotation(direction) * Quaternion.LookRotation(-_rotation);
@@ -92,9 +100,16 @@ namespace ASP
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (hit && rayCastHit.rigidbody && dist < _maxDist && _textureEdit != null)
+                if (hit && rayCastHit.rigidbody && dist < _maxDist && textureEditors != null)
                 {
-                    _textureEdit.editTextureEvent();
+                    foreach (ASPTextureEdit textureEdit in textureEditors)
+                    {
+                        if (textureEdit != null)
+                        {
+                            textureEdit.setPainter(_painter);
+                            textureEdit.editTextureEvent();
+                        }
+                    }
                     Destroy(_pointer);
                     Destroy(this);
                 }
