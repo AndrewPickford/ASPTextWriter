@@ -1,6 +1,6 @@
 0.8.0
  * recompile for ksp 0.90
- * fix decal names urls
+ * fix decal urls (breaks 0.7.0 saves with decals)
  * auto select new layer in gui
  * add space paint resource for eva painting
  * add gui label option
