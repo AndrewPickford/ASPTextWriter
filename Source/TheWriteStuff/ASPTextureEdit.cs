@@ -54,12 +54,22 @@ namespace ASP
                 ScreenMessages.PostScreenMessage("Error unable to start text writer gui", 5, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
+            
+            TextureEditGUI[] gs = gameObject.GetComponents<TextureEditGUI>() as TextureEditGUI[];
+            _gui = null;
+            foreach (TextureEditGUI gui in gs)
+            {
+                if (gui.textureEdit() == this)
+                {
+                    _gui = gui;
+                    break;
+                }
+            }
 
-            _gui = gameObject.GetComponent<TextureEditGUI>();
             if (_gui == null)
             {
                 _gui = gameObject.AddComponent<TextureEditGUI>();
-                _gui.initialise(this);
+                _gui.initialise(this, gs.Length);
                 _usedPaint = false;
             }
         }
@@ -106,11 +116,11 @@ namespace ASP
                 if (_painter != null)
                 {
                     _painter.usePaint();
-                    _gui = null;
                     _painter = null;
                 }
                 _usedPaint = false;
             }
+            _gui = null;
         }
 
         public void writeTexture()

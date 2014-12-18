@@ -1,4 +1,5 @@
 0.8.0
+ * recompile for ksp 0.90
  * fix decal names urls
  * auto select new layer in gui
  * add space paint resource for eva painting
@@ -7,7 +8,7 @@
  * move textplaque to start tech
  * move paint bottle to basicRocketry
  * flip raise/lower in normal maps
- * recompile for ksp 0.90
+ * fix eva painting for multiple textures
 
 0.7.0
  * add multi purpose texture editor

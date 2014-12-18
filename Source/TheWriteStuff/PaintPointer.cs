@@ -16,6 +16,7 @@ namespace ASP
         private ASPPainter _painter;
         private GameObject _pointer = null;
         private MeshRenderer[] _meshRenderers;
+        ASPTextureEdit[] _textureEditors = null;
 
         public void initialise(ASPPainter painter)
         {
@@ -64,7 +65,6 @@ namespace ASP
             bool hit = Physics.Raycast(ray, out rayCastHit, 50);
             Color color = Color.yellow;
             float dist = 99f;
-            ASPTextureEdit[] textureEditors = null;
 
             if (hit)
             {
@@ -73,14 +73,14 @@ namespace ASP
 
                 if (rayCastHit.rigidbody && dist < _maxDist)
                 {
-                    textureEditors = rayCastHit.rigidbody.GetComponentsInChildren<ASPTextureEdit>() as ASPTextureEdit[];
-                    if (textureEditors == null) color = Color.red;
+                    _textureEditors = rayCastHit.rigidbody.GetComponentsInChildren<ASPTextureEdit>() as ASPTextureEdit[];
+                    if (_textureEditors == null) color = Color.red;
                     else
                     {
-                        if (textureEditors.Length == 0) color = Color.red;
+                        if (_textureEditors.Length == 0) color = Color.red;
                         else
                         {
-                            if (textureEditors[0] == null) color = Color.red;
+                            if (_textureEditors[0] == null) color = Color.red;
                             else color = Color.green;
                         }
                     }
@@ -90,7 +90,11 @@ namespace ASP
                     _pointer.transform.rotation = rotation;
                 }
             }
-            else _pointer.transform.position = ray.GetPoint(50);
+            else
+            {
+                _pointer.transform.position = ray.GetPoint(50);
+                _textureEditors = null;
+            }
 
             color.a = 0.5f;
             foreach (MeshRenderer mesh in _meshRenderers)
@@ -100,12 +104,14 @@ namespace ASP
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (hit && rayCastHit.rigidbody && dist < _maxDist && textureEditors != null)
+                if (hit && rayCastHit.rigidbody && dist < _maxDist && _textureEditors != null)
                 {
-                    foreach (ASPTextureEdit textureEdit in textureEditors)
+                    if (Global.Debug2) Utils.Log("found {0} ASPTextureEdit modules", _textureEditors.Length);
+                    foreach (ASPTextureEdit textureEdit in _textureEditors)
                     {
                         if (textureEdit != null)
                         {
+                            if (Global.Debug3) Utils.Log("opening texture edit gui {0}", textureEdit.transforms);
                             textureEdit.setPainter(_painter);
                             textureEdit.editTextureEvent();
                         }

@@ -40,6 +40,11 @@ namespace ASP
             if (_previewTexture != null) Destroy(_previewTexture);
         }
 
+        public ASPTextureEdit textureEdit()
+        {
+            return _textureEdit;
+        }
+
         public IntVector2 centrePosition()
         {
             IntVector2 position = new IntVector2();
@@ -71,13 +76,13 @@ namespace ASP
             _remakePreview = true;
         }
 
-        public void initialise(ASPTextureEdit textureEdit)
+        public void initialise(ASPTextureEdit textureEdit, int count)
         {
             _windowID = _nextID;
             ++_nextID;
 
             _textureEdit = textureEdit;
-            _windowPosition = new Rect(700, 100, 400, 400);
+            _windowPosition = new Rect(700, 200 -((count) * 100), 400, 400);
             _locked = false;
             _remakePreview = true;
 
