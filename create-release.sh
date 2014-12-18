@@ -39,4 +39,4 @@ cd /cygdrive/d/ksp/asp/ASP-TheWriteStuff/GameData
 find . -perm 000 -exec chmod 644 {} \;
 find . -type d ! -perm -u+x -exec chmod a+x {} \;
 
-zip -r /cygdrive/d/ksp/asp/ASP-TheWriteStuff/Ignore/$file ASP/TheWriteStuff --exclude ASP/TheWriteStuff/TheWriteStuff.cfg
+zip -r /cygdrive/d/ksp/asp/ASP-TheWriteStuff/Ignore/$file ASP/TheWriteStuff --exclude ASP/TheWriteStuff/TheWriteStuff.cfg --exclude "ASP/TheWriteStuff/TWS Configs/other.cfg"
