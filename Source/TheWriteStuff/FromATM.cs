@@ -22,8 +22,9 @@
  */
 
 /*
- * The MBMToTexture function from Active Texture Management
- * Modified a fair bit by Andrew Pickford
+ * Initial MBMToTexture and TGAToTexture functions from Active Texture Management
+ * Modified a fair bit by A. Pickford
+ * 
  */
 
 
