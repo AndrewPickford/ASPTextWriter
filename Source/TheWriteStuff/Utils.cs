@@ -9,7 +9,7 @@ namespace ASP
 {
     public class Utils
     {
-        private static string[] _textureExtentionNames = { "png", "jpg", "tga", "mbm" };
+        private static string[] _textureExtentionNames = { "png", "jpg", "tga", "mbm", "dds" };
         private static char[] _delimiters = { ',' };
 
         public static string[] SplitString(string text)
@@ -87,6 +87,7 @@ namespace ASP
 
             if (extension == ".mbm") texture = FromATM.MBMToTexture(bytes, normalMap);
             else if (extension == ".tga") texture = FromATM.TGAToTexture(bytes, normalMap);
+            else if (extension == ".dds") texture = DDSTexture.Load(bytes, normalMap);
             else
             {
                 texture = new Texture2D(1, 1);
@@ -97,6 +98,7 @@ namespace ASP
             {
                 bool convertToNormal = true;
                 if (extension == ".mbm" && bytes[12] == 1) convertToNormal = false;
+                if (extension == ".dds") convertToNormal = false;
 
                 if (convertToNormal)
                 {
@@ -114,6 +116,8 @@ namespace ASP
 
             texture.name = System.IO.Path.GetFileNameWithoutExtension(fileName);
             texture.Apply();
+
+            if (Global.Debug3) Utils.Log("Loaded texture: {0}, width:{1}, height: {2}", texture.name, texture.width, texture.height);
 
             return texture;
         }

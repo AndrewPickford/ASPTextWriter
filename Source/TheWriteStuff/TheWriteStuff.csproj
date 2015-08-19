@@ -53,6 +53,7 @@
     <Compile Include="BitmapDecal.cs" />
     <Compile Include="BitmapDecalCache.cs" />
     <Compile Include="BitmapDecalLoader.cs" />
+    <Compile Include="DDSTexture.cs" />
     <Compile Include="IM_AutoBaseTexture.cs" />
     <Compile Include="IM_BaseTexture.cs" />
     <Compile Include="IM_BitmapColorDecal.cs" />
