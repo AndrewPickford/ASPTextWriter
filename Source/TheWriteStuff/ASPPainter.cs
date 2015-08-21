@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace ASP
 {
-    public class ASPPainter : PartModule
+    public class ASPPainter : KIS.ModuleKISItem
     {
         private PaintPointer _pointer;
         private PartResourceDefinition _paintResource = null;
         private PartResource _paint = null;
 
-        [KSPEvent(name = "paintEvent", guiName = "Paint", active = false, guiActive = true, guiActiveEditor = false, externalToEVAOnly = true, guiActiveUnfocused = false)]
+        [KSPEvent(name = "paintEvent", guiName = "Paint", active = false, guiActive = true)]
         public void paintEvent()
         {
             if (_paint == null)
@@ -35,75 +35,53 @@ namespace ASP
             }
         }
 
-        public void OnDestroy()
+        public override void OnItemUse(KIS.KIS_Item item, KIS.KIS_Item.UseFrom useFrom)
         {
-            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+            if (Global.Debug3) Utils.Log("start");
+
+            ASPPainter[] painterMods = item.equippedPart.GetComponents<ASPPainter>();
+            if (painterMods.Length == 1) painterMods[0].paintEvent();
+            else Utils.LogError("expected one ASPPainter module found {0}", painterMods.Length);
         }
 
-        public void OnVesselChange(Vessel vesselChange)
+        public override void OnEquip(KIS.KIS_Item item)
         {
-            setPaintState();
-        }
+            if (Global.Debug3) Utils.Log("start");
 
-        private void setPaintState()
-        {
-            if (_paint == null)
-            {
-                if (Global.Debug1) Utils.Log("Part has no space paint resource.");
-                Events["paintEvent"].active = false;
-                return;
-            }
-
-            if (_paint.amount == 0)
-            {
-                if (Global.Debug3) Utils.Log("Part has no space paint left.");
-                Events["paintEvent"].active = false;
-                return;
-            }
-
-            if (this.part.vessel.isEVA) Events["paintEvent"].active = true;
-            else Events["paintEvent"].active = false;
-
-            if (Global.Debug3) Utils.Log("painter state {0}", Events["paintEvent"].active);
-        }
-
-        // KAS part grabbed message
-        public void OnPartGrabbed(Vessel vessel)
-        {
-            setPaintState();
-        }
-
-        // KAS part dropped message
-        public void OnPartDropped(Vessel vessel)
-        {
-            setPaintState();
+            ASPPainter[] painterMods = item.equippedPart.GetComponents<ASPPainter>();
+            if (painterMods.Length == 1) painterMods[0].paintEventOn();
+            else Utils.LogError("expected one ASPPainter module found {0}", painterMods.Length);
         }
 
         public void usePaint()
         {
             _paint.amount -= 1;
             if (_paint.amount < 0) _paint.amount = 0;
-            setPaintState();
+        }
+
+        public void paintEventOn()
+        {
+            Events["paintEvent"].active = true;
+        }
+
+        public override void OnLoad(ConfigNode node)
+        {
+            if (Global.Debug3) Utils.Log("start");
+            Events["paintEvent"].active = false;
         }
 
         public override void OnStart(StartState state)
         {
+            if (Global.Debug3) Utils.Log("start");
             base.OnStart(state);
-
-            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(this.OnVesselChange));
 
             if (state == StartState.Editor)
             {
                 Events["paintEvent"].active = false;
-                return;
             }
 
             _paintResource = PartResourceLibrary.Instance.GetDefinition("SpacePaint");
             _paint = this.part.Resources.Get(_paintResource.id);
-            setPaintState();
-
-            if (Global.Debug3) Utils.Log("paint resource id: {0}", _paintResource);
-            if (Global.Debug3) Utils.Log("paint: {0}/{1}", _paint.amount, _paint.maxAmount);
         }
     }
 }
