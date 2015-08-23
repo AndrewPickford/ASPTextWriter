@@ -112,7 +112,7 @@ namespace ASP
                         if (textureEdit != null)
                         {
                             if (Global.Debug3) Utils.Log("opening texture edit gui {0}", textureEdit.transforms);
-                            textureEdit.setPainter(_painter);
+                            textureEdit.setPainter(_painter.gameObject);
                             textureEdit.editTextureEvent();
                         }
                     }

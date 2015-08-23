@@ -34,7 +34,7 @@ namespace ASP
         private TextureEditGUI _gui;
         private Texture2D _generatedMainTexture = null;
         private Texture2D _generatedNormalMap = null;
-        private ASPPainter _painter = null;
+        private GameObject _painter = null;
         private bool _usedPaint = false;
         private StartState _startState;
 
@@ -104,7 +104,7 @@ namespace ASP
             _boundingBox = boundingBox.clone();
         }
 
-        public void setPainter(ASPPainter painter)
+        public void setPainter(GameObject painter)
         {
             _painter = painter;
         }
@@ -115,7 +115,7 @@ namespace ASP
             {
                 if (_painter != null)
                 {
-                    _painter.usePaint();
+                    _painter.SendMessage("usePaint");
                     _painter = null;
                 }
                 _usedPaint = false;
