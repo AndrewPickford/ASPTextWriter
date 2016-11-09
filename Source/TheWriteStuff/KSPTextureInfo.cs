@@ -23,7 +23,7 @@ namespace ASP
 
         private void setShader(Transform transform)
         {
-            shader = transform.gameObject.renderer.material.shader.name;
+            shader = transform.gameObject.GetComponent<Renderer>().material.shader.name;
             if (shader.IndexOf("Bumped") != -1) hasNormalMap = true;
             if (shader.IndexOf("Specular") != -1) isSpecular = true;
 
@@ -33,6 +33,10 @@ namespace ASP
                 if (shader == kspShaders[i]) knownShader = true;
             }
             if (knownShader == false) Utils.LogError("Unknown shader: {0}", shader);
+            else
+            {
+                if (Global.Debug3) Utils.Log("shader {0}, normalMap = {1}, specular = {2}", shader, hasNormalMap, isSpecular);
+            }
         }
 
         private string getUrl(Texture2D texture)
@@ -44,6 +48,7 @@ namespace ASP
             {
                 url = texture.name;
                 if (Global.Debug3) Utils.Log("texture {0} using texture.name, info null", url);
+                return url;
             }
 
             if (info.name != string.Empty && texture.name != string.Empty)
@@ -79,19 +84,21 @@ namespace ASP
 
             setShader(transform);
            
-            mainTexture = transform.gameObject.renderer.material.mainTexture as Texture2D;
+            mainTexture = transform.gameObject.GetComponent<Renderer>().material.mainTexture as Texture2D;
             mainUrl = getUrl(mainTexture);
             dirUrl = System.IO.Path.GetDirectoryName(mainUrl);
 
-            normalMapTexture = transform.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+            if (Global.Debug3) Utils.Log("dirUrl {0}", dirUrl);
+
+            normalMapTexture = transform.gameObject.GetComponent<Renderer>().material.GetTexture("_BumpMap") as Texture2D;
             if (normalMapTexture != null)
             {
                 normalMapUrl = getUrl(normalMapTexture);
                 hasNormalMap = true;
             }
             else hasNormalMap = false;
-
             displayName = System.IO.Path.GetFileName(mainUrl);
+            if (Global.Debug3) Utils.Log("displayName {0}", displayName);
         }
     }
 }

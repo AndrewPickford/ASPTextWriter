@@ -17,9 +17,9 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public string label = string.Empty;
 
-        // originialConfig is serialized (copied) when the part is duplicated in the editor
+        // currentConfig is serialized (copied) when the part is duplicated in the editor
         [SerializeField]
-        public ConfigNode originalConfig;
+        public ConfigNode currentConfig;
 
         public KSPTextureInfo kspTextureInfo { get; private set; }
 
@@ -29,6 +29,7 @@ namespace ASP
         private ImageModifiers _imageModifiers = null;
 
         private bool _ok = false;
+        private bool _loadedConfig = false;
         private List<string> _transformNames = null;
         private List<Transform> _transforms = null;
         private TextureEditGUI _gui;
@@ -37,6 +38,7 @@ namespace ASP
         private GameObject _painter = null;
         private bool _usedPaint = false;
         private StartState _startState;
+        private ConfigNode _prefabConfig;
 
         ~ASPTextureEdit()
         {
@@ -143,7 +145,7 @@ namespace ASP
 
             Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
             mainTexture.SetPixels32(textureImage.pixels);
-            mainTexture.name = _baseTexture.mainUrl() + "_TWS";
+            mainTexture.name = _baseTexture.mainUrl();// + "_TWS";
 
             if (outputReadable) mainTexture.Apply(true);
             else
@@ -156,7 +158,7 @@ namespace ASP
             foreach (Transform transform in _transforms)
             {
                 if (Global.Debug3) Utils.Log("setting texture in transform {0}", transform.name);
-                transform.gameObject.renderer.material.SetTexture("_MainTex", mainTexture);
+                transform.gameObject.GetComponent<Renderer>().material.SetTexture("_MainTex", mainTexture);
             }
 
             Texture2D normalMapTexture = null;
@@ -164,7 +166,7 @@ namespace ASP
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
-                normalMapTexture.name = _baseTexture.normalMapUrl() + "_TWS";
+                normalMapTexture.name = _baseTexture.normalMapUrl();// + "_TWS";
 
                 if (outputReadable) normalMapTexture.Apply(false);
                 else normalMapTexture.Apply(false, true);
@@ -172,7 +174,7 @@ namespace ASP
                 foreach (Transform transform in _transforms)
                 {
                     if (Global.Debug3) Utils.Log("setting normalMap in transform {0}", transform.name);
-                    transform.gameObject.renderer.material.SetTexture("_BumpMap", normalMapTexture);
+                    transform.gameObject.GetComponent<Renderer>().material.SetTexture("_BumpMap", normalMapTexture);
                 }
             }
 
@@ -187,6 +189,10 @@ namespace ASP
             _baseTexture.cleanUp();
             _imageModifiers.cleanUp();
 
+            // save current config
+            currentConfig = new ConfigNode();
+            saveConfig(currentConfig);
+
             _usedPaint = true;
         }
 
@@ -194,17 +200,17 @@ namespace ASP
         {
             foreach (Transform child in transforms)
             {
-                if (child.gameObject.renderer != null && child.gameObject.renderer.material != null)
+                if (child.gameObject.GetComponent<Renderer>() != null && child.gameObject.GetComponent<Renderer>().material != null)
                 {
                     if (validTexture == false) return child.name;
 
-                    Texture2D main = child.gameObject.renderer.material.mainTexture as Texture2D;
+                    Texture2D main = child.gameObject.GetComponent<Renderer>().material.mainTexture as Texture2D;
 
                     if (main != null && main.name != string.Empty)
                     {
                         if (validNormalMap)
                         {
-                            Texture2D normal = child.gameObject.renderer.material.GetTexture("_BumpMap") as Texture2D;
+                            Texture2D normal = child.gameObject.GetComponent<Renderer>().material.GetTexture("_BumpMap") as Texture2D;
 
                             if (normal != null && normal.name != string.Empty) return child.name;
                         }
@@ -284,7 +290,7 @@ namespace ASP
             if (Global.Debug1) Utils.Log("found {0} usable transforms", count);
         }
 
-        private void findTextures()
+        private void setTextureInfo()
         {
             kspTextureInfo = new KSPTextureInfo(_transforms[0]);
 
@@ -298,7 +304,13 @@ namespace ASP
 
         public override void OnSave(ConfigNode node)
         {
-            if (Global.Debug2) Utils.Log("OnSave start");
+            if (Global.Debug2) Utils.Log("start");
+            saveConfig(node);
+        }
+
+        public void saveConfig(ConfigNode node)
+        {
+            if (Global.Debug3) Utils.Log("start");
 
             if (_boundingBox != null)
             {
@@ -326,18 +338,23 @@ namespace ASP
 
         public override void OnLoad(ConfigNode node)
         {
-            if (Global.Debug2) Utils.Log("OnLoad start");
+            if (Global.Debug2) Utils.Log("start");
+            base.OnLoad(node);
+            _loadedConfig = true;
 
-            // save the original config
-            originalConfig = new ConfigNode();
-            node.CopyTo(originalConfig);
+            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            {
+                // save the original config
+                _prefabConfig = new ConfigNode();
+                node.CopyTo(_prefabConfig);
+            }
 
             loadConfig(node);
         }
 
         private void loadConfig(ConfigNode node)
         {
-            if (Global.Debug3) Utils.Log("loadConfig start");
+            if (Global.Debug3) Utils.Log("start");
 
             _ok = false;
             _transformNames = null;
@@ -383,15 +400,20 @@ namespace ASP
             if (Global.Debug2) Utils.Log("state {0}", state.ToString());
             base.OnStart(state);
 
-            // side step serialization issues and use the saved config
             _startState = state;
-            if (state == StartState.Editor)
+            if (state == StartState.Editor && _loadedConfig == false)
             {
-                if (originalConfig == null)
+                if (Global.Debug3) Utils.Log("no loaded config");
+                if (currentConfig == null)
                 {
-                    if (Global.Debug1) Utils.Log("originalConfig is null");
+                    if (Global.Debug3) Utils.Log("loading config from prefab");
+                    loadConfig((part.partInfo.partPrefab.Modules["ASPTextureEdit"] as ASPTextureEdit)._prefabConfig);
                 }
-                else loadConfig(originalConfig);
+                else
+                {
+                    if (Global.Debug3) Utils.Log("loading config from source part");
+                    loadConfig(currentConfig);
+                }
             }
 
             if (label != string.Empty) Events["editTextureEvent"].guiName = label;
@@ -410,8 +432,7 @@ namespace ASP
                     return;
                 }
 
-                findTextures();
-
+                setTextureInfo();
                 if (_imageModifiers == null) _imageModifiers = new ImageModifiers();
                 if (_boundingBox == null) _boundingBox = new BoundingBox();
                 if (_baseTexture == null) _baseTexture = new IM.AutoBaseTexture();

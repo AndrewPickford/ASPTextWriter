@@ -174,7 +174,7 @@ namespace ASP
                 _locked = true;
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-                    EditorTooltip.Instance.HideToolTip();
+                    //EditorTooltip.Instance.HideToolTip();
                     EditorLogic.fetch.Lock(false, false, false, _lockText);
                 }
 

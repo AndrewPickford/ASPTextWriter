@@ -4,6 +4,7 @@ bin/
 obj/
 
 GameData/ASP/TheWriteStuff/Plugins/TheWriteStuff.dll
+GameData/ASP/TheWriteStuff/Plugins/TWSPainter.dll
 
 Ignore
 
@@ -26,3 +27,4 @@ sysinfo.txt
 **/*.unity
 **/*.blend1
 **/*.blend1.meta
+GameData/ASP/TheWriteStuff/Plugins/TWSPainter.dll
