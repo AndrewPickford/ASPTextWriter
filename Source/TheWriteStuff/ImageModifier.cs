@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ASP
 {
     public enum Rotation { R0, R90, R180, R270 };
-    public enum BlendMethod { PIXEL, RGB, HSV };
+    public enum BlendMethod { PIXEL, RGB, HSV, SSR };
     public enum TransformOption { USE_FIRST, USE_ALL };
     public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
     public enum AlphaOption { USE_TEXTURE, OVERWRITE };
@@ -83,7 +83,7 @@ namespace ASP
         private static string[] _posButtons = { "+", "-", "<", ">", "++", "--", "<<", ">>" };
         private static string[] _speedGrid = { "x 1", "x 10" };
         private static string[] _rotationGrid = { "0", "90", "180", "270" };
-        private static string[] _blendMethodGrid = { "Pixel", "RGB", "HSV" };
+        private static string[] _blendMethodGrid = { "Pixel", "RGB", "HSV", "SSR" };
         private static string[] _alphaOptionGrid = { "Use Texture", "Overwrite" };
         private static string[] _normalOptionGrid = { "Flat", "Raise", "Lower", "Background" };
 

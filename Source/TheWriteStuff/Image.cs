@@ -309,6 +309,41 @@ namespace ASP
             }
         }
 
+        public void blendSSR(Image overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
+        {
+            int minX, minY, maxX, maxY;
+            setMinMax(out minX, out minY, out maxX, out maxY, boundingBox);
+
+            for (int i = 0; i < overlay.width; ++i)
+            {
+                for (int j = 0; j < overlay.height; ++j)
+                {
+                    int px = position.x + i;
+                    int py = position.y + j;
+                    if (px >= minX && px <= maxX && py >= minY && py <= maxY)
+                    {
+                        Color32 overlayColor = Utils.GetElement2D(overlay.pixels, i, j, overlay.width);
+
+                        if (overlayColor.a > 0)
+                        {
+                            Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
+                            double r = ((oldColor.r * oldColor.r * (255 - overlayColor.a)) / 255f) + ((overlayColor.r * overlayColor.r * overlayColor.a) / 255f);
+                            double g = ((oldColor.g * oldColor.g * (255 - overlayColor.a)) / 255f) + ((overlayColor.g * overlayColor.g * overlayColor.a) / 255f);
+                            double b = ((oldColor.b * oldColor.b * (255 - overlayColor.a)) / 255f) + ((overlayColor.b * overlayColor.b * overlayColor.a) / 255f);
+                            r = Math.Sqrt(r);
+                            g = Math.Sqrt(g);
+                            b = Math.Sqrt(b);
+                            pixels[px + py * width].r = (byte) r;
+                            pixels[px + py * width].g = (byte) g;
+                            pixels[px + py * width].b = (byte) b;
+
+                            if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
+                        }
+                    }
+                }
+            }
+        }
+
         public void blendHSV(Image overlay, IntVector2 position, AlphaOption alphaOption, byte textureAlpha, BoundingBox boundingBox = null)
         {
             int minX, minY, maxX, maxY;
@@ -355,6 +390,10 @@ namespace ASP
 
                 case ASP.BlendMethod.RGB:
                     blendRGB(image, position, alphaOption, alpha, boundingBox);
+                    break;
+
+                case ASP.BlendMethod.SSR:
+                    blendSSR(image, position, alphaOption, alpha, boundingBox);
                     break;
 
                 case ASP.BlendMethod.PIXEL:
