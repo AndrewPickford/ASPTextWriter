@@ -49,7 +49,7 @@ namespace ASP
                 if (node.HasValue("alpha")) _alpha = byte.Parse(node.GetValue("alpha"));
                 if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
-                if (node.HasValue("normalScale")) _normalScale = int.Parse(node.GetValue("normalScale"));
+                if (node.HasValue("normalScale")) _normalScale = float.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
                 if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
                 if (node.HasValue("rotation")) _rotation = (Rotation)ConfigNode.ParseEnum(typeof(Rotation), node.GetValue("rotation"));
