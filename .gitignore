@@ -28,3 +28,4 @@ sysinfo.txt
 **/*.blend1
 **/*.blend1.meta
 GameData/ASP/TheWriteStuff/Plugins/TWSPainter.dll
+*.dll
