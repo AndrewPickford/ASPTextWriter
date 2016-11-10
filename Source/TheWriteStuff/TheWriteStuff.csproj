@@ -86,6 +86,7 @@
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="SerializableConfigNode.cs" />
     <Compile Include="TextureEditGUI.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="BitmapFont.cs" />

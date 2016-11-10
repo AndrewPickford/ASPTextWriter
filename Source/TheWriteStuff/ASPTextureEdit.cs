@@ -17,9 +17,9 @@ namespace ASP
         [KSPField(isPersistant = true)]
         public string label = string.Empty;
 
-        // currentConfig is serialized (copied) when the part is duplicated in the editor
+        // serializable object for part duplication in editor
         [SerializeField]
-        public ConfigNode currentConfig;
+        public SerializableConfigNode currentConfig = null;
 
         public KSPTextureInfo kspTextureInfo { get; private set; }
 
@@ -145,7 +145,7 @@ namespace ASP
 
             Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
             mainTexture.SetPixels32(textureImage.pixels);
-            mainTexture.name = _baseTexture.mainUrl();// + "_TWS";
+            mainTexture.name = _baseTexture.mainUrl() + "_TWS";
 
             if (outputReadable) mainTexture.Apply(true);
             else
@@ -166,7 +166,7 @@ namespace ASP
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
-                normalMapTexture.name = _baseTexture.normalMapUrl();// + "_TWS";
+                normalMapTexture.name = _baseTexture.normalMapUrl() + "_TWS";
 
                 if (outputReadable) normalMapTexture.Apply(false);
                 else normalMapTexture.Apply(false, true);
@@ -189,9 +189,10 @@ namespace ASP
             _baseTexture.cleanUp();
             _imageModifiers.cleanUp();
 
-            // save current config
-            currentConfig = new ConfigNode();
-            saveConfig(currentConfig);
+            // store current config for part duplication
+            if (currentConfig == null) currentConfig = new SerializableConfigNode();
+            currentConfig.node = new ConfigNode();
+            saveConfig(currentConfig.node);
 
             _usedPaint = true;
         }
@@ -412,8 +413,12 @@ namespace ASP
                 else
                 {
                     if (Global.Debug3) Utils.Log("loading config from source part");
-                    loadConfig(currentConfig);
+                    loadConfig(currentConfig.node);
                 }
+            }
+            else
+            {
+                if (Global.Debug3) Utils.Log("using loaded config");
             }
 
             if (label != string.Empty) Events["editTextureEvent"].guiName = label;

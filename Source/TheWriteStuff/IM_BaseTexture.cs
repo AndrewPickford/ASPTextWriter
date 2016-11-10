@@ -33,6 +33,7 @@ namespace ASP
 
                 Method method = Method.AUTO;
                 if (node.HasValue("method")) method = (Method)ConfigNode.ParseEnum(typeof(Method), node.GetValue("method"));
+                if (Global.Debug3) Utils.Log("method: {0}", method);
 
                 switch (method)
                 {

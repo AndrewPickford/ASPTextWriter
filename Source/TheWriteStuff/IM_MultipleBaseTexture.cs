@@ -97,8 +97,8 @@ namespace ASP
                 string[] textureNamesArray = Utils.SplitString(_textureNames);
                 string[] normalMapNamesArray = Utils.SplitString(_normalMapNames);
 
-                string dirUrl = info.dirUrl;
-                if (_textureDir != string.Empty) dirUrl = _textureDir;
+                string dirUrl = _textureDir;
+                if (dirUrl == string.Empty) dirUrl = info.dirUrl;
 
                 _mainTextInfo = new List<TextureInfo>();
                 for (int i = 0; i < textureNamesArray.Length; ++i)
