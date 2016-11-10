@@ -8,7 +8,7 @@ namespace ASP
 {
     public class KSPTextureInfo
     {
-        private static string[] kspShaders = { "KSP/Diffuse", "KSP/Bumped", "KSP/Specular", "KSP/Bumped Specular" };
+        private static string[] kspShaders = { "KSP/Diffuse", "KSP/Bumped", "KSP/Specular", "KSP/Bumped Specular", "KSP/Emissive/Diffuse", "KSP/Emissive/Bumped Specular", "KSP/Emissive/Specular" };
 
         public string mainUrl = string.Empty;
         public string normalMapUrl = string.Empty;
