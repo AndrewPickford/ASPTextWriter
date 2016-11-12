@@ -23,13 +23,19 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 		
 		UnityEngine.Object obj = AssetDatabase.LoadMainAssetAtPath (assetFilePath);
 		string path = AssetDatabase.GetAssetPath (obj);
+		string outputFolder = Path.GetDirectoryName(path) + "/" + assetFileName;
+
+        	if (!System.IO.Directory.Exists(outputFolder))
+        	{
+          		System.IO.Directory.CreateDirectory(outputFolder);
+        	}
 		
 		TrueTypeFontImporter fontImporter = AssetImporter.GetAtPath (path) as TrueTypeFontImporter;
 		
-		string assetFilePathImport = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + assetFileExt);
-		string texturePath = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + ".png");
-		string texturePathPngMap = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() + ".pngmap");
-		string configPath = path.Replace (assetFileName + assetFileExt, assetFileName + "-" + fontImporter.fontSize.ToString() +".cfg");
+		string assetFilePathImport = outputFolder + "/" + assetFileName + "-" + fontImporter.fontSize.ToString();
+		string configPath = outputFolder + "/" + assetFileName + "-" + fontImporter.fontSize.ToString() +".cfg";
+		string texturePath = outputFolder + "/" + assetFileName + "-" + fontImporter.fontSize.ToString() +".png";
+		string texturePathPngMap = outputFolder + "/" + assetFileName + "-" + fontImporter.fontSize.ToString() +".pngmap";
 		
 		Font font = fontImporter.GenerateEditableFont (assetFilePathImport);
 		
