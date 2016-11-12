@@ -138,7 +138,7 @@ namespace ASP
                     int oldFontSizeSelection = _fontSizeSelection;
                     GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
-                    _fontSizeSelection = GUILayout.SelectionGrid(_fontSizeSelection, _fontSizeGrid, 6);
+                    _fontSizeSelection = GUILayout.SelectionGrid(_fontSizeSelection, _fontSizeGrid, 4);
                     GUILayout.FlexibleSpace();
                     GUILayout.EndHorizontal();
                     if (oldFontSizeSelection != _fontSizeSelection) newFontSelection = true;
