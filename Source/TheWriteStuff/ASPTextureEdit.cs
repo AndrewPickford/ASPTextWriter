@@ -190,7 +190,7 @@ namespace ASP
             _imageModifiers.cleanUp();
 
             // store current config for part duplication
-            if (currentConfig == null) currentConfig = new SerializableConfigNode();
+            if (currentConfig == null) currentConfig = ScriptableObject.CreateInstance<SerializableConfigNode>();
             currentConfig.node = new ConfigNode();
             saveConfig(currentConfig.node);
 
