@@ -154,11 +154,13 @@ namespace ASP
 
                     GUILayout.BeginVertical(GUI.skin.box);
 
-                    GUILayout.Label("Rectangle");
+                    GUILayout.Label("Rectangle Size");
 
                     GUILayout.Space(3);
 
                     GUILayout.BeginHorizontal();
+
+                    GUILayout.FlexibleSpace();
 
                     _widthSelector.draw();
                     GUILayout.Space(10f);
@@ -199,7 +201,7 @@ namespace ASP
 
                 public override string buttonText()
                 {
-                    return "Rectangle Size";
+                    return "Rectangle";
                 }
             }
 
