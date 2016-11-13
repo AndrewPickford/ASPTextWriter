@@ -25,6 +25,11 @@ namespace ASP
             resize(w, h);
         }
 
+        public Image(IntVector2 size)
+        {
+            resize(size);
+        }
+
         public Image(Image image)
         {
             resize(image.width, image.height);
@@ -39,6 +44,11 @@ namespace ASP
             length = width * height;
 
             pixels = new Color32[length];
+        }
+
+        public void resize(IntVector2 size)
+        {
+            resize(size.x, size.y);
         }
 
         public void resizeAndFill(int w, int h, Color32[] pix)

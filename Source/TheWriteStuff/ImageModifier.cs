@@ -9,12 +9,12 @@ namespace ASP
     public enum Rotation { R0, R90, R180, R270 };
     public enum BlendMethod { PIXEL, RGB, HSV, SSR };
     public enum TransformOption { USE_FIRST, USE_ALL };
-    public enum NormalOption { FLAT, RAISE_TEXT, LOWER_TEXT, USE_BACKGROUND };
+    public enum NormalOption { FLAT, RAISE, LOWER, USE_BACKGROUND };
     public enum AlphaOption { USE_TEXTURE, OVERWRITE };
 
     public abstract class ImageModifier
     {
-        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL };
+        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL, RECTANGLE };
 
         public abstract void save(ConfigNode node);
         public abstract void load(ConfigNode node);

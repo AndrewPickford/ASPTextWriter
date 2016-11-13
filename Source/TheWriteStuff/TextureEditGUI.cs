@@ -408,6 +408,16 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
+            if (GUILayout.Button("Rectangle", GUILayout.ExpandWidth(true)))
+            {
+                IM.Rectangle im = new IM.Rectangle();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
+            }
+
             GUILayout.EndScrollView();
         }
 

@@ -23,6 +23,8 @@ namespace ASP
             public Overlay()
             {
                 _position = new IntVector2();
+                _position.x = 0;
+                _position.y = 0;
             }
 
             public void setPosition(IntVector2 position)
@@ -98,8 +100,8 @@ namespace ASP
                 backgroundImage.fill(backgroudColor);
 
                 Color32 color = Global.Gray32;
-                if (_normalOption == NormalOption.RAISE_TEXT) color = Global.White32;
-                if (_normalOption == NormalOption.LOWER_TEXT) color = Global.Black32;
+                if (_normalOption == NormalOption.RAISE) color = Global.White32;
+                if (_normalOption == NormalOption.LOWER) color = Global.Black32;
 
                 Image decalImage = new Image(decal.image);
                 decalImage.recolor(Global.Black32, color, false, true);

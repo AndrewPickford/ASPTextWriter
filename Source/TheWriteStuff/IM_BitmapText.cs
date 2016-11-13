@@ -51,8 +51,8 @@ namespace ASP
                 textImage.fill(backgroudColor);
 
                 Color32 color = Global.Gray32;
-                if (_normalOption == NormalOption.RAISE_TEXT) color = Global.White32;
-                if (_normalOption == NormalOption.LOWER_TEXT) color = Global.Black32;
+                if (_normalOption == NormalOption.RAISE) color = Global.White32;
+                if (_normalOption == NormalOption.LOWER) color = Global.Black32;
 
                 textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, 255, BlendMethod.PIXEL);
 

@@ -86,8 +86,6 @@ namespace ASP
 
 
 
-
-
             public class BitmapMonoDecalGui : MonoOverlayGui
             {
                 private IM.BitmapMonoDecal _imBitmapMonoDecal;
