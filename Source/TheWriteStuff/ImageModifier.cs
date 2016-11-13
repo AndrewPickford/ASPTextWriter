@@ -52,6 +52,10 @@ namespace ASP
                     imageModifier = new IM.BitmapColorDecal();
                     break;
 
+                case Type.RECTANGLE:
+                    imageModifier = new IM.Rectangle();
+                    break;
+
                 default:
                 case Type.INVALID:
                     break;

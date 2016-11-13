@@ -53,7 +53,7 @@ namespace ASP
             {
                 // something has gone wrong in OnStart
                 Utils.LogError("Incorrect start up, not displaying gui");
-                ScreenMessages.PostScreenMessage("Error unable to start text writer gui", 5, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage("Error unable to start editor gui", 5, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
             
@@ -145,7 +145,7 @@ namespace ASP
 
             Texture2D mainTexture = new Texture2D(textureImage.width, textureImage.height, TextureFormat.ARGB32, true);
             mainTexture.SetPixels32(textureImage.pixels);
-            mainTexture.name = _baseTexture.mainUrl() + "_TWS";
+            mainTexture.name = _baseTexture.mainUrl();
 
             if (outputReadable) mainTexture.Apply(true);
             else
@@ -166,7 +166,7 @@ namespace ASP
             {
                 normalMapTexture = new Texture2D(normalMapImage.width, normalMapImage.height, TextureFormat.ARGB32, false);
                 normalMapTexture.SetPixels32(normalMapImage.pixels);
-                normalMapTexture.name = _baseTexture.normalMapUrl() + "_TWS";
+                normalMapTexture.name = _baseTexture.normalMapUrl();
 
                 if (outputReadable) normalMapTexture.Apply(false);
                 else normalMapTexture.Apply(false, true);
@@ -454,6 +454,7 @@ namespace ASP
                 if (_baseTexture.valid)
                 {
                     if (_imageModifiers.modifiers.Count > 0) writeTexture();
+                    if (Global.Debug3) Utils.Log("all ok");
                     _ok = true;
                 }
             }
