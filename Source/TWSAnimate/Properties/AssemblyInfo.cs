@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TWSPainter")]
+[assembly: AssemblyTitle("TWSAnimate")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TWSPainter")]
+[assembly: AssemblyProduct("TWSAnimate")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0a1c8e66-5832-4786-84fc-ae571aaba2d6")]
+[assembly: Guid("40b9e43c-fe10-49b6-ba58-864a1e48028d")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,9 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.2.0.0")]
-[assembly: AssemblyFileVersion("0.2.0.0")]
-
-[assembly: KSPAssembly("TWSPainter", 0, 1)]
-[assembly: KSPAssemblyDependency("TheWriteStuff", 0, 9)]
-[assembly: KSPAssemblyDependency("KIS", 1, 2)]
+[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyFileVersion("10.1.0.0")]
