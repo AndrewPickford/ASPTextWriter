@@ -35,15 +35,15 @@ namespace ASP
                 _size.x = 0;
                 _size.y = 0;
 
-                loadOverlay(node);
+                loadMonoOverlay(node);
 
-                if (node.HasValue("width")) _size.y = int.Parse(node.GetValue("height"));
+                if (node.HasValue("width")) _size.x = int.Parse(node.GetValue("width"));
                 if (node.HasValue("height")) _size.y = int.Parse(node.GetValue("height"));
             }
 
             public override void save(ConfigNode node)
             {
-                saveOverlay(node);
+                saveMonoOverlay(node);
                 node.AddValue("width", _size.x);
                 node.AddValue("height", _size.y);
             }
