@@ -8,7 +8,7 @@ namespace ASP
 {
     public class PaintPointer : MonoBehaviour
     {
-        static private string _pointerModel = "ASP/TheWriteStuff/Parts/PaintBottle/PaintBrush";
+        static private string _pointerModel = "ASP/TheWriteStuff/Assets/paint-brush";
         static private float _offset = 0.2f;
         static private Vector3 _rotation = new Vector3(0f, -1f, 0f);
         static float _maxDist = 5.0f;
