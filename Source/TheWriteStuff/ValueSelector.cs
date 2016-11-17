@@ -210,15 +210,30 @@ namespace ASP
         private float _autoRepeatGap;
         private float _lastButtonPress;
         private bool _changed;
+        private bool _showButtons;
 
         public T value() { return _value; }
+
         public void set(T value)
         {
             _value = value;
             _valueText = _field.ToString(_value);
+            _changed = true;
         }
 
-        public ValueSelector(T value, T min, T max, T step, string label, Color color)
+        public void add(T step)
+        {
+            T v = _value;
+            _field.Add(ref v, step, _max);
+            if (_field.NotEqual(v, _value))
+            {
+                _value = v;
+                _valueText = _field.ToString(_value);
+                _changed = true;
+            }
+        }
+
+        public ValueSelector(T value, T min, T max, T step, string label, Color color, bool showButtons = true)
         {
             _field = new U();
 
@@ -228,6 +243,7 @@ namespace ASP
             _step = step;
             _label = label;
             _color = color;
+            _showButtons = showButtons;
 
             _field.Clamp(ref _value, _min, _max);
             _valueText = _field.ToString(_value);
@@ -277,39 +293,42 @@ namespace ASP
                 }
             }
 
-            GUILayout.BeginVertical();
-            if (GUILayout.RepeatButton("+", GUILayout.Height(25), GUILayout.Width(20)))
+            if (_showButtons)
             {
-                _lastButtonPress = Time.time;
-                if (repeatOK)
+                GUILayout.BeginVertical();
+                if (GUILayout.RepeatButton("+", GUILayout.Height(25), GUILayout.Width(20)))
                 {
-                    T v = _value;
-                    _field.Add(ref v, _step, _max);
-                    if (_field.NotEqual(v, _value))
+                    _lastButtonPress = Time.time;
+                    if (repeatOK)
                     {
-                        _value = v;
-                        _valueText = _field.ToString(_value);
-                        _changed = true;
+                        T v = _value;
+                        _field.Add(ref v, _step, _max);
+                        if (_field.NotEqual(v, _value))
+                        {
+                            _value = v;
+                            _valueText = _field.ToString(_value);
+                            _changed = true;
+                        }
                     }
                 }
-            }
 
-            if (GUILayout.RepeatButton("-", GUILayout.Height(25), GUILayout.Width(20)))
-            {
-                _lastButtonPress = Time.time;
-                if (repeatOK)
+                if (GUILayout.RepeatButton("-", GUILayout.Height(25), GUILayout.Width(20)))
                 {
-                    T v = _value;
-                    _field.Sub(ref v, _step, _min);
-                    if (_field.NotEqual(v, _value))
+                    _lastButtonPress = Time.time;
+                    if (repeatOK)
                     {
-                        _value = v;
-                        _valueText = _field.ToString(_value);
-                        _changed = true;
+                        T v = _value;
+                        _field.Sub(ref v, _step, _min);
+                        if (_field.NotEqual(v, _value))
+                        {
+                            _value = v;
+                            _valueText = _field.ToString(_value);
+                            _changed = true;
+                        }
                     }
                 }
+                GUILayout.EndVertical();
             }
-            GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(3);

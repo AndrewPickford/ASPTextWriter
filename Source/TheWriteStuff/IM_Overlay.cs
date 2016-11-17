@@ -125,6 +125,8 @@ namespace ASP
                 private ValueSelector<byte, ByteField> _alphaSelector;
                 private ValueSelector<float, FloatField> _normalScaleSelector;
                 private ValueSelector<byte, ByteField> _textureAlphaSelector;
+                private ValueSelector<int, IntField> _xPositionSelector;
+                private ValueSelector<int, IntField> _yPositionSelector;
 
                 protected virtual void drawBottomOverlayExtras1(TextureEditGUI gui)
                 {
@@ -138,7 +140,7 @@ namespace ASP
                 protected void drawBottomOverlay(TextureEditGUI gui)
                 {
                     GUILayout.BeginHorizontal();
-                    positionSelector(gui, ref _overlay._position);
+                    positionSelector(gui, ref _xPositionSelector, ref _yPositionSelector);
                     GUILayout.Space(5);
 
                     GUILayout.BeginVertical();
@@ -177,6 +179,18 @@ namespace ASP
 
                     GUILayout.EndHorizontal();
 
+                    if (_overlay._position.x != _xPositionSelector.value())
+                    {
+                        _overlay._position.x = _xPositionSelector.value();
+                        gui.setRemakePreview();
+                    }
+
+                    if (_overlay._position.y != _yPositionSelector.value())
+                    {
+                        _overlay._position.y = _yPositionSelector.value();
+                        gui.setRemakePreview();
+                    }
+
                     if (_overlay._alpha != _alphaSelector.value())
                     {
                         _overlay._alpha = _alphaSelector.value();
@@ -189,6 +203,9 @@ namespace ASP
 
                 protected void initialiseOverlay(TextureEditGUI gui)
                 {
+                    _xPositionSelector = new ValueSelector<int, IntField>(_overlay._position.x, -9999, 9999, 1, "X", Color.white, false);
+                    _yPositionSelector = new ValueSelector<int, IntField>(_overlay._position.y, -9999, 9999, 1, "Y", Color.white, false);
+
                     _alphaSelector = new ValueSelector<byte, ByteField>(_overlay._alpha, 0, 255, 1, "Alpha", Color.white);
 
                     _textureAlphaSelector = new ValueSelector<byte, ByteField>(_overlay._textureAlpha, 0, 255, 1, "Texture Alpha", Color.white);

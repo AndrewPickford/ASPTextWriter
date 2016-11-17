@@ -96,7 +96,7 @@ namespace ASP
         public abstract string buttonText();
         public abstract void initialise(TextureEditGUI gui);
 
-        public void positionSelector(TextureEditGUI gui, ref IntVector2 position)
+        public void positionSelector(TextureEditGUI gui, ref ValueSelector<int, IntField> xSelector, ref ValueSelector<int, IntField> ySelector)
         {
             bool repeatOK = false;
             bool buttonPressed = false;
@@ -128,7 +128,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 Global.LastButtonPress = Time.time;
-                if (repeatOK) position.y += delta;
+                if (repeatOK) ySelector.add(delta);
             }
 
             GUILayout.FlexibleSpace();
@@ -143,14 +143,15 @@ namespace ASP
             {
                 buttonPressed = true;
                 Global.LastButtonPress = Time.time;
-                if (repeatOK) position.x -= delta;
+                if (repeatOK) xSelector.add(-delta);
             }
 
             GUILayout.Space(5);
 
             if (GUILayout.Button("O", GUILayout.Width(25), GUILayout.Height(25)))
             {
-                position = gui.centrePosition();
+                xSelector.set(gui.centrePosition().x);
+                ySelector.set(gui.centrePosition().y);
                 gui.setRemakePreview();
             }
 
@@ -160,7 +161,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 Global.LastButtonPress = Time.time;
-                if (repeatOK) position.x += delta;
+                if (repeatOK) xSelector.add(delta);
             }
 
             GUILayout.FlexibleSpace();
@@ -175,7 +176,7 @@ namespace ASP
             {
                 buttonPressed = true;
                 Global.LastButtonPress = Time.time;
-                if (repeatOK) position.y -= delta;
+                if (repeatOK) ySelector.add(-delta);
             }
 
             GUILayout.FlexibleSpace();
@@ -193,12 +194,21 @@ namespace ASP
 
             GUILayout.FlexibleSpace();
 
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            xSelector.draw();
+            GUILayout.FlexibleSpace();
+            ySelector.draw();
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.FlexibleSpace();
+
             GUILayout.EndVertical();
 
             if (buttonPressed && repeatOK)
             {
                 Global.LastRepeat = Global.LastButtonPress;
-                gui.setRemakePreview();
 
                 Global.AutoRepeatGap = Global.AutoRepeatGap * 0.8f;
                 if (Global.AutoRepeatGap < 0.04f) Global.AutoRepeatGap = 0.04f;
