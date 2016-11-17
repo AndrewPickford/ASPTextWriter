@@ -2,6 +2,8 @@
  * Fix editor part duplication
  * add 128pt character fonts
  * add open sans font
+ * recompile for ksp 1.2.1
+ * add sign posts and sign parts
 
 0.9.0
  * recompile for ksp 1.2
