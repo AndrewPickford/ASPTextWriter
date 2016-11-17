@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="1024" height="1024" viewBox="0 0 1024 1024"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+<desc>'sign-post.blend', Cube, (Blender 2.78 (sub 0))</desc>
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="4.000,379.000 304.000,379.000 304.000,359.000 4.000,359.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="0.000,1024.000 900.000,1024.000 900.000,424.000 0.000,424.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="304.000,339.000 4.000,339.000 4.000,359.000 304.000,359.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="0.000,414.000 300.000,414.000 300.000,214.000 0.000,214.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="454.000,297.000 4.000,297.000 4.000,317.000 454.000,317.000 " />
+<polygon stroke="black" stroke-width="1" fill="rgb(204, 204, 204)" fill-opacity="0.25" points="4.000,337.000 454.000,337.000 454.000,317.000 4.000,317.000 " />
+
+</svg>
