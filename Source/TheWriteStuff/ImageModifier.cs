@@ -25,6 +25,7 @@ namespace ASP
         public abstract string displayName();
         public abstract ImageModifierGui gui();
 
+        public bool longRight { get; protected set; } = true;
         protected Type _type = Type.INVALID;
 
         public static ImageModifier CreateFromConfig(ConfigNode node)
@@ -192,7 +193,7 @@ namespace ASP
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.FlexibleSpace();
+            GUILayout.Space(5);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -218,13 +219,14 @@ namespace ASP
         public void colorSelector(TextureEditGUI gui, ref ValueSelector<byte, ByteField> redSelector, ref ValueSelector<byte, ByteField> greenSelector,
                                   ref ValueSelector<byte, ByteField> blueSelector, ref ValueSelector<byte, ByteField> alphaSelector)
         {
-            if (redSelector.draw()) gui.setRemakePreview();
+            redSelector.draw();
             GUILayout.Space(10f);
-            if (greenSelector.draw()) gui.setRemakePreview();
+            greenSelector.draw();
             GUILayout.Space(10f);
-            if (blueSelector.draw()) gui.setRemakePreview();
+            blueSelector.draw();
             GUILayout.Space(10f);
-            if (alphaSelector.draw()) gui.setRemakePreview();     
+            alphaSelector.draw();
+            GUILayout.Space(10f);
         }
 
         public void header(TextureEditGUI gui, string text)

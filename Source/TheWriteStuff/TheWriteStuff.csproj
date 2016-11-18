@@ -64,11 +64,13 @@
     <Compile Include="IM_AutoBaseTexture.cs" />
     <Compile Include="IM_BaseTexture.cs" />
     <Compile Include="IM_BitmapColorDecal.cs" />
+    <Compile Include="IM_ColorOverlay.cs" />
     <Compile Include="IM_CurrentBaseTexture.cs" />
     <Compile Include="IM_MonoOverlay.cs" />
     <Compile Include="IM_MultipleBaseTexture.cs" />
     <Compile Include="IM_Overlay.cs" />
     <Compile Include="IM_Rectangle.cs" />
+    <Compile Include="IM_MonoPolygon.cs" />
     <Compile Include="IM_SingleBaseTexture.cs" />
     <Compile Include="IM_Text.cs" />
     <Compile Include="KSPTextureInfo.cs" />

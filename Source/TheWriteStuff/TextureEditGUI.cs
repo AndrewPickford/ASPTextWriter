@@ -10,6 +10,10 @@ namespace ASP
     {
         static private int _nextID = 23851;
 
+        public GUIStyle largeHeader;
+        public GUIStyle smallHeader;
+        public GUIStyle windowTitle;
+
         private int _windowID = 0;
         private bool _first = true;
 
@@ -33,7 +37,6 @@ namespace ASP
         private ValueSelector<int, IntField> _bbHselector;
 
         internal int speedSelection;
-        internal GUIStyle largeHeader;
 
         ~TextureEditGUI()
         {
@@ -111,18 +114,19 @@ namespace ASP
         private void OnVesselChange(Vessel vesselChange)
         {
             GameObject.Destroy(this);
-            if (_previewTexture != null)
-            {
-                Destroy(_previewTexture);
-                _previewTexture = null;
-            }
+        }
+
+        private void OnGameSceneLoadRequested(GameScenes scene)
+        {
+            GameObject.Destroy(this);
         }
 
         public void Awake()
         {
             InputLockManager.RemoveControlLock(_lockText);
             _remakePreview = true;
-            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+            GameEvents.onVesselChange.Add(this.OnVesselChange);
+            GameEvents.onGameSceneLoadRequested.Add(this.OnGameSceneLoadRequested);
         }
 
         public void OnDestroy()
@@ -132,7 +136,8 @@ namespace ASP
             if (_textureEdit != null) _textureEdit.finalisePainting();
             if (_previewTexture != null) Destroy(_previewTexture);
 
-            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+            GameEvents.onVesselChange.Remove(this.OnVesselChange);
+            GameEvents.onGameSceneLoadRequested.Remove(this.OnGameSceneLoadRequested);
         }
 
         public void OnGUI()
@@ -140,11 +145,22 @@ namespace ASP
             if (_first)
             {
                 _first = false;
+
                 largeHeader = new GUIStyle(GUI.skin.label);
                 largeHeader.fontSize = 24;
                 largeHeader.fontStyle = FontStyle.Bold;
                 largeHeader.normal.background = Global.WhiteBackground;
                 largeHeader.normal.textColor = Color.black;
+
+                smallHeader = new GUIStyle(GUI.skin.label);
+                smallHeader.fontSize = 16;
+                smallHeader.fontStyle = FontStyle.Bold;
+                smallHeader.normal.textColor = Color.white;
+
+                windowTitle = new GUIStyle(GUI.skin.box);
+                windowTitle.fontSize = 16;
+                windowTitle.fontStyle = FontStyle.Bold;
+                windowTitle.normal.textColor = Color.white;
             }
 
             GUI.backgroundColor = Global.BackgroundColor;
@@ -155,7 +171,7 @@ namespace ASP
                 _windowPosition.height = 10;
             }
 
-            _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Texture Editor");
+            _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Texture Editor", windowTitle);
 
             if (Event.current.type != EventType.Layout) checkGUILock();
 
@@ -195,10 +211,70 @@ namespace ASP
         {
             GUILayout.BeginVertical();
 
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count && _imageModifiers.modifiers[_selectedModifier].longRight) drawWindowLongRight();
+            else drawWindowLongBottom();
+
+            GUILayout.Space(10);
+
+            drawMainButtons();
+
+            GUILayout.Space(10);
+
+            GUILayout.EndVertical();
+
+            GUI.DragWindow();
+        }
+
+        private void drawWindowLongRight()
+        {
             GUILayout.BeginHorizontal();
 
             GUILayout.BeginVertical();
 
+            drawWindowMiddlePart();
+
+            GUILayout.Space(10);
+
+            if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
+            if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
+
+            GUILayout.EndVertical();
+
+            GUILayout.Space(10);
+
+            if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
+
+            GUILayout.EndHorizontal();
+        }
+
+        private void drawWindowLongBottom()
+        {
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+
+            drawWindowMiddlePart();
+
+            GUILayout.Space(10);
+
+            if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
+            if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
+            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
+
+            GUILayout.EndVertical();
+        }
+
+        private void drawWindowMiddlePart()
+        {
             GUILayout.BeginHorizontal();
             drawTexture();
             GUILayout.FlexibleSpace();
@@ -212,30 +288,8 @@ namespace ASP
             GUILayout.EndVertical();
             GUILayout.Space(5);
             GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-
-            if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
-            if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
-            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawBottom(this);
-         
-            GUILayout.EndVertical();
-
-            if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
-            if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count)_imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-
-            drawMainButtons();
-
-            GUILayout.Space(10);
-
-            GUILayout.EndVertical();
-
-            GUI.DragWindow();
         }
+
 
         private void drawMainButtons()
         {

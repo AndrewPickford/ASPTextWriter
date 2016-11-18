@@ -8,7 +8,7 @@ namespace ASP
 {
     namespace IM
     {
-        public class Rectangle : MonoOverlay
+        public class Rectangle : MonoPolygon
         {
             static string _displayName = "Rectangle";
 
@@ -35,7 +35,7 @@ namespace ASP
                 _size.x = 0;
                 _size.y = 0;
 
-                loadMonoOverlay(node);
+                loadMonoPolygon(node);
 
                 if (node.HasValue("width")) _size.x = int.Parse(node.GetValue("width"));
                 if (node.HasValue("height")) _size.y = int.Parse(node.GetValue("height"));
@@ -43,7 +43,7 @@ namespace ASP
 
             public override void save(ConfigNode node)
             {
-                saveMonoOverlay(node);
+                saveMonoPolygon(node);
                 node.AddValue("width", _size.x);
                 node.AddValue("height", _size.y);
             }
@@ -51,8 +51,7 @@ namespace ASP
             public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
                 Image rectangleImage = new Image(_size);
-                Color32 color = new Color32(_red, _green, _blue, _alpha);
-                rectangleImage.fill(color);
+                rectangleImage.fill(_fillColor);
                 rectangleImage.rotateImage(_rotation);
                 if (_mirror) rectangleImage.flipHorizontally();
 
@@ -75,7 +74,7 @@ namespace ASP
 
                 Image rectangleImage = new Image(_size);
                 rectangleImage.fill(color);
-                rectangleImage.fillAlpha(_alpha);
+                rectangleImage.fillAlpha(_fillColor.a);
                 rectangleImage.rotateImage(_rotation);
                 if (_mirror) rectangleImage.flipHorizontally();
 
@@ -94,7 +93,7 @@ namespace ASP
                 im._type = _type;
                 im._size = new IntVector2(_size);
 
-                im.copyFromMonoOverlay(this);
+                im.copyFromMonoPolygon(this);
 
                 return im;
             }
@@ -118,7 +117,7 @@ namespace ASP
 
 
 
-            public class RectangleGui : MonoOverlayGui
+            public class RectangleGui : MonoPolygonGui
             {
                 private IM.Rectangle _imRectangle;
                 private ValueSelector<int, IntField> _widthSelector;
@@ -142,21 +141,18 @@ namespace ASP
 
                     GUILayout.Space(5);
 
-                    drawBottomMonoOverlay(gui);
+                    drawBottomMonoPolygon(gui);
 
                     GUILayout.EndVertical();
                 }
 
                 public override void drawRight(TextureEditGUI gui)
                 {
-                    Color contentColor = GUI.contentColor;
-                    GUI.backgroundColor = Global.BackgroundColor;
-
                     GUILayout.BeginVertical(GUI.skin.box);
 
-                    GUILayout.Label("Rectangle Size");
+                    GUILayout.Label("Rectangle Size", gui.smallHeader);
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
                     GUILayout.BeginHorizontal();
 
@@ -186,8 +182,6 @@ namespace ASP
                     GUILayout.FlexibleSpace();
 
                     GUILayout.EndVertical();
-
-                    GUI.contentColor = contentColor;
                 }
 
                 public override void initialise(TextureEditGUI gui)

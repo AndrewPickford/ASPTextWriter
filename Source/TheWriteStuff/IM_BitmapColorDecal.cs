@@ -8,7 +8,7 @@ namespace ASP
 {
     namespace IM
     {
-        public class BitmapColorDecal : Overlay
+        public class BitmapColorDecal : ColorOverlay
         {
             static string _displayName = "Color Decal";
 
@@ -25,14 +25,14 @@ namespace ASP
                 _type = Type.BITMAP_COLOR_DECAL;
                 _url = string.Empty;
 
-                loadOverlay(node);
+                loadColorOverlay(node);
 
                 if (node.HasValue("url")) _url = node.GetValue("url");
             }
 
             public override void save(ConfigNode node)
             {
-                saveOverlay(node);
+                saveColorOverlay(node);
                 node.AddValue("url", _url);
             }
 
@@ -61,7 +61,7 @@ namespace ASP
                 im._type = _type;
                 im._url = _url;
 
-                im.copyFromOverlay(this);
+                im.copyFromColorOverlay(this);
 
                 return im;
             }
@@ -85,7 +85,7 @@ namespace ASP
 
 
 
-            public class BitmapColorDecalGui : OverlayGui
+            public class BitmapColorDecalGui : ColorOverlayGui
             {
                 private IM.BitmapColorDecal _imBitmapColorDecal;
                 private int _selectedSheet = 0;
@@ -118,7 +118,7 @@ namespace ASP
                     GUILayout.Label("Url: " + _imBitmapColorDecal._url, GUILayout.ExpandWidth(false));
                     GUILayout.Space(5);
 
-                    drawBottomOverlay(gui);
+                    drawBottomColorOverlay(gui);
 
                     GUILayout.EndVertical();
                 }
@@ -128,13 +128,12 @@ namespace ASP
                     if (BitmapDecalCache.Instance.colorSheets.Count == 0) return;
 
                     Color contentColor = GUI.contentColor;
-                    GUI.backgroundColor = Global.BackgroundColor;
 
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(250), GUILayout.ExpandHeight(true));
 
-                    GUILayout.Label("Decal Sheets");
+                    GUILayout.Label("Decal Sheets", gui.smallHeader);
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
                     int oldSelectedSheet = _selectedSheet;
                     for (int i = 0; i < BitmapDecalCache.Instance.colorSheets.Count; ++i)
@@ -160,9 +159,9 @@ namespace ASP
 
                     GUILayout.Space(10);
 
-                    GUILayout.Label("Decals");
+                    GUILayout.Label("Decals", gui.smallHeader);
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
                     if (_textures == null)
                     {
@@ -220,7 +219,7 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseOverlay(gui);
+                    initialiseColorOverlay(gui);
 
                     if (_imBitmapColorDecal._url == string.Empty) _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
                     BitmapDecalCache.Instance.getColorDecalIndex(_imBitmapColorDecal._url, out _selectedSheet, out _selectedDecal);

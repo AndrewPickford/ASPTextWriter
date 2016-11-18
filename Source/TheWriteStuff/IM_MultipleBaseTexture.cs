@@ -325,6 +325,8 @@ namespace ASP
 
                 public override void drawRight(TextureEditGUI gui)
                 {
+                    Color contentColor = GUI.contentColor;
+
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
                     int oldSelectedTexture = _multipleBaseTexture._selectedTexture;
@@ -346,6 +348,8 @@ namespace ASP
                     }
 
                     GUILayout.EndScrollView();
+
+                    GUI.contentColor = contentColor;
                 }
 
                 public override void initialise(TextureEditGUI gui)

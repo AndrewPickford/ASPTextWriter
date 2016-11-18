@@ -124,7 +124,7 @@ namespace ASP
 
                     _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
-                    GUILayout.Label("Size");
+                    GUILayout.Label("Size", gui.smallHeader);
 
                     if (_fontSizeGrid == null)
                     {
@@ -143,9 +143,9 @@ namespace ASP
                     GUILayout.EndHorizontal();
                     if (oldFontSizeSelection != _fontSizeSelection) newFontSelection = true;
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
-                    GUILayout.Label("Font");
+                    GUILayout.Label("Font", gui.smallHeader);
 
                     int oldSelectedFont = _selectedFont;
                     for (int i = 0; i < BitmapFontCache.Instance.fontInfo.Count; ++i)

@@ -129,13 +129,12 @@ namespace ASP
                     if (BitmapDecalCache.Instance.monoSheets.Count == 0) return;
 
                     Color contentColor = GUI.contentColor;
-                    GUI.backgroundColor = Global.BackgroundColor;
 
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(250), GUILayout.ExpandHeight(true));
 
-                    GUILayout.Label("Decal Sheets");
+                    GUILayout.Label("Decal Sheets", gui.smallHeader);
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
                     int oldSelectedSheet = _selectedSheet;
                     for (int i = 0; i < BitmapDecalCache.Instance.monoSheets.Count; ++i)
@@ -161,9 +160,9 @@ namespace ASP
 
                     GUILayout.Space(10);
 
-                    GUILayout.Label("Decals");
+                    GUILayout.Label("Decals", gui.smallHeader);
 
-                    GUILayout.Space(3);
+                    GUILayout.Space(5);
 
                     if (_textures == null)
                     {
@@ -223,7 +222,6 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseOverlay(gui);
                     initialiseMonoOverlay(gui);
                     
                     if (_imBitmapMonoDecal._url == string.Empty) _imBitmapMonoDecal._url = BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[_selectedDecal].url;

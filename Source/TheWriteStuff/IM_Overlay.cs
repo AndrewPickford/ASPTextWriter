@@ -12,7 +12,6 @@ namespace ASP
         {
             protected IntVector2 _position;
             protected bool _mirror = false;
-            protected byte _alpha = 255;
             protected byte _textureAlpha = 0;
             protected AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
             protected float _normalScale = 2.0f;
@@ -37,7 +36,6 @@ namespace ASP
             {
                 _position = new IntVector2();
                 _mirror = false;
-                _alpha = 255;
                 _textureAlpha = 0;
                 _alphaOption = AlphaOption.USE_TEXTURE;
                 _normalScale = 2.0f;
@@ -48,7 +46,6 @@ namespace ASP
                 if (node.HasValue("x")) _position.x = int.Parse(node.GetValue("x"));
                 if (node.HasValue("y")) _position.y = int.Parse(node.GetValue("y"));
                 if (node.HasValue("mirror")) _mirror = bool.Parse(node.GetValue("mirror"));
-                if (node.HasValue("alpha")) _alpha = byte.Parse(node.GetValue("alpha"));
                 if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
                 if (node.HasValue("normalScale")) _normalScale = float.Parse(node.GetValue("normalScale"));
@@ -63,7 +60,6 @@ namespace ASP
                 node.AddValue("x", _position.x);
                 node.AddValue("y", _position.y);
                 node.AddValue("mirror", _mirror);
-                node.AddValue("alpha", _alpha);
                 node.AddValue("textureAlpha", _textureAlpha);
                 node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
                 node.AddValue("normalScale", _normalScale);
@@ -77,7 +73,6 @@ namespace ASP
                 copyFromImageModifer(overlay);
                 _position = new IntVector2(overlay._position);
                 _mirror = overlay._mirror;
-                _alpha = overlay._alpha;
                 _textureAlpha = overlay._textureAlpha;
                 _alphaOption = overlay._alphaOption;
                 _normalScale = overlay._normalScale;
@@ -122,11 +117,10 @@ namespace ASP
             public abstract class OverlayGui : ImageModifierGui
             {
                 private IM.Overlay _overlay;
-                private ValueSelector<byte, ByteField> _alphaSelector;
-                private ValueSelector<float, FloatField> _normalScaleSelector;
-                private ValueSelector<byte, ByteField> _textureAlphaSelector;
-                private ValueSelector<int, IntField> _xPositionSelector;
-                private ValueSelector<int, IntField> _yPositionSelector;
+                protected ValueSelector<float, FloatField> _normalScaleSelector;
+                protected ValueSelector<byte, ByteField> _textureAlphaSelector;
+                protected ValueSelector<int, IntField> _xPositionSelector;
+                protected ValueSelector<int, IntField> _yPositionSelector;
 
                 protected virtual void drawBottomOverlayExtras1(TextureEditGUI gui)
                 {
@@ -147,8 +141,6 @@ namespace ASP
 
                     GUILayout.BeginHorizontal();
                     drawBottomOverlayExtras1(gui);
-                    _alphaSelector.draw();
-                    GUILayout.Space(10f);
                     rotationSelector(gui, ref _overlay._rotation, ref _overlay._mirror);
                     GUILayout.Space(10f);
                     blendMethodSelector(gui, ref _overlay._blendMethod);
@@ -191,12 +183,6 @@ namespace ASP
                         gui.setRemakePreview();
                     }
 
-                    if (_overlay._alpha != _alphaSelector.value())
-                    {
-                        _overlay._alpha = _alphaSelector.value();
-                        gui.setRemakePreview();
-                    }
-
                     if (_overlay._normalScale != _normalScaleSelector.value()) _overlay._normalScale = _normalScaleSelector.value();
                     if (_overlay._textureAlpha != _textureAlphaSelector.value()) _overlay._textureAlpha = _textureAlphaSelector.value();
                 }
@@ -205,8 +191,6 @@ namespace ASP
                 {
                     _xPositionSelector = new ValueSelector<int, IntField>(_overlay._position.x, -9999, 9999, 1, "X", Color.white, false);
                     _yPositionSelector = new ValueSelector<int, IntField>(_overlay._position.y, -9999, 9999, 1, "Y", Color.white, false);
-
-                    _alphaSelector = new ValueSelector<byte, ByteField>(_overlay._alpha, 0, 255, 1, "Alpha", Color.white);
 
                     _textureAlphaSelector = new ValueSelector<byte, ByteField>(_overlay._textureAlpha, 0, 255, 1, "Texture Alpha", Color.white);
                     _normalScaleSelector = new ValueSelector<float, FloatField>(_overlay._normalScale, 0, 5.0f, 0.1f, "Normal Scale", Color.white);
