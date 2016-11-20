@@ -156,11 +156,6 @@ namespace ASP
                 smallHeader.fontSize = 16;
                 smallHeader.fontStyle = FontStyle.Bold;
                 smallHeader.normal.textColor = Color.white;
-
-                windowTitle = new GUIStyle(GUI.skin.box);
-                windowTitle.fontSize = 16;
-                windowTitle.fontStyle = FontStyle.Bold;
-                windowTitle.normal.textColor = Color.white;
             }
 
             GUI.backgroundColor = Global.BackgroundColor;
@@ -171,7 +166,7 @@ namespace ASP
                 _windowPosition.height = 10;
             }
 
-            _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Texture Editor", windowTitle);
+            _windowPosition = GUILayout.Window(_windowID, _windowPosition, drawWindow, "Texture Editor");
 
             if (Event.current.type != EventType.Layout) checkGUILock();
 
@@ -233,7 +228,7 @@ namespace ASP
 
             drawWindowMiddlePart();
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
             if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
@@ -241,7 +236,7 @@ namespace ASP
 
             GUILayout.EndVertical();
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
             if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
@@ -257,14 +252,14 @@ namespace ASP
 
             drawWindowMiddlePart();
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             if (_selectedModifier == -2) _baseTexture.gui().drawRight(this);
             if (_selectedModifier >= 0 && _selectedModifier < _imageModifiers.modifiers.Count) _imageModifiers.modifiers[_selectedModifier].gui().drawRight(this);
 
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             if (_selectedModifier == -2) _baseTexture.gui().drawBottom(this);
             if (_selectedModifier == -1) drawGlobalBoundingBoxSelector();
@@ -355,7 +350,7 @@ namespace ASP
            
             _modifiersScrollPos = GUILayout.BeginScrollView(_modifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
-            GUILayout.Label("Layers", GUILayout.ExpandWidth(true));
+            GUILayout.Label("Layers", smallHeader, GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 
@@ -428,7 +423,7 @@ namespace ASP
         {
             _availableModifiersScrollPos = GUILayout.BeginScrollView(_availableModifiersScrollPos, GUI.skin.box, GUILayout.MinWidth(150), GUILayout.ExpandHeight(true));
 
-            GUILayout.Label("Add Layer", GUILayout.ExpandWidth(true));
+            GUILayout.Label("Add Layer", smallHeader, GUILayout.ExpandWidth(true));
 
             GUILayout.Space(3);
 
@@ -465,6 +460,16 @@ namespace ASP
             if (GUILayout.Button("Rectangle", GUILayout.ExpandWidth(true)))
             {
                 IM.Rectangle im = new IM.Rectangle();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
+            }
+
+            if (GUILayout.Button("Circle", GUILayout.ExpandWidth(true)))
+            {
+                IM.Circle im = new IM.Circle();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);

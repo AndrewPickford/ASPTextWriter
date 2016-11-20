@@ -12,23 +12,28 @@ namespace ASP
         {
             protected byte _alpha;
 
-            protected void loadColorOverlay(ConfigNode node)
+            public ColorOverlay() :
+                base()
             {
                 _alpha = 255;
+            }
 
-                loadOverlay(node);
+            public override void load(ConfigNode node)
+            {
+                _alpha = 255;
+                base.load(node);
                 if (node.HasValue("alpha")) _alpha = byte.Parse(node.GetValue("alpha"));
             }
 
-            protected void saveColorOverlay(ConfigNode node)
+            public override void save(ConfigNode node)
             {
-                saveOverlay(node);
+                base.save(node);
                 node.AddValue("alpha", _alpha);
             }
 
-            protected void copyFromColorOverlay(ColorOverlay overlay)
+            protected void copyFrom(ColorOverlay overlay)
             {
-                copyFromOverlay(overlay);
+                base.copyFrom(overlay);
                 _alpha = overlay._alpha;
             }
 
@@ -46,26 +51,24 @@ namespace ASP
                     _overlay = overlay;
                 }
 
-                protected void drawBottomColorOverlay(TextureEditGUI gui)
+                protected override void drawExtras2(TextureEditGUI gui)
                 {
-                    drawBottomOverlay(gui);
-                }
+                    base.drawExtras2(gui);
 
-                protected override void drawBottomOverlayExtras1(TextureEditGUI gui)
-                {
                     _alphaSelector.draw();
                     GUILayout.Space(10f);
 
-                    if (_overlay._alpha != _alphaSelector.value())
-                    {
-                        _overlay._alpha = _alphaSelector.value();
-                        gui.setRemakePreview();
-                    }
+                    checkChanged(ref _overlay._alpha, _alphaSelector.value(), gui);
                 }
 
-                protected void initialiseColorOverlay(TextureEditGUI gui)
+                protected virtual void extras2ColorOverlay(TextureEditGUI gui)
                 {
-                    initialiseOverlay(gui);
+                }
+
+                public override void initialise(TextureEditGUI gui)
+                {
+                    base.initialise(gui);
+
                     _alphaSelector = new ValueSelector<byte, ByteField>(_overlay._alpha, 0, 255, 1, "Alpha", Color.white);
                 }
             }

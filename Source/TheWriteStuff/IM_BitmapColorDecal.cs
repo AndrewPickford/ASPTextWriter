@@ -11,6 +11,7 @@ namespace ASP
         public class BitmapColorDecal : ColorOverlay
         {
             static string _displayName = "Color Decal";
+            static string _headerName = "COLOR DECAL";
 
             private string _url = string.Empty;
             private BitmapColorDecalGui _gui;
@@ -25,14 +26,14 @@ namespace ASP
                 _type = Type.BITMAP_COLOR_DECAL;
                 _url = string.Empty;
 
-                loadColorOverlay(node);
+                base.load(node);
 
                 if (node.HasValue("url")) _url = node.GetValue("url");
             }
 
             public override void save(ConfigNode node)
             {
-                saveColorOverlay(node);
+                base.save(node);
                 node.AddValue("url", _url);
             }
 
@@ -56,14 +57,17 @@ namespace ASP
 
             public override ImageModifier clone()
             {
-                IM.BitmapColorDecal im = new IM.BitmapColorDecal();
+                BitmapColorDecal colorDecal = new BitmapColorDecal();
+                colorDecal.copyFrom(this);
+                return colorDecal;
+            }
 
-                im._type = _type;
-                im._url = _url;
+            protected void copyFrom(BitmapColorDecal colorDecal)
+            {
+                base.copyFrom(colorDecal);
 
-                im.copyFromColorOverlay(this);
-
-                return im;
+                _type = colorDecal._type;
+                _url = colorDecal._url;
             }
 
             public override void cleanUp()
@@ -74,6 +78,11 @@ namespace ASP
             public override string displayName()
             {
                 return _displayName;
+            }
+
+            public override string headerName()
+            {
+                return _headerName;
             }
 
             public override ImageModifierGui gui()
@@ -109,18 +118,12 @@ namespace ASP
                     }
                 }
 
-                public override void drawBottom(TextureEditGUI gui)
+                protected override void drawExtras1(TextureEditGUI gui)
                 {
-                    GUILayout.BeginVertical(GUI.skin.box);
+                    base.drawExtras1(gui);
 
-                    header(gui, "COLOR DECAL");
-
+                    GUILayout.Space(5f);
                     GUILayout.Label("Url: " + _imBitmapColorDecal._url, GUILayout.ExpandWidth(false));
-                    GUILayout.Space(5);
-
-                    drawBottomColorOverlay(gui);
-
-                    GUILayout.EndVertical();
                 }
 
                 public override void drawRight(TextureEditGUI gui)
@@ -131,9 +134,11 @@ namespace ASP
 
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(250), GUILayout.ExpandHeight(true));
 
-                    GUILayout.Label("Decal Sheets", gui.smallHeader);
+                    header(gui, "COLOR DECAL");
+                    GUILayout.Space(5f);
 
-                    GUILayout.Space(5);
+                    GUILayout.Label("Decal Sheets", gui.smallHeader);
+                    GUILayout.Space(5f);
 
                     int oldSelectedSheet = _selectedSheet;
                     for (int i = 0; i < BitmapDecalCache.Instance.colorSheets.Count; ++i)
@@ -159,8 +164,8 @@ namespace ASP
 
                     GUILayout.Space(10);
 
+                    GUI.contentColor = Global.SelectedColor;
                     GUILayout.Label("Decals", gui.smallHeader);
-
                     GUILayout.Space(5);
 
                     if (_textures == null)
@@ -219,7 +224,7 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseColorOverlay(gui);
+                    base.initialise(gui);
 
                     if (_imBitmapColorDecal._url == string.Empty) _imBitmapColorDecal._url = BitmapDecalCache.Instance.colorSheets[_selectedSheet].decals[_selectedDecal].url;
                     BitmapDecalCache.Instance.getColorDecalIndex(_imBitmapColorDecal._url, out _selectedSheet, out _selectedDecal);

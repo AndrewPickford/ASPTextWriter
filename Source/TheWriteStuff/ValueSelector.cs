@@ -140,7 +140,7 @@ namespace ASP
     {
         public string ToString(float value)
         {
-            return value.ToString();
+            return value.ToString("F1");
         }
 
         public float Parse(string text)

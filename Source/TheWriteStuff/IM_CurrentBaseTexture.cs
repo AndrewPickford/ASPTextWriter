@@ -25,7 +25,7 @@ namespace ASP
             {
                 IM.CurrentBaseTexture im = new IM.CurrentBaseTexture();
 
-                im.copyFromSingleBaseTexture(this);
+                im.copyFrom(this);
                 if (_main != null) im._main = _main.cloneTexture();
                 if (_normalMap != null) im._normalMap = _normalMap.cloneTexture();
 

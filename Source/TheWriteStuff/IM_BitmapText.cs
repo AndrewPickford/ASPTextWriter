@@ -25,19 +25,17 @@ namespace ASP
             public override void load(ConfigNode node)
             {
                 _type = Type.BITMAP_TEXT;
-
-                loadText(node);
+                base.load(node);
             }
 
             public override void save(ConfigNode node)
             {
-                saveText(node);
+                base.save(node);
             }
 
             public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
-                Color32 color = new Color32(_red, _green, _blue, _alpha);
-                image.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, _alphaOption, _textureAlpha, _blendMethod, boundingBox);
+                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _textureAlpha, _blendMethod, boundingBox);
             }
 
             public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
@@ -72,9 +70,9 @@ namespace ASP
 
             public override ImageModifier clone()
             {
-                IM.BitmapText im = new IM.BitmapText();
-                im.copyFromText(this);
-                return im;
+                IM.BitmapText text = new IM.BitmapText();
+                text.copyFrom(this);
+                return text;
             }
 
             public override void cleanUp()
@@ -87,7 +85,7 @@ namespace ASP
                 return _displayName;
             }
 
-            protected override string headerName()
+            public override string headerName()
             {
                 return _headerName;
             }
@@ -123,6 +121,9 @@ namespace ASP
                     Color contentColor = GUI.contentColor;
 
                     _fontScrollPos = GUILayout.BeginScrollView(_fontScrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
+
+                    header(gui, _imBitmapText.headerName());
+                    GUILayout.Space(5f);
 
                     GUILayout.Label("Size", gui.smallHeader);
 
@@ -180,7 +181,7 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseText(gui);
+                    base.initialise(gui);
 
                     _selectedFont = BitmapFontCache.Instance.getFontIndexByName(_imBitmapText._fontName);
                     if (_selectedFont < 0) _selectedFont = 0;

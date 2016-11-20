@@ -25,7 +25,7 @@ namespace ASP
             {
                 IM.AutoBaseTexture im = new IM.AutoBaseTexture();
 
-                im.copyFromSingleBaseTexture(this);
+                im.copyFrom(this);
                 if (_main != null) im._main = _main.cloneUrl();
                 if (_normalMap != null) im._normalMap = _normalMap.cloneUrl();
 

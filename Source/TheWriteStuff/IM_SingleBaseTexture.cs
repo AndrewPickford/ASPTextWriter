@@ -16,9 +16,9 @@ namespace ASP
 
             protected abstract void setupImages();
 
-            protected void copyFromSingleBaseTexture(SingleBaseTexture baseTexture)
+            protected void copyFrom(SingleBaseTexture baseTexture)
             {
-                copyFromBaseTexture(baseTexture);
+                base.copyFrom(baseTexture);
             }
 
             public override string mainUrl()
@@ -45,7 +45,7 @@ namespace ASP
 
             public override void save(ConfigNode node)
             {
-                saveBaseTexture(node);
+                base.save(node);
             }
 
             public override void drawOnImage(ref Image image)

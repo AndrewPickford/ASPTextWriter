@@ -33,7 +33,7 @@ namespace ASP
             {
                 IM.MultipleBaseTexture im = new IM.MultipleBaseTexture();
 
-                im.copyFromBaseTexture(this);
+                im.copyFrom(this);
 
                 im._textureDir = _textureDir;
                 im._textureNames = _textureNames;
@@ -210,7 +210,7 @@ namespace ASP
 
             public override void save(ConfigNode node)
             {
-                saveBaseTexture(node);
+                base.save(node);
                 node.AddValue("textureDir", _textureDir);
                 node.AddValue("textures", _textureNames);
                 node.AddValue("normals", _normalMapNames);

@@ -14,19 +14,25 @@ namespace ASP
 
     public abstract class ImageModifier
     {
-        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL, RECTANGLE };
+        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL, RECTANGLE, CIRCLE };
 
-        public abstract void save(ConfigNode node);
         public abstract void load(ConfigNode node);
         public abstract void drawOnImage(ref Image image, BoundingBox boundingBox);
         public abstract void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox);
-        public abstract ImageModifier clone();
         public abstract void cleanUp();
+        public abstract ImageModifier clone();
         public abstract string displayName();
+        public abstract string headerName();
         public abstract ImageModifierGui gui();
 
-        public bool longRight { get; protected set; } = true;
+        public bool longRight { get; protected set; }
         protected Type _type = Type.INVALID;
+
+        public ImageModifier()
+        {
+            longRight = true;
+            _type = Type.INVALID;
+        }
 
         public static ImageModifier CreateFromConfig(ConfigNode node)
         {
@@ -57,6 +63,10 @@ namespace ASP
                     imageModifier = new IM.Rectangle();
                     break;
 
+                case Type.CIRCLE:
+                    imageModifier = new IM.Circle();
+                    break;
+
                 default:
                 case Type.INVALID:
                     break;
@@ -72,14 +82,13 @@ namespace ASP
             return imageModifier;
         }
 
-        protected void saveImageModifier(ConfigNode node)
+        public virtual void save(ConfigNode node)
         {
             node.AddValue("type", ConfigNode.WriteEnum(_type));
         }
 
-        protected void copyFromImageModifer(ImageModifier imageModifier)
+        protected void copyFrom(ImageModifier imageModifier)
         {
-            _type = imageModifier._type;
         }
     }
 
@@ -96,6 +105,33 @@ namespace ASP
         public abstract void drawRight(TextureEditGUI gui);
         public abstract string buttonText();
         public abstract void initialise(TextureEditGUI gui);
+
+        public void checkChanged(ref byte old, byte value, TextureEditGUI gui)
+        {
+            if (old != value)
+            {
+                old = value;
+                gui.setRemakePreview();
+            }
+        }
+
+        public void checkChanged(ref int old, int value, TextureEditGUI gui)
+        {
+            if (old != value)
+            {
+                old = value;
+                gui.setRemakePreview();
+            }
+        }
+
+        public void checkChanged(ref float old, float value, TextureEditGUI gui)
+        {
+            if (old != value)
+            {
+                old = value;
+                gui.setRemakePreview();
+            }
+        }
 
         public void positionSelector(TextureEditGUI gui, ref ValueSelector<int, IntField> xSelector, ref ValueSelector<int, IntField> ySelector)
         {
@@ -220,21 +256,27 @@ namespace ASP
                                   ref ValueSelector<byte, ByteField> blueSelector, ref ValueSelector<byte, ByteField> alphaSelector)
         {
             redSelector.draw();
-            GUILayout.Space(10f);
+            GUILayout.Space(10);
             greenSelector.draw();
-            GUILayout.Space(10f);
+            GUILayout.Space(10);
             blueSelector.draw();
-            GUILayout.Space(10f);
+            GUILayout.Space(10);
             alphaSelector.draw();
-            GUILayout.Space(10f);
+            GUILayout.Space(10);
         }
 
-        public void header(TextureEditGUI gui, string text)
+        public void header(TextureEditGUI gui, string text, float endSpace = 0f)
         {
+            if (endSpace > 0f) GUILayout.BeginHorizontal();
             GUILayout.BeginHorizontal(gui.largeHeader);
-            GUILayout.Space(20);
+            GUILayout.Space(20f);
             GUILayout.Label(text, gui.largeHeader, GUILayout.ExpandWidth(true));
             GUILayout.EndHorizontal();
+            if (endSpace > 0f)
+            {
+                GUILayout.Space(endSpace + 10f);
+                GUILayout.EndHorizontal();
+            }
         }
 
         public void rotationSelector(TextureEditGUI gui, ref Rotation rotation, ref bool mirror)

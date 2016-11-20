@@ -13,6 +13,7 @@ namespace ASP
             public enum Method { AUTO, CURRENT, MULTIPLE };
 
             static string _displayName = "Base Texture";
+            static string _headerName = "BASE TEXTURE";
 
             public bool valid { get; protected set; }
             protected Method _method = Method.AUTO;
@@ -59,20 +60,25 @@ namespace ASP
                 return _displayName;
             }
 
+            public override string headerName()
+            {
+                return _headerName;
+            }
+
             public bool hasNormalMap()
             {
                 return _hasNormalMap;
             }
 
-            protected void saveBaseTexture(ConfigNode node)
+            public override void save(ConfigNode node)
             {
-                saveImageModifier(node);
+                base.save(node);
                 node.AddValue("method", _method);
             }
 
-            protected void copyFromBaseTexture(BaseTexture baseTexture)
+            protected void copyFrom(BaseTexture baseTexture)
             {
-                copyFromImageModifer(baseTexture);
+                base.copyFrom(baseTexture);
                 _method = baseTexture._method;
                 _hasNormalMap = baseTexture._hasNormalMap;
             }

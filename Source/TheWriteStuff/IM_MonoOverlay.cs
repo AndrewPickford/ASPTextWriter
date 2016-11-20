@@ -10,41 +10,38 @@ namespace ASP
     {
         public abstract class MonoOverlay : Overlay
         {
-            protected byte _red;
-            protected byte _green;
-            protected byte _blue;
-            protected byte _alpha;
+            protected Color32 _color;
 
-            protected void loadMonoOverlay(ConfigNode node)
+            public MonoOverlay() :
+                base()
             {
-                _red = 0;
-                _green = 0;
-                _blue = 0;
-                _alpha = 255;
-
-                loadOverlay(node);
-                if (node.HasValue("red")) _red = byte.Parse(node.GetValue("red"));
-                if (node.HasValue("green")) _green = byte.Parse(node.GetValue("green"));
-                if (node.HasValue("blue")) _blue = byte.Parse(node.GetValue("blue"));
-                if (node.HasValue("alpha")) _alpha = byte.Parse(node.GetValue("alpha"));
+                _color = new Color32(0, 0, 0, 255);
             }
 
-            protected void saveMonoOverlay(ConfigNode node)
+            public override void load(ConfigNode node)
             {
-                saveOverlay(node);
-                node.AddValue("red", _red);
-                node.AddValue("green", _green);
-                node.AddValue("blue", _blue);
-                node.AddValue("alpha", _alpha);
+                _color = new Color32(0, 0, 0, 255);
+
+                base.load(node);
+                if (node.HasValue("red")) _color.r = byte.Parse(node.GetValue("red"));
+                if (node.HasValue("green")) _color.g = byte.Parse(node.GetValue("green"));
+                if (node.HasValue("blue")) _color.b = byte.Parse(node.GetValue("blue"));
+                if (node.HasValue("alpha")) _color.a = byte.Parse(node.GetValue("alpha"));
             }
 
-            protected void copyFromMonoOverlay(MonoOverlay overlay)
+            public override void save(ConfigNode node)
             {
-                copyFromOverlay(overlay);
-                _red = overlay._red;
-                _green = overlay._green;
-                _blue = overlay._blue;
-                _alpha = overlay._alpha;
+                base.save(node);
+                node.AddValue("red", _color.r);
+                node.AddValue("green", _color.g);
+                node.AddValue("blue", _color.b);
+                node.AddValue("alpha", _color.a);
+            }
+
+            protected void copyFrom(MonoOverlay overlay)
+            {
+                base.copyFrom(overlay);
+                _color = new Color32(overlay._color.r, overlay._color.g, overlay._color.b, overlay._color.a);
             }
 
 
@@ -64,47 +61,26 @@ namespace ASP
                     _overlay = overlay;
                 }
 
-                protected void drawBottomMonoOverlay(TextureEditGUI gui)
+                protected override void drawExtras2(TextureEditGUI gui)
                 {
-                    drawBottomOverlay(gui);
-                }
+                    base.drawExtras2(gui);
 
-                protected override void drawBottomOverlayExtras1(TextureEditGUI gui)
-                {
                     colorSelector(gui, ref _redSelector, ref _greenSelector, ref _blueSelector, ref _alphaSelector);
 
-                    if (_overlay._red != _redSelector.value())
-                    {
-                        _overlay._red = _redSelector.value();
-                        gui.setRemakePreview();
-                    }
-
-                    if (_overlay._green != _greenSelector.value())
-                    {
-                        _overlay._green = _greenSelector.value();
-                        gui.setRemakePreview();
-                    }
-
-                    if (_overlay._blue != _blueSelector.value())
-                    {
-                        _overlay._blue = _blueSelector.value();
-                        gui.setRemakePreview();
-                    }
-
-                    if (_overlay._alpha != _alphaSelector.value())
-                    {
-                        _overlay._alpha = _alphaSelector.value();
-                        gui.setRemakePreview();
-                    }
+                    checkChanged(ref _overlay._color.r, _redSelector.value(), gui);
+                    checkChanged(ref _overlay._color.g, _greenSelector.value(), gui);
+                    checkChanged(ref _overlay._color.b, _blueSelector.value(), gui);
+                    checkChanged(ref _overlay._color.a, _alphaSelector.value(), gui);
                 }
 
-                protected void initialiseMonoOverlay(TextureEditGUI gui)
+                public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseOverlay(gui);
-                    _redSelector = new ValueSelector<byte, ByteField>(_overlay._red, 0, 255, 1, "Red", Color.red);
-                    _greenSelector = new ValueSelector<byte, ByteField>(_overlay._green, 0, 255, 1, "Green", Color.green);
-                    _blueSelector = new ValueSelector<byte, ByteField>(_overlay._blue, 0, 255, 1, "Blue", Color.blue);
-                    _alphaSelector = new ValueSelector<byte, ByteField>(_overlay._alpha, 0, 255, 1, "Alpha", Color.white);
+                    base.initialise(gui);
+
+                    _redSelector = new ValueSelector<byte, ByteField>(_overlay._color.r, 0, 255, 1, "Red", Color.red);
+                    _greenSelector = new ValueSelector<byte, ByteField>(_overlay._color.g, 0, 255, 1, "Green", Color.green);
+                    _blueSelector = new ValueSelector<byte, ByteField>(_overlay._color.b, 0, 255, 1, "Blue", Color.blue);
+                    _alphaSelector = new ValueSelector<byte, ByteField>(_overlay._color.a, 0, 255, 1, "Alpha", Color.white);
                 }
             }
         }

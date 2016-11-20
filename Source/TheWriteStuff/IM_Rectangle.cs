@@ -11,6 +11,7 @@ namespace ASP
         public class Rectangle : MonoPolygon
         {
             static string _displayName = "Rectangle";
+            static string _headerName = "RECTANGLE";
 
             private IntVector2 _size;
             private RectangleGui _gui;
@@ -31,19 +32,17 @@ namespace ASP
 
             public override void load(ConfigNode node)
             {
-                _type = Type.RECTANGLE;
                 _size.x = 0;
                 _size.y = 0;
 
-                loadMonoPolygon(node);
-
+                base.load(node);
                 if (node.HasValue("width")) _size.x = int.Parse(node.GetValue("width"));
                 if (node.HasValue("height")) _size.y = int.Parse(node.GetValue("height"));
             }
 
             public override void save(ConfigNode node)
             {
-                saveMonoPolygon(node);
+                base.save(node);
                 node.AddValue("width", _size.x);
                 node.AddValue("height", _size.y);
             }
@@ -51,7 +50,7 @@ namespace ASP
             public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
                 Image rectangleImage = new Image(_size);
-                rectangleImage.fill(_fillColor);
+                rectangleImage.fill(_color);
                 rectangleImage.rotateImage(_rotation);
                 if (_mirror) rectangleImage.flipHorizontally();
 
@@ -74,7 +73,7 @@ namespace ASP
 
                 Image rectangleImage = new Image(_size);
                 rectangleImage.fill(color);
-                rectangleImage.fillAlpha(_fillColor.a);
+                rectangleImage.fillAlpha(_color.a);
                 rectangleImage.rotateImage(_rotation);
                 if (_mirror) rectangleImage.flipHorizontally();
 
@@ -88,14 +87,15 @@ namespace ASP
 
             public override ImageModifier clone()
             {
-                IM.Rectangle im = new IM.Rectangle();
+                IM.Rectangle rectangle = new IM.Rectangle();
+                rectangle.copyFrom(this);
+                return rectangle;
+            }
 
-                im._type = _type;
-                im._size = new IntVector2(_size);
-
-                im.copyFromMonoPolygon(this);
-
-                return im;
+            protected void copyFrom(Rectangle rectangle)
+            {
+                base.copyFrom(rectangle);
+                _size = new IntVector2(rectangle._size);
             }
 
             public override void cleanUp()
@@ -106,6 +106,11 @@ namespace ASP
             public override string displayName()
             {
                 return _displayName;
+            }
+
+            public override string headerName()
+            {
+                return _headerName;
             }
 
             public override ImageModifierGui gui()
@@ -133,64 +138,35 @@ namespace ASP
                 {
                 }
 
-                public override void drawBottom(TextureEditGUI gui)
-                {
-                    GUILayout.BeginVertical(GUI.skin.box);
-
-                    header(gui, "RECTANGLE");
-
-                    GUILayout.Space(5);
-
-                    drawBottomMonoPolygon(gui);
-
-                    GUILayout.EndVertical();
-                }
-
                 public override void drawRight(TextureEditGUI gui)
                 {
                     GUILayout.BeginVertical(GUI.skin.box);
+                    header(gui, _imRectangle.headerName());
 
-                    GUILayout.Label("Rectangle Size", gui.smallHeader);
+                    GUILayout.Space(5f);
+                    GUILayout.Label("Size", gui.smallHeader);
 
-                    GUILayout.Space(5);
-
+                    GUILayout.Space(5f);
                     GUILayout.BeginHorizontal();
-
-                    GUILayout.FlexibleSpace();
-
                     _widthSelector.draw();
                     GUILayout.Space(10f);
                     _heightSelector.draw();
-                    GUILayout.Space(10f);
-
-                    if (_imRectangle._size.x != _widthSelector.value())
-                    {
-                        _imRectangle._size.x = _widthSelector.value();
-                        gui.setRemakePreview();
-                    }
-
-                    if (_imRectangle._size.y != _heightSelector.value())
-                    {
-                        _imRectangle._size.y = _heightSelector.value();
-                        gui.setRemakePreview();
-                    }
-
                     GUILayout.FlexibleSpace();
-
                     GUILayout.EndHorizontal();
 
                     GUILayout.FlexibleSpace();
-
                     GUILayout.EndVertical();
+
+                    checkChanged(ref _imRectangle._size.x, _widthSelector.value(), gui);
+                    checkChanged(ref _imRectangle._size.y, _heightSelector.value(), gui);
                 }
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseOverlay(gui);
-                    initialiseMonoOverlay(gui);
+                    base.initialise(gui);
 
-                    _widthSelector = new ValueSelector<int, IntField>(_imRectangle._size.x, 1, 9999, 1, "width", Color.white);
-                    _heightSelector = new ValueSelector<int, IntField>(_imRectangle._size.y, 1, 9999, 1, "height", Color.white);
+                    _widthSelector = new ValueSelector<int, IntField>(_imRectangle._size.x, 1, 9999, 1, "Width", Color.white);
+                    _heightSelector = new ValueSelector<int, IntField>(_imRectangle._size.y, 1, 9999, 1, "Height", Color.white);
                 }
 
                 public override string buttonText()
@@ -198,21 +174,6 @@ namespace ASP
                     return "Rectangle";
                 }
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
     }
 }

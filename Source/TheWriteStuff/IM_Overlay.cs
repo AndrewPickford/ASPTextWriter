@@ -19,7 +19,8 @@ namespace ASP
             protected BlendMethod _blendMethod = BlendMethod.RGB;
             protected Rotation _rotation = Rotation.R0;
 
-            public Overlay()
+            public Overlay() :
+                base()
             {
                 _position = new IntVector2();
                 _position.x = 0;
@@ -32,7 +33,7 @@ namespace ASP
                 _position.y = position.y;
             }
 
-            protected void loadOverlay(ConfigNode node)
+            public override void load(ConfigNode node)
             {
                 _position = new IntVector2();
                 _mirror = false;
@@ -54,23 +55,23 @@ namespace ASP
                 if (node.HasValue("rotation")) _rotation = (Rotation)ConfigNode.ParseEnum(typeof(Rotation), node.GetValue("rotation"));
             }
 
-            protected void saveOverlay(ConfigNode node)
+            public override void save(ConfigNode node)
             {
-                saveImageModifier(node);
+                base.save(node);
                 node.AddValue("x", _position.x);
                 node.AddValue("y", _position.y);
                 node.AddValue("mirror", _mirror);
                 node.AddValue("textureAlpha", _textureAlpha);
                 node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
-                node.AddValue("normalScale", _normalScale);
+                node.AddValue("normalScale", _normalScale.ToString("F1"));
                 node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
                 node.AddValue("blendMethod", ConfigNode.WriteEnum(_blendMethod));
                 node.AddValue("rotation", ConfigNode.WriteEnum(_rotation));
             }
 
-            protected void copyFromOverlay(Overlay overlay)
+            protected void copyFrom(Overlay overlay)
             {
-                copyFromImageModifer(overlay);
+                base.copyFrom(overlay);
                 _position = new IntVector2(overlay._position);
                 _mirror = overlay._mirror;
                 _textureAlpha = overlay._textureAlpha;
@@ -122,17 +123,18 @@ namespace ASP
                 protected ValueSelector<int, IntField> _xPositionSelector;
                 protected ValueSelector<int, IntField> _yPositionSelector;
 
-                protected virtual void drawBottomOverlayExtras1(TextureEditGUI gui)
-                {
-                }
-
                 public OverlayGui(IM.Overlay overlay)
                 {
                     _overlay = overlay;
                 }
 
-                protected void drawBottomOverlay(TextureEditGUI gui)
+                public override void drawBottom(TextureEditGUI gui)
                 {
+                    GUILayout.BeginVertical(GUI.skin.box);
+                    header(gui, _overlay.headerName());
+                    drawExtras1(gui);
+                    GUILayout.Space(5f);
+
                     GUILayout.BeginHorizontal();
                     positionSelector(gui, ref _xPositionSelector, ref _yPositionSelector);
                     GUILayout.Space(5);
@@ -140,7 +142,7 @@ namespace ASP
                     GUILayout.BeginVertical();
 
                     GUILayout.BeginHorizontal();
-                    drawBottomOverlayExtras1(gui);
+                    drawExtras2(gui);
                     rotationSelector(gui, ref _overlay._rotation, ref _overlay._mirror);
                     GUILayout.Space(10f);
                     blendMethodSelector(gui, ref _overlay._blendMethod);
@@ -171,23 +173,23 @@ namespace ASP
 
                     GUILayout.EndHorizontal();
 
-                    if (_overlay._position.x != _xPositionSelector.value())
-                    {
-                        _overlay._position.x = _xPositionSelector.value();
-                        gui.setRemakePreview();
-                    }
+                    GUILayout.EndVertical();
 
-                    if (_overlay._position.y != _yPositionSelector.value())
-                    {
-                        _overlay._position.y = _yPositionSelector.value();
-                        gui.setRemakePreview();
-                    }
-
+                    checkChanged(ref _overlay._position.x, _xPositionSelector.value(), gui);
+                    checkChanged(ref _overlay._position.y, _yPositionSelector.value(), gui);
                     if (_overlay._normalScale != _normalScaleSelector.value()) _overlay._normalScale = _normalScaleSelector.value();
                     if (_overlay._textureAlpha != _textureAlphaSelector.value()) _overlay._textureAlpha = _textureAlphaSelector.value();
                 }
 
-                protected void initialiseOverlay(TextureEditGUI gui)
+                protected virtual void drawExtras1(TextureEditGUI gui)
+                {
+                }
+
+                protected virtual void drawExtras2(TextureEditGUI gui)
+                {
+                }
+
+                public override void initialise(TextureEditGUI gui)
                 {
                     _xPositionSelector = new ValueSelector<int, IntField>(_overlay._position.x, -9999, 9999, 1, "X", Color.white, false);
                     _yPositionSelector = new ValueSelector<int, IntField>(_overlay._position.y, -9999, 9999, 1, "Y", Color.white, false);

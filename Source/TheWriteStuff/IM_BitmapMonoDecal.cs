@@ -11,6 +11,7 @@ namespace ASP
         public class BitmapMonoDecal : MonoOverlay
         {
             static string _displayName = "Mono Decal";
+            static string _headerName = "MONO DECAL";
 
             private string _url = string.Empty;
             private BitmapMonoDecalGui _gui;
@@ -25,14 +26,13 @@ namespace ASP
                 _type = Type.BITMAP_MONO_DECAL;
                 _url = string.Empty;
 
-                loadMonoOverlay(node);
-
+                base.load(node);
                 if (node.HasValue("url")) _url = node.GetValue("url");
             }
 
             public override void save(ConfigNode node)
             {
-                saveMonoOverlay(node);
+                base.save(node);
                 node.AddValue("url", _url);
             }
 
@@ -42,8 +42,7 @@ namespace ASP
                 if (!BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) return;
 
                 Image decalImage = new Image(decal.image);
-                Color32 color = new Color32(_red, _green, _blue, _alpha);
-                decalImage.recolor(Global.Black32, color, false, true);
+                decalImage.recolor(Global.Black32, _color, false, true);
                 decalImage.rotateImage(_rotation);
                 if (_mirror) decalImage.flipHorizontally();
 
@@ -57,14 +56,17 @@ namespace ASP
 
             public override ImageModifier clone()
             {
-                IM.BitmapMonoDecal im = new IM.BitmapMonoDecal();
+                BitmapMonoDecal monoDecal = new BitmapMonoDecal();
+                monoDecal.copyFrom(this);
+                return monoDecal;
+            }
 
-                im._type = _type;
-                im._url = _url;
+            protected void copyFrom(BitmapMonoDecal monoDecal)
+            {
+                base.copyFrom(monoDecal);
 
-                im.copyFromMonoOverlay(this);
-
-                return im;
+                _type = monoDecal._type;
+                _url = monoDecal._url;
             }
 
             public override void cleanUp()
@@ -75,6 +77,11 @@ namespace ASP
             public override string displayName()
             {
                 return _displayName;
+            }
+
+            public override string headerName()
+            {
+                return _headerName;
             }
 
             public override ImageModifierGui gui()
@@ -110,18 +117,12 @@ namespace ASP
                     }
                 }
 
-                public override void drawBottom(TextureEditGUI gui)
+                protected override void drawExtras1(TextureEditGUI gui)
                 {
-                    GUILayout.BeginVertical(GUI.skin.box);
+                    base.drawExtras1(gui);
 
-                    header(gui, "MONO DECAL");
-
+                    GUILayout.Space(5f);
                     GUILayout.Label("Url: " + _imBitmapMonoDecal._url, GUILayout.ExpandWidth(false));
-                    GUILayout.Space(5);
-
-                    drawBottomMonoOverlay(gui);
-
-                    GUILayout.EndVertical();
                 }
 
                 public override void drawRight(TextureEditGUI gui)
@@ -132,8 +133,10 @@ namespace ASP
 
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(250), GUILayout.ExpandHeight(true));
 
-                    GUILayout.Label("Decal Sheets", gui.smallHeader);
+                    header(gui, "MONO DECAL");
+                    GUILayout.Space(5);
 
+                    GUILayout.Label("Decal Sheets", gui.smallHeader);
                     GUILayout.Space(5);
 
                     int oldSelectedSheet = _selectedSheet;
@@ -160,8 +163,8 @@ namespace ASP
 
                     GUILayout.Space(10);
 
+                    GUI.contentColor = Global.SelectedColor;
                     GUILayout.Label("Decals", gui.smallHeader);
-
                     GUILayout.Space(5);
 
                     if (_textures == null)
@@ -222,7 +225,7 @@ namespace ASP
 
                 public override void initialise(TextureEditGUI gui)
                 {
-                    initialiseMonoOverlay(gui);
+                    base.initialise(gui);
                     
                     if (_imBitmapMonoDecal._url == string.Empty) _imBitmapMonoDecal._url = BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[_selectedDecal].url;
                     BitmapDecalCache.Instance.getMonoDecalIndex(_imBitmapMonoDecal._url, out _selectedSheet, out _selectedDecal);
