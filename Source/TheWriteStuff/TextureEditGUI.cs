@@ -457,9 +457,9 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
-            if (GUILayout.Button("Line", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Quadrilateral", GUILayout.ExpandWidth(true)))
             {
-                IM.Line im = new IM.Line();
+                IM.Quadrilateral im = new IM.Quadrilateral();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);
@@ -467,9 +467,9 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
-            if (GUILayout.Button("Quadrilateral", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Rectangle", GUILayout.ExpandWidth(true)))
             {
-                IM.Quadrilateral im = new IM.Quadrilateral();
+                IM.Rectangle im = new IM.Rectangle();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);

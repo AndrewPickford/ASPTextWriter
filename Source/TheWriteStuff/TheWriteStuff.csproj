@@ -67,7 +67,7 @@
     <Compile Include="IM_Circle.cs" />
     <Compile Include="IM_ColorOverlay.cs" />
     <Compile Include="IM_CurrentBaseTexture.cs" />
-    <Compile Include="IM_Line.cs" />
+    <Compile Include="IM_Rectangle.cs" />
     <Compile Include="IM_MonoOverlay.cs" />
     <Compile Include="IM_MultipleBaseTexture.cs" />
     <Compile Include="IM_Overlay.cs" />

@@ -73,8 +73,8 @@ namespace ASP
                 polygon.scale(_scale);
                 polygon.close();
 
-                _offset.x = -(int) polygon.minX;
-                _offset.y = -(int) polygon.minY;
+                _offset.x = -(int) polygon.minX + 2;
+                _offset.y = -(int) polygon.minY + 2;
 
                 polygon.align();
                 int w = (int)polygon.maxX + 2;

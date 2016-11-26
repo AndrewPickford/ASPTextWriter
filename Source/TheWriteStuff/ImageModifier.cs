@@ -14,7 +14,7 @@ namespace ASP
 
     public abstract class ImageModifier
     {
-        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL, LINE, CIRCLE, QUADRILATERAL, TRIANGLE };
+        public enum Type { INVALID, BASE_TEXTURE, BITMAP_TEXT, BITMAP_MONO_DECAL, BITMAP_COLOR_DECAL, RECTANGLE, CIRCLE, QUADRILATERAL, TRIANGLE };
 
         public abstract void load(ConfigNode node);
         public abstract void drawOnImage(ref Image image, BoundingBox boundingBox);
@@ -59,8 +59,8 @@ namespace ASP
                     imageModifier = new IM.BitmapColorDecal();
                     break;
 
-                case Type.LINE:
-                    imageModifier = new IM.Line();
+                case Type.RECTANGLE:
+                    imageModifier = new IM.Rectangle();
                     break;
 
                 case Type.CIRCLE:
