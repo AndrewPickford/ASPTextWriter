@@ -24,7 +24,7 @@ namespace ASP
             UnityEngine.Texture2D texture = Utils.LoadTexture("GameData/" + nodeUrl + ".pngmap", false);
 
             characterMap = new Dictionary<char, BitmapChar>();
-            float h = 0;
+            double h = 0d;
             foreach(ConfigNode n in node.GetNodes("ASP_BITMAP_CHAR"))
             {
                 BitmapChar cMap = new BitmapChar(n, texture);

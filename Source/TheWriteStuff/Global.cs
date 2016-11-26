@@ -13,10 +13,11 @@ namespace ASP
         public static bool Debug1 = false;
         public static bool Debug2 = false;
         public static bool Debug3 = false;
+        public static bool Debug4 = false;
         public static int FileCacheSize = 20 * 1024 * 1024; // bytes
-        public static float LastButtonPress;
-        public static float LastRepeat;
-        public static float AutoRepeatGap;
+        public static double LastButtonPress;
+        public static double LastRepeat;
+        public static double AutoRepeatGap;
         public static Texture2D WhiteBackground;
         public static Color32 Black32;
         public static Color32 White32;
@@ -41,6 +42,7 @@ namespace ASP
                     if (debugLevel >= 1) Debug1 = true;
                     if (debugLevel >= 2) Debug2 = true;
                     if (debugLevel >= 3) Debug3 = true;
+                    if (debugLevel >= 4) Debug3 = true;
                     Utils.Log("Debug level {0}", debugLevel);
                 }
 

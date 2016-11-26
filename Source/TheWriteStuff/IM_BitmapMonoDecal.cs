@@ -36,22 +36,12 @@ namespace ASP
                 node.AddValue("url", _url);
             }
 
-            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            public override void drawImageGS()
             {
                 BitmapDecal decal;
                 if (!BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) return;
 
-                Image decalImage = new Image(decal.image);
-                decalImage.recolor(Global.Black32, _color, false, true);
-                decalImage.rotateImage(_rotation);
-                if (_mirror) decalImage.flipHorizontally();
-
-                image.blendImage(decalImage, _blendMethod, _position, _alphaOption, _textureAlpha, boundingBox);
-            }
-
-            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
-            {
-                drawDecalOnImage(ref image, ref normalMap, _url, boundingBox);
+                _gsImage = new ImageGS(decal.gsImage);
             }
 
             public override ImageModifier clone()
@@ -172,8 +162,7 @@ namespace ASP
                         _textures = new List<Texture2D>();
                         for (int i = 0; i < BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals.Count; ++i)
                         {
-                            Image image = new Image(BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[i].image);
-                            image.recolor(Global.Black32, Global.White32, false, false);
+                            Image image = BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals[i].image;
 
                             Texture2D texture = new Texture2D(image.width, image.height, TextureFormat.ARGB32, false);
                             texture.SetPixels32(image.pixels);

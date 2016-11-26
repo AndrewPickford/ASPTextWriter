@@ -136,58 +136,58 @@ namespace ASP
         }
     }
 
-    public class FloatField : IValueField<float>
+    public class DoubleField : IValueField<double>
     {
-        public string ToString(float value)
+        public string ToString(double value)
         {
             return value.ToString("F1");
         }
 
-        public float Parse(string text)
+        public double Parse(string text)
         {
-            return float.Parse(text);
+            return double.Parse(text);
         }
 
-        public bool TryParse(string text, out float value)
+        public bool TryParse(string text, out double value)
         {
-            return float.TryParse(text, out value);
+            return double.TryParse(text, out value);
         }
 
-        public bool CheckLimits(float value, float min, float max)
+        public bool CheckLimits(double value, double min, double max)
         {
             if (value >= min && value <= max) return true;
             else return false;
         }
 
-        public void Clamp(ref float value, float min, float max)
+        public void Clamp(ref double value, double min, double max)
         {
             if (value < min) value = min;
             if (value > max) value = max;
         }
 
-        public void Add(ref float value, float step)
+        public void Add(ref double value, double step)
         {
             value += step;
         }
 
-        public void Add(ref float value, float step, float max)
+        public void Add(ref double value, double step, double max)
         {
             if (value < max) value += step;
             if (value > max) value = max;
         }
 
-        public void Sub(ref float value, float step)
+        public void Sub(ref double value, double step)
         {
             value -= step;
         }
 
-        public void Sub(ref float value, float step, float min)
+        public void Sub(ref double value, double step, double min)
         {
             if (value > min) value -= step;
             if (value < min) value = min;
         }
 
-        public bool NotEqual(float lhs, float rhs)
+        public bool NotEqual(double lhs, double rhs)
         {
             if (lhs != rhs) return true;
             else return false;
@@ -206,9 +206,9 @@ namespace ASP
         private string _label;
         private Color _color;
         private string _valueText;
-        private float _lastRepeat;
-        private float _autoRepeatGap;
-        private float _lastButtonPress;
+        private double _lastRepeat;
+        private double _autoRepeatGap;
+        private double _lastButtonPress;
         private bool _changed;
         private bool _showButtons;
 
@@ -249,7 +249,7 @@ namespace ASP
             _valueText = _field.ToString(_value);
 
             _lastRepeat = Time.time;
-            _autoRepeatGap = 0.4f;
+            _autoRepeatGap = 0.4;
             _lastButtonPress = _lastRepeat;
         }
 
@@ -276,7 +276,7 @@ namespace ASP
 
             string oldValueText = _valueText;
             _valueText = GUILayout.TextField(_valueText, GUILayout.Height(50), GUILayout.Width(50));
-            _valueText = System.Text.RegularExpressions.Regex.Replace(_valueText, @"[^0-9.]", "");
+            _valueText = System.Text.RegularExpressions.Regex.Replace(_valueText, @"[^0-9.-]", "");
 
             if (oldValueText != _valueText)
             {
@@ -338,11 +338,11 @@ namespace ASP
             if (_changed)
             {
                 _lastRepeat = _lastButtonPress;
-                _autoRepeatGap = _autoRepeatGap * 0.8f;
-                if (_autoRepeatGap < 0.04f) _autoRepeatGap = 0.04f;
+                _autoRepeatGap = _autoRepeatGap * 0.8;
+                if (_autoRepeatGap < 0.04) _autoRepeatGap = 0.04;
             }
 
-            if ((Time.time - _lastButtonPress) > 0.3f) _autoRepeatGap = 0.4f;
+            if ((Time.time - _lastButtonPress) > 0.3) _autoRepeatGap = 0.4;
 
             return _changed;
         }

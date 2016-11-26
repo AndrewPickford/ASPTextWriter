@@ -10,8 +10,8 @@ namespace ASP
     {
         public class BitmapText : Text
         {
-            static string _displayName = "Bitmap Text";
-            static string _headerName = "BITMAP TEXT";
+            static string _displayName = "Text";
+            static string _headerName = "TEXT";
 
             private BitmapTextGui _gui;
 
@@ -58,10 +58,10 @@ namespace ASP
                 if (image.width != normalMap.width || image.height != normalMap.height)
                 {
                     textImage.rescale(normalMap.width, normalMap.height);
-                    bBox.x = (int)((float)bBox.x * (float)normalMap.width / (float)image.width);
-                    bBox.w = (int)((float)bBox.w * (float)normalMap.width / (float)image.width);
-                    bBox.y = (int)((float)bBox.y * (float)normalMap.height / (float)image.height);
-                    bBox.h = (int)((float)bBox.h * (float)normalMap.height / (float)image.height);
+                    bBox.x = (int)((double)bBox.x * (double)normalMap.width / (double)image.width);
+                    bBox.w = (int)((double)bBox.w * (double)normalMap.width / (double)image.width);
+                    bBox.y = (int)((double)bBox.y * (double)normalMap.height / (double)image.height);
+                    bBox.h = (int)((double)bBox.h * (double)normalMap.height / (double)image.height);
                 }
 
                 Image normalMapImage = textImage.createNormalMap(_normalScale);

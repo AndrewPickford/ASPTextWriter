@@ -8,12 +8,12 @@ namespace ASP
 {
     namespace IM
     {
-        public abstract class Shape : MonoOverlay
+        public abstract class MonoShape : MonoOverlay
         {
             protected bool _fillShape;
-            protected float _edgeWidth;
+            protected double _edgeWidth;
 
-            public Shape() :
+            public MonoShape() :
                 base()
             {
                 _fillShape = true;
@@ -27,7 +27,7 @@ namespace ASP
 
                 base.load(node);
                 if (node.HasValue("fill_shape")) _fillShape = bool.Parse(node.GetValue("fill_shape"));
-                if (node.HasValue("edge_width")) _edgeWidth = float.Parse(node.GetValue("edge_width"));
+                if (node.HasValue("edge_width")) _edgeWidth = double.Parse(node.GetValue("edge_width"));
             }
 
             public override void save(ConfigNode node)
@@ -37,7 +37,7 @@ namespace ASP
                 node.AddValue("edge_width", _edgeWidth.ToString("F1"));
             }
 
-            protected void copyFrom(Shape shape)
+            protected void copyFrom(MonoShape shape)
             {
                 base.copyFrom(shape);
                 _fillShape = shape._fillShape;
@@ -47,13 +47,13 @@ namespace ASP
 
 
 
-            public abstract class ShapeGui : MonoOverlayGui
+            public abstract class MonoShapeGui : MonoOverlayGui
             {
-                private IM.Shape _overlay;
-                private ValueSelector<float, FloatField> _edgeWidthSelector;
+                private IM.MonoShape _overlay;
+                private ValueSelector<double, DoubleField> _edgeWidthSelector;
              
 
-                public ShapeGui(IM.Shape overlay) :
+                public MonoShapeGui(IM.MonoShape overlay) :
                     base(overlay)
                 {
                     _overlay = overlay;
@@ -63,25 +63,26 @@ namespace ASP
                 {
                     base.drawExtras2(gui);
 
+                    // not yet implemented
+                    /* 
                     bool oldFillShape = _overlay._fillShape;
 
                     GUILayout.Space(10f);
-                    _edgeWidthSelector.draw();
-                    GUILayout.Space(10f);
+
                     GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
                     _overlay._fillShape = GUILayout.Toggle(_overlay._fillShape, "Fill");
+                    _edgeWidthSelector.draw();
                     GUILayout.EndVertical();                    
 
                     if (oldFillShape != _overlay._fillShape) gui.setRemakePreview();
-                    checkChanged(ref _overlay._edgeWidth, _edgeWidthSelector.value(), gui);
-                    GUILayout.Space(10f);
+                    checkChanged(ref _overlay._edgeWidth, _edgeWidthSelector.value(), gui); */
                 }
 
                 public override void initialise(TextureEditGUI gui)
                 {
                     base.initialise(gui);
 
-                    _edgeWidthSelector = new ValueSelector<float, FloatField>(_overlay._edgeWidth, 0.1f, 9999f, 0.1f, "Width", Color.white);
+                    _edgeWidthSelector = new ValueSelector<double, DoubleField>(_overlay._edgeWidth, 0.1, 9999, 0.1, "Width", Color.white);
                 }
             }
         }

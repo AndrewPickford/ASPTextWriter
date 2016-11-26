@@ -37,9 +37,6 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\ksptest\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="KIS">
-      <HintPath>..\..\..\ksptest\Kerbal Space Program\GameData\KIS\Plugins\KIS.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +58,8 @@
     <Compile Include="BitmapDecalCache.cs" />
     <Compile Include="BitmapDecalLoader.cs" />
     <Compile Include="DDSTexture.cs" />
+    <Compile Include="DoubleVector2.cs" />
+    <Compile Include="Edge.cs" />
     <Compile Include="ImageGS.cs" />
     <Compile Include="IM_AutoBaseTexture.cs" />
     <Compile Include="IM_BaseTexture.cs" />
@@ -68,14 +67,16 @@
     <Compile Include="IM_Circle.cs" />
     <Compile Include="IM_ColorOverlay.cs" />
     <Compile Include="IM_CurrentBaseTexture.cs" />
+    <Compile Include="IM_Line.cs" />
     <Compile Include="IM_MonoOverlay.cs" />
     <Compile Include="IM_MultipleBaseTexture.cs" />
     <Compile Include="IM_Overlay.cs" />
-    <Compile Include="IM_Rectangle.cs" />
+    <Compile Include="IM_Quadrilateral.cs" />
     <Compile Include="IM_MonoPolygon.cs" />
-    <Compile Include="IM_Shape.cs" />
+    <Compile Include="IM_MonoShape.cs" />
     <Compile Include="IM_SingleBaseTexture.cs" />
     <Compile Include="IM_Text.cs" />
+    <Compile Include="IM_Triangle.cs" />
     <Compile Include="KSPTextureInfo.cs" />
     <Compile Include="BoundingBox.cs" />
     <Compile Include="BitmapChar.cs" />
@@ -89,10 +90,12 @@
     <Compile Include="IntVector2.cs" />
     <Compile Include="BitmapFontLoader.cs" />
     <Compile Include="IM_BitmapMonoDecal.cs" />
+    <Compile Include="Polygon.cs" />
     <Compile Include="RGB.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="SerializableConfigNode.cs" />
+    <Compile Include="Spline.cs" />
     <Compile Include="TextureEditGUI.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="BitmapFont.cs" />
@@ -100,6 +103,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ASP_Texture2D_Extension.cs" />
     <Compile Include="ValueSelector.cs" />
+    <Compile Include="Vertex.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -7,11 +7,11 @@ namespace ASP
 {
     public class RGB
     {
-        public float r { get; private set; }
-        public float g { get; private set; }
-        public float b { get; private set; }
+        public double r { get; private set; }
+        public double g { get; private set; }
+        public double b { get; private set; }
 
-        public RGB(float red, float green, float blue)
+        public RGB(double red, double green, double blue)
         {
             r = red;
             g = green;
@@ -20,35 +20,35 @@ namespace ASP
 
         public RGB(UnityEngine.Color32 color)
         {
-            r = (float) color.r / 255f;
-            g = (float) color.g / 255f;
-            b = (float) color.b / 255f;
+            r = (double) color.r / 255d;
+            g = (double) color.g / 255d;
+            b = (double) color.b / 255d;
         }
 
         public HSV toHSV()
         {
-            float min = Math.Min(Math.Min(r, g), b);
-            float max = Math.Max(Math.Max(r, g), b);
-            float delta = max - min;
+            double min = Math.Min(Math.Min(r, g), b);
+            double max = Math.Max(Math.Max(r, g), b);
+            double delta = max - min;
 
-            float h = 0f;
-            float s = 0f;
-            float v = max;
+            double h = 0d;
+            double s = 0d;
+            double v = max;
 
-            if (delta != 0f)
+            if (delta != 0d)
             {
                 s = delta / max;
 
-                float deltaR = (((max - r) / 6f) + (delta / 2f)) / delta;
-                float deltaG = (((max - g) / 6f) + (delta / 2f)) / delta;
-                float deltaB = (((max - b) / 6f) + (delta / 2f)) / delta;
+                double deltaR = (((max - r) / 6d) + (delta / 2d)) / delta;
+                double deltaG = (((max - g) / 6d) + (delta / 2d)) / delta;
+                double deltaB = (((max - b) / 6d) + (delta / 2d)) / delta;
 
                 if (r == max) h = deltaB - deltaG;
-                else if (g == max) h = 1f / 3f + deltaR - deltaB;
-                else if (b == max) h = 2f / 3f + deltaG - deltaR;
+                else if (g == max) h = 1d / 3d + deltaR - deltaB;
+                else if (b == max) h = 2d / 3d + deltaG - deltaR;
 
-                if (h < 0f) h += 1f;
-                if (h > 1f) h -= 1f;
+                if (h < 0d) h += 1d;
+                if (h > 1d) h -= 1d;
             }
 
             return new HSV(h, s, v);

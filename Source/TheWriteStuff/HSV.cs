@@ -7,27 +7,27 @@ namespace ASP
 {
     public class HSV
     {
-        public float h { get; private set; }
-        public float s { get; private set; }
-        public float v { get; private set; }
+        public double h { get; private set; }
+        public double s { get; private set; }
+        public double v { get; private set; }
 
-        public HSV(float hue, float saturation, float value)
+        public HSV(double hue, double saturation, double value)
         {
             h = hue;
             s = saturation;
             v = value;
         }
 
-        public HSV blend(HSV second, float fraction)
+        public HSV blend(HSV second, double fraction)
         {
-            float h1 = this.h;
-            float h2 = second.h;
-            float d = h2 - h1;
-            float f = fraction;
+            double h1 = this.h;
+            double h2 = second.h;
+            double d = h2 - h1;
+            double f = fraction;
 
             if (h1 > h2)
             {
-                float t = h1;
+                double t = h1;
                 h1 = h2;
                 h2 = t;
                 d = - d;
@@ -35,11 +35,11 @@ namespace ASP
 
             }
 
-            float H = 0f;
-            float S = this.s + f * (second.s - this.s);
-            float V = this.v + f * (second.s - this.v);
+            double H = 0d;
+            double S = this.s + f * (second.s - this.s);
+            double V = this.v + f * (second.s - this.v);
 
-            if (d > 0.5f)
+            if (d > 0.5)
             {
                 h1 = h1 + 1;
                 H = h1 + f*(h2-h1);
@@ -49,31 +49,31 @@ namespace ASP
                 H = h1 + f*d;
             }
 
-            if (H < 0f) H += 1f;
-            if (H >= 1f) H -= 1f;
+            if (H < 0d) H += 1f;
+            if (H >= 1d) H -= 1f;
 
             return new HSV(H, S, V);
         }
 
         public RGB toRGB()
         {
-            if (s == 0f)
+            if (s == 0d)
             {
                 return new RGB(v, v, v);
             }
 
-            float hh = h * 6f;
-            if (hh == 6f) hh = 0f;
+            double hh = h * 6d;
+            if (hh == 6d) hh = 0d;
 
             int i = (int) hh;
 
-            float v1 = v * (1-s);
-            float v2 = v * (1 - s*(hh - i));
-            float v3 = v * (1 - s*(1 - (hh - i)));
+            double v1 = v * (1-s);
+            double v2 = v * (1 - s*(hh - i));
+            double v3 = v * (1 - s*(1 - (hh - i)));
 
-            float r = 0f;
-            float g = 0f;
-            float b = 0f;
+            double r = 0d;
+            double g = 0d;
+            double b = 0d;
 
             switch (i)
             {

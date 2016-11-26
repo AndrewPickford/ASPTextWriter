@@ -15,6 +15,7 @@ namespace ASP
         public string name { get; private set; }
         public Type type { get; private set; }
         public Image image { get; private set; }
+        public ImageGS gsImage { get; private set; }
 
         public BitmapDecal(ConfigNode node, BitmapDecalCache.Sheet sheet, Texture2D texture)
         {
@@ -40,15 +41,24 @@ namespace ASP
             Orientation orientation = Orientation.UPRIGHT;
             if (node.HasValue("orientation")) orientation = (Orientation)ConfigNode.ParseEnum(typeof(Orientation), node.GetValue("orientation"));
 
-            image = texture.GetImage(rect);
+            if (type == Type.MONO)
+            {
+                gsImage = texture.GetImageMono(rect);
+                image = texture.GetImage(rect);
+                image.recolor(Color.black, Color.white, false, false);
+            }
+            else image = texture.GetImage(rect);
+           
 
             switch (orientation)
             {
                 case Orientation.FLIPPED_XY:
+                    if (gsImage != null) gsImage.flipXY(false);
                     image.flipXY(false);
                     break;
 
                 case Orientation.INVERTED:
+                    if (gsImage != null) gsImage.flipVertically();
                     image.flipVertically();
                     break;
 

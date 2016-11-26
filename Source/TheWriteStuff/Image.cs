@@ -51,6 +51,17 @@ namespace ASP
             resize(size.x, size.y);
         }
 
+        public void clear()
+        {
+            for (int i = 0; i < length; ++i)
+            {
+                pixels[i].r = 0;
+                pixels[i].g = 0;
+                pixels[i].b = 0;
+                pixels[i].a = 0;
+            }
+        }
+
         public void resizeAndFill(int w, int h, Color32[] pix)
         {
             resize(w, h);
@@ -104,6 +115,27 @@ namespace ASP
             }
         }
 
+        public void fillFromGrayScale(ImageGS gs, Color32 color)
+        {
+            int w = Math.Min(width, gs.width);
+            int h = Math.Min(height, gs.height);
+            for (int i = 0; i < w; ++i)
+            {
+                for (int j = 0; j < h; ++j)
+                {
+                    if (gs.getPixel(i, j) > 0)
+                    {
+                        pixels[i + j * width].r = color.r;
+                        pixels[i + j * width].g = color.g;
+                        pixels[i + j * width].b = color.b;
+
+                        int a = ((int)gs.getPixel(i, j) * (int)color.a / 255);
+                        pixels[i + j * width].a = (byte) a;
+                    }
+                }
+            }
+        }
+
         public void recolor(Color32 from, Color32 to, bool checkAlpha, bool replaceAlpha)
         {
             for (int i = 0; i < length; ++i)
@@ -140,6 +172,8 @@ namespace ASP
         public void setPixel(int x, int y, Color32 color)
         {
             int p = x + y * width;
+            if (p < 0 || p >= length) return;
+
             pixels[p].r = color.r;
             pixels[p].g = color.g;
             pixels[p].b = color.b;
@@ -158,6 +192,26 @@ namespace ASP
 
             width = height;
             height = t;
+        }
+
+        public void drawFromGS(ImageGS gs, Color32 color)
+        {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    int p = i + j * width;
+                    int a = (color.a * gs.getPixel(i, j)) / 255;
+
+                    if (a > 0)
+                    {
+                        pixels[p].r = color.r;
+                        pixels[p].g = color.g;
+                        pixels[p].b = color.b;
+                        pixels[p].a = (byte)a;
+                    }
+                }
+            }
         }
 
         public void writeToFile(string fileName)
@@ -337,9 +391,9 @@ namespace ASP
                         if (overlayColor.a > 0)
                         {
                             Color32 oldColor = Utils.GetElement2D(pixels, px, py, width);
-                            double r = ((oldColor.r * oldColor.r * (255 - overlayColor.a)) / 255f) + ((overlayColor.r * overlayColor.r * overlayColor.a) / 255f);
-                            double g = ((oldColor.g * oldColor.g * (255 - overlayColor.a)) / 255f) + ((overlayColor.g * overlayColor.g * overlayColor.a) / 255f);
-                            double b = ((oldColor.b * oldColor.b * (255 - overlayColor.a)) / 255f) + ((overlayColor.b * overlayColor.b * overlayColor.a) / 255f);
+                            double r = ((oldColor.r * oldColor.r * (255 - overlayColor.a)) / 255d) + ((overlayColor.r * overlayColor.r * overlayColor.a) / 255d);
+                            double g = ((oldColor.g * oldColor.g * (255 - overlayColor.a)) / 255d) + ((overlayColor.g * overlayColor.g * overlayColor.a) / 255d);
+                            double b = ((oldColor.b * oldColor.b * (255 - overlayColor.a)) / 255d) + ((overlayColor.b * overlayColor.b * overlayColor.a) / 255d);
                             r = Math.Sqrt(r);
                             g = Math.Sqrt(g);
                             b = Math.Sqrt(b);
@@ -376,12 +430,12 @@ namespace ASP
                             RGB rgb2 = new RGB(overlayColor);
                             HSV hsv1 = rgb1.toHSV();
                             HSV hsv2 = rgb2.toHSV();
-                            HSV hsv3 = hsv1.blend(hsv2, (float) overlayColor.a / 255f);
+                            HSV hsv3 = hsv1.blend(hsv2, (double) overlayColor.a / 255d);
                             RGB rgb3 = hsv3.toRGB();
 
-                            pixels[px + py * width].r = Math.Min((byte) (rgb3.r * 255f), (byte) 255);
-                            pixels[px + py * width].g = Math.Min((byte) (rgb3.g * 255f), (byte) 255);
-                            pixels[px + py * width].b = Math.Min((byte) (rgb3.b * 255f), (byte) 255);
+                            pixels[px + py * width].r = Math.Min((byte) (rgb3.r * 255d), (byte) 255);
+                            pixels[px + py * width].g = Math.Min((byte) (rgb3.g * 255d), (byte) 255);
+                            pixels[px + py * width].b = Math.Min((byte) (rgb3.b * 255d), (byte) 255);
 
                             if (alphaOption == AlphaOption.OVERWRITE) pixels[px + py * width].a = textureAlpha;
                         }
@@ -438,7 +492,7 @@ namespace ASP
         public void drawCharacter(char c, BitmapFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
                                   byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
         {
-            if (Global.Debug3) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
+            if (Global.Debug4) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
 
             ASP.BitmapChar charMap;
             IntVector2 cPos = new IntVector2();
@@ -571,7 +625,7 @@ namespace ASP
             length = width * height;
         }
 
-        public Image createNormalMap(float scale)
+        public Image createNormalMap(double scale)
         {
             if (Global.Debug2) Utils.Log("create normalMap {0},{1}", width, height);
             Image normalMap = new Image(width, height);
@@ -627,18 +681,18 @@ namespace ASP
             return normalMap;
         }
 
-        public Color32 getPixelBilinear(float x, float y, float w, float h)
+        public Color32 getPixelBilinear(double x, double y, double w, double h)
         {
-            float red = 0f;
-            float green = 0f;
-            float blue = 0f;
-            float alpha = 0f;
-            float totalArea = 0f;
+            double red = 0d;
+            double green = 0d;
+            double blue = 0d;
+            double alpha = 0d;
+            double totalArea = 0d;
 
-            float minX = (x - w / 2f) * width;
-            float minY = (y - w / 2f) * height;
-            float maxX = (x + w / 2f) * width;
-            float maxY = (y + w / 2f) * height;
+            double minX = (x - w / 2d) * width;
+            double minY = (y - w / 2d) * height;
+            double maxX = (x + w / 2d) * width;
+            double maxY = (y + w / 2d) * height;
             int minPX = (int) minX;
             int minPY = (int) minY;
             int maxPX = (int) maxX;
@@ -650,16 +704,16 @@ namespace ASP
                 {
                     if (i >= 0 && i < width && j >= 0 && j < height)
                     {
-                        float area = 0f;
+                        double area = 0d;
                         if (i == minPX || j == minPY || (i + 1) > maxPX || (j + 1) > maxPY)
                         {
-                            float pxMin = Math.Max(i, minX);
-                            float pxMax = Math.Min(i + 1, maxX);
-                            float pyMin = Math.Max(j, minY);
-                            float pyMax = Math.Min(j + 1, maxY);
+                            double pxMin = Math.Max(i, minX);
+                            double pxMax = Math.Min(i + 1, maxX);
+                            double pyMin = Math.Max(j, minY);
+                            double pyMax = Math.Min(j + 1, maxY);
                             area = (pxMax - pxMin) * (pyMax - pyMin);
                         }
-                        else area = 1f;
+                        else area = 1d;
 
                         red += pixels[i + j * width].r * area;
                         green += pixels[i + j * width].g * area;
@@ -670,7 +724,7 @@ namespace ASP
                 }
             }
 
-            if (totalArea > 0f)
+            if (totalArea > 0d)
             {
                 red /= totalArea;
                 green /= totalArea;
@@ -694,15 +748,15 @@ namespace ASP
 
             Color32[] newPixels = new Color32[newWidth * newHeight];
 
-            float pixelWidth = 1f / (float)newWidth;
-            float pixelHeight = 1f / (float)newHeight;
+            double pixelWidth = 1f / (double)newWidth;
+            double pixelHeight = 1f / (double)newHeight;
 
             for (int i = 0; i < newWidth; ++i)
             {
                 for (int j = 0; j < newHeight; ++j)
                 {
-                    float x = (((float)i + 0.5f) / (float)newWidth);
-                    float y = (((float)j + 0.5f) / (float)newHeight);
+                    double x = (((double)i + 0.5d) / (double)newWidth);
+                    double y = (((double)j + 0.5d) / (double)newHeight);
 
                     newPixels[i + j * newWidth] = getPixelBilinear(x, y, pixelWidth, pixelHeight);
                 }

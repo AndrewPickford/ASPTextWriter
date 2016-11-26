@@ -427,7 +427,17 @@ namespace ASP
 
             GUILayout.Space(3);
 
-            if (GUILayout.Button("Color Decal", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Circle", GUILayout.ExpandWidth(true)))
+            {
+                IM.Circle im = new IM.Circle();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
+            }
+
+            if (GUILayout.Button("Decal, Color", GUILayout.ExpandWidth(true)))
             {
                 IM.BitmapColorDecal im = new IM.BitmapColorDecal();
                 im.setPosition(centrePosition());
@@ -437,7 +447,7 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
-            if (GUILayout.Button("Mono Decal", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Decal, Mono", GUILayout.ExpandWidth(true)))
             {
                 IM.BitmapMonoDecal im = new IM.BitmapMonoDecal();
                 im.setPosition(centrePosition());
@@ -447,7 +457,27 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
-            if (GUILayout.Button("Bitmap Text", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Line", GUILayout.ExpandWidth(true)))
+            {
+                IM.Line im = new IM.Line();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
+            }
+
+            if (GUILayout.Button("Quadrilateral", GUILayout.ExpandWidth(true)))
+            {
+                IM.Quadrilateral im = new IM.Quadrilateral();
+                im.setPosition(centrePosition());
+                im.gui().initialise(this);
+                _imageModifiers.add(im);
+                _remakePreview = true;
+                _selectedModifier = _imageModifiers.modifiers.Count - 1;
+            }
+
+            if (GUILayout.Button("Text", GUILayout.ExpandWidth(true)))
             {
                 IM.Text im = new IM.BitmapText();
                 im.setPosition(centrePosition());
@@ -457,19 +487,9 @@ namespace ASP
                 _selectedModifier = _imageModifiers.modifiers.Count - 1;
             }
 
-            if (GUILayout.Button("Rectangle", GUILayout.ExpandWidth(true)))
+            if (GUILayout.Button("Triangle", GUILayout.ExpandWidth(true)))
             {
-                IM.Rectangle im = new IM.Rectangle();
-                im.setPosition(centrePosition());
-                im.gui().initialise(this);
-                _imageModifiers.add(im);
-                _remakePreview = true;
-                _selectedModifier = _imageModifiers.modifiers.Count - 1;
-            }
-
-            if (GUILayout.Button("Circle", GUILayout.ExpandWidth(true)))
-            {
-                IM.Circle im = new IM.Circle();
+                IM.Triangle im = new IM.Triangle();
                 im.setPosition(centrePosition());
                 im.gui().initialise(this);
                 _imageModifiers.add(im);

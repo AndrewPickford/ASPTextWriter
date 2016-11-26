@@ -171,10 +171,10 @@ namespace ASP
             return v;
         }
 
-        public static float ParseFloatWithLimits(string value, float min, float max)
+        public static double ParsedoubleWithLimits(string value, double min, double max)
         {
-            float v = 0f;
-            float.TryParse(value, out v);
+            double v = 0;
+            double.TryParse(value, out v);
 
             if (v < min) v = min;
             if (v > max) v = max;
@@ -192,10 +192,10 @@ namespace ASP
             return v.ToString();
         }
 
-        public static string StringAdd(string value, float a)
+        public static string StringAdd(string value, double a)
         {
-            float v = 0;
-            float.TryParse(value, out v);
+            double v = 0;
+            double.TryParse(value, out v);
 
             v += a;
 
@@ -207,9 +207,9 @@ namespace ASP
             return ParseIntWithLimits(value, min, max).ToString();
         }
 
-        public static string LimitFloatString(string value, float min, float max)
+        public static string LimitdoubleString(string value, double min, double max)
         {
-            return ParseFloatWithLimits(value, min, max).ToString();
+            return ParsedoubleWithLimits(value, min, max).ToString();
         }
 
         public static string FindModelURL(string partName)

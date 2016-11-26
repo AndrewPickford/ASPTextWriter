@@ -11,11 +11,11 @@ namespace ASP
         public enum Orientation { UPRIGHT, FLIPPED_XY, INVERTED };
 
         public char character { get; private set; }
-        public float vx { get; private set; }
-        public float vy { get; private set; }
-        public float vw { get; private set; }
-        public float vh { get; private set; }
-        public float cw { get; private set; }
+        public double vx { get; private set; }
+        public double vy { get; private set; }
+        public double vw { get; private set; }
+        public double vh { get; private set; }
+        public double cw { get; private set; }
         public Image image { get; private set; }
 
         public BitmapChar(ConfigNode node, UnityEngine.Texture2D texture)
@@ -25,11 +25,11 @@ namespace ASP
             else if (node.GetValue("character") == "_close_brace_") character = '}';
             else character = node.GetValue("character")[0];
 
-            vx = float.Parse(node.GetValue("vx"));
-            vy = float.Parse(node.GetValue("vy"));
-            vw = float.Parse(node.GetValue("vw"));
-            vh = float.Parse(node.GetValue("vh"));
-            cw = float.Parse(node.GetValue("cw"));
+            vx = double.Parse(node.GetValue("vx"));
+            vy = double.Parse(node.GetValue("vy"));
+            vw = double.Parse(node.GetValue("vw"));
+            vh = double.Parse(node.GetValue("vh"));
+            cw = double.Parse(node.GetValue("cw"));
 
             Rectangle rect = new Rectangle();
             rect.x = int.Parse(node.GetValue("x"));

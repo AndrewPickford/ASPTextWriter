@@ -11,12 +11,13 @@ namespace ASP
         public abstract class Overlay : ImageModifier
         {
             protected IntVector2 _position;
+            protected IntVector2 _offset;
             protected bool _mirror = false;
             protected byte _textureAlpha = 0;
             protected AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
-            protected float _normalScale = 2.0f;
+            protected double _normalScale = 2.0d;
             protected NormalOption _normalOption = NormalOption.USE_BACKGROUND;
-            protected BlendMethod _blendMethod = BlendMethod.RGB;
+            protected BlendMethod _blendMethod = BlendMethod.SSR;
             protected Rotation _rotation = Rotation.R0;
 
             public Overlay() :
@@ -25,6 +26,10 @@ namespace ASP
                 _position = new IntVector2();
                 _position.x = 0;
                 _position.y = 0;
+
+                _offset = new IntVector2();
+                _offset.x = 0;
+                _offset.y = 0;
             }
 
             public void setPosition(IntVector2 position)
@@ -49,7 +54,7 @@ namespace ASP
                 if (node.HasValue("mirror")) _mirror = bool.Parse(node.GetValue("mirror"));
                 if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
-                if (node.HasValue("normalScale")) _normalScale = float.Parse(node.GetValue("normalScale"));
+                if (node.HasValue("normalScale")) _normalScale = double.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
                 if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
                 if (node.HasValue("rotation")) _rotation = (Rotation)ConfigNode.ParseEnum(typeof(Rotation), node.GetValue("rotation"));
@@ -118,7 +123,7 @@ namespace ASP
             public abstract class OverlayGui : ImageModifierGui
             {
                 private IM.Overlay _overlay;
-                protected ValueSelector<float, FloatField> _normalScaleSelector;
+                protected ValueSelector<double, DoubleField> _normalScaleSelector;
                 protected ValueSelector<byte, ByteField> _textureAlphaSelector;
                 protected ValueSelector<int, IntField> _xPositionSelector;
                 protected ValueSelector<int, IntField> _yPositionSelector;
@@ -195,7 +200,7 @@ namespace ASP
                     _yPositionSelector = new ValueSelector<int, IntField>(_overlay._position.y, -9999, 9999, 1, "Y", Color.white, false);
 
                     _textureAlphaSelector = new ValueSelector<byte, ByteField>(_overlay._textureAlpha, 0, 255, 1, "Texture Alpha", Color.white);
-                    _normalScaleSelector = new ValueSelector<float, FloatField>(_overlay._normalScale, 0, 5.0f, 0.1f, "Normal Scale", Color.white);
+                    _normalScaleSelector = new ValueSelector<double, DoubleField>(_overlay._normalScale, 0, 5.0, 0.1, "Normal Scale", Color.white);
 
                     if (gui.kspTextureInfo().isSpecular) _textureAlphaSelector.setLabel("Specularity");
                     else if (gui.kspTextureInfo().isTransparent) _textureAlphaSelector.setLabel("Transparency");
