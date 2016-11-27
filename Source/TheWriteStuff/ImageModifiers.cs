@@ -57,17 +57,30 @@ namespace ASP
             }
         }
 
-        public void load(ConfigNode node)
+        public bool load(ConfigNode node)
         {
+            bool ok = true;
+            int c = 0;
             modifiers = new List<ImageModifier>();
           
             ConfigNode[] nodes = node.GetNodes("ASP_IMAGEMODIFIER");
 
             foreach (ConfigNode n in nodes)
             {
-                ImageModifier im = ImageModifier.CreateFromConfig(n);
-                if (im != null) modifiers.Add(im);
+                try
+                {
+                    ImageModifier im = ImageModifier.CreateFromConfig(n);
+                    if (im != null) modifiers.Add(im);
+                }
+                catch
+                {
+                    Utils.LogError("Failled to parse imagemodifier: {0}", c);
+                    ok = false;
+                }
+                ++c;
             }
+
+            return ok;
         }
 
         public void drawOnImage(ref Image image, BoundingBox boundingBox)

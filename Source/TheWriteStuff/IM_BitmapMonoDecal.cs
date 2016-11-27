@@ -39,9 +39,11 @@ namespace ASP
             public override void drawImageGS()
             {
                 BitmapDecal decal;
-                if (!BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) return;
+                if (BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) _gsImage = new ImageGS(decal.gsImage);
+                else _gsImage = new ImageGS(2, 2);
 
-                _gsImage = new ImageGS(decal.gsImage);
+                _origin.x = _gsImage.width / 2;
+                _origin.y = _gsImage.height / 2;
             }
 
             public override ImageModifier clone()

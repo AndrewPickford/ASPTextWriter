@@ -467,139 +467,117 @@ namespace ASP
             }
         }
  
-        public void rotateImage(Rotation rotation)
+        public void rotate(int rotation, ref IntVector2 origin)
         {
-            switch (rotation)
+            if (rotation == 0) return;
+            else if (rotation == 90)
             {
-                case Rotation.R180:
-                    rotate180();
-                    break;
-
-                case Rotation.R270:
-                    flipXY(false);
-                    break;
-
-                case Rotation.R90:
-                    flipXY(true);
-                    break;
-
-                case Rotation.R0:
-                default:
-                    break;
+                flipXY(false);
+                int oy = origin.y;
+                origin.y = origin.x;
+                origin.x = width - oy; 
             }
+            else if (rotation == 180)
+            {
+                rotate180();
+                origin.x = width - origin.x;
+                origin.y = height - origin.y;
+            }
+            else if (rotation == 270)
+            {
+                flipXY(true);
+                int ox = origin.x;
+                origin.x = origin.y;
+                origin.y = height - ox;
+            }
+            else rotateExact(rotation, ref origin);
         }
 
-        public void drawCharacter(char c, BitmapFont font, ref IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
-                                  byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
+        public void rotateExact(double rotation, ref IntVector2 origin)
         {
-            if (Global.Debug4) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
+            int subPixels = 8;
+            int size = width;
+            if (height > size) size = height;
+            size = (int)(size * 2.5d);
 
-            ASP.BitmapChar charMap;
-            IntVector2 cPos = new IntVector2();
+            long[,,] map = new long[size, size, 5];
+            Array.Clear(map, 0, map.Length);
 
-            if (font.characterMap.TryGetValue(c, out charMap) == false)
+            IntVector2 originNew = new IntVector2(size / 2, size / 2);
+            IntVector2 min = new IntVector2(size, size);
+            IntVector2 max = new IntVector2(0, 0);
+            IntVector2 rpos = new IntVector2(0, 0);
+
+            double sr = Math.Sin(2 * Math.PI * (rotation / 360d));
+            double cr = Math.Cos(2 * Math.PI * (rotation / 360d));
+
+            if (Global.Debug3)
             {
-                c = '?';
-                if (font.characterMap.TryGetValue(c, out charMap) == false) return;
+                Utils.Log("Rotate {0} degrees", rotation);
+                Utils.Log("Size: {0} x {1} -> {2} x {3}", width, height, size, size);
+                Utils.Log("Centres: ({0}, {1}) -> ({2}, {3})", origin.x, origin.y, originNew.x, originNew.y);
             }
 
-            Image charImage = new Image(charMap.image);
-            charImage.recolor(Global.Black32, color, false, true);
 
-            if (mirror) charImage.flipHorizontally();
-
-            switch (rotation)
+            for (int i = 0; i < width; ++i)
             {
-                case Rotation.R180:
-                    charImage.rotate180();
-                    cPos.x = position.x - ((int)charMap.vx + (int)charMap.vw);
-                    cPos.y = position.y - (font.size + (int)charMap.vy);
-                    position.x -= (int) charMap.cw;
-                    break;
-
-                case Rotation.R90:
-                    charImage.flipXY(true);
-                    cPos.x = position.x + (font.size + (int)charMap.vy + (int)charMap.vh);
-                    cPos.y = position.y - ((int)charMap.vx + (int)charMap.vw);
-                    position.y -= (int)charMap.cw;
-                    break;
-
-                case Rotation.R270:
-                    charImage.flipXY(false);
-                    cPos.x = position.x - (font.size + (int)charMap.vy);
-                    cPos.y = position.y + (int)charMap.vx;
-                    position.y += (int)charMap.cw;
-                    break;
-
-                case Rotation.R0:
-                default:
-                    cPos.x = position.x + (int)charMap.vx;
-                    cPos.y = position.y + (font.size + (int)charMap.vy + (int)charMap.vh);
-                    position.x += (int)charMap.cw;
-                    break;
-            }
-
-            blendImage(charImage, blendMethod, cPos, alphaOption, textureAlpha, boundingBox);
-        }
-
-        public void drawText(string text, string fontName, int fontSize, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
-                             byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
-        {
-            BitmapFont font = BitmapFontCache.Instance.getFontByNameSize(fontName, fontSize);
-            if (font == null) font = BitmapFontCache.Instance.fonts.First();
-
-            drawText(text, font, position, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
-        }
-
-        public void drawText(string text, BitmapFont font, IntVector2 position, Rotation rotation, Color32 color, bool mirror, AlphaOption alphaOption,
-                             byte textureAlpha, BlendMethod blendMethod, BoundingBox boundingBox = null)
-        {
-            if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);
-
-            IntVector2 charPos = new IntVector2(position);
-            bool escapeMode = false;
-
-            string textToWrite = string.Empty;
-            if (mirror) textToWrite = ASP.Utils.Reverse(text);
-            else textToWrite = text;
-
-            foreach (char c in textToWrite)
-            {
-                if (c == '\\')
+                for (int j = 0; j < height; ++j)
                 {
-                    escapeMode = !escapeMode;
-                }
-
-                if (escapeMode)
-                {
-                    if (c == 'n')
+                    if (pixels[i + j * width].a > 0)
                     {
-                        switch (rotation)
-                        {
-                            case Rotation.R90:
-                                charPos.x -= font.size;
-                                charPos.y = position.y;
-                                break;
-                            case Rotation.R270:
-                                charPos.x += font.size;
-                                charPos.y = position.y;
-                                break;
+                        byte r = pixels[i + j * width].r;
+                        byte g = pixels[i + j * width].g;
+                        byte b = pixels[i + j * width].b;
+                        byte a = pixels[i + j * width].a;
 
-                            case Rotation.R0:
-                                charPos.y -= font.size;
-                                charPos.x = position.x;
-                                break;
-                            case Rotation.R180:
-                            default:
-                                charPos.y += font.size;
-                                charPos.x = position.x;
-                                break;
+                        for (int k = 0; k < subPixels; ++k)
+                        {
+                            double x0 = i - origin.x + ((k + 0.5d) / (double)subPixels);
+                            for (int l = 0; l < subPixels; ++l)
+                            {
+                                double y0 = j - origin.y + ((l + 0.5d) / (double)subPixels);
+                                rpos.x = (int)(x0 * cr - y0 * sr + originNew.x);
+                                rpos.y = (int)(x0 * sr + y0 * cr + originNew.y);
+
+                                map[rpos.x, rpos.y, 0] += r * r * a;
+                                map[rpos.x, rpos.y, 1] += g * g * a;
+                                map[rpos.x, rpos.y, 2] += b * b * a;
+                                map[rpos.x, rpos.y, 3] += a;
+                                map[rpos.x, rpos.y, 4] += 1;
+
+                                if (rpos.x < min.x) min.x = rpos.x;
+                                if (rpos.x > max.x) max.x = rpos.x;
+                                if (rpos.y < min.y) min.y = rpos.y;
+                                if (rpos.y > max.y) max.y = rpos.y;
+                            }
                         }
                     }
-                    if (c != '\\') escapeMode = false;
                 }
-                else drawCharacter(c, font, ref charPos, rotation, color, mirror, alphaOption, textureAlpha, blendMethod, boundingBox);
             }
+
+            resize(max.x - min.x + 1, max.y - min.y + 1);
+            if (Global.Debug3) Utils.Log("New size: {0} x {1}", width, height);
+            for (int i = 0; i < width; ++i)
+            {
+                for (int j = 0; j < height; ++j)
+                {
+                    int x = i + min.x;
+                    int y = j + min.y;
+
+                    if (map[x, y, 3] > 0 && map[x, y, 4] > 0)
+                    {
+                        byte r = (byte)Math.Sqrt(map[x, y, 0] / map[x, y, 3]);
+                        byte g = (byte)Math.Sqrt(map[x, y, 1] / map[x, y, 3]);
+                        byte b = (byte)Math.Sqrt(map[x, y, 2] / map[x, y, 3]);
+                        byte a = (byte)Math.Min(255, (map[x, y, 3] / (subPixels*subPixels)));
+
+                        pixels[i + j * width] = new Color32(r, g, b, a);
+                    }
+                }
+            }
+
+            origin.x = originNew.x - min.x;
+            origin.y = originNew.y - min.y;
         }
 
         public void clip(BoundingBox boundingBox)

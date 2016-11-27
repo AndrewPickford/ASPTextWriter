@@ -10,16 +10,18 @@ namespace ASP
         public List<Vertex> vertices { get; private set; }
         public List<Edge> edges { get; private set; }
         public List<Spline> splines { get; private set; }
-        public double minX { get; private set; }
-        public double maxX { get; private set; }
-        public double minY { get; private set; }
-        public double maxY { get; private set; }
+        public DoubleVector2 min { get; private set; }
+        public DoubleVector2 max { get; private set; }
+        public DoubleVector2 centre { get; private set; }
 
         public Polygon()
         {
             vertices = new List<Vertex>();
             edges = new List<Edge>();
             splines = new List<Spline>();
+            min = new DoubleVector2(0, 0);
+            max = new DoubleVector2(0, 0);
+            centre = new DoubleVector2(0, 0);
         }
 
         public void addVertex(double x, double y, int rounding)
@@ -51,7 +53,6 @@ namespace ASP
                 vertices[i].x *= scale;
                 vertices[i].y *= scale;
             }
-            calculateMinMaxes();
         }
 
         public void align()
@@ -59,11 +60,37 @@ namespace ASP
             calculateMinMaxes();
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vertices[i].x = vertices[i].x - minX + 2d;
-                vertices[i].y = vertices[i].y - minY + 2d;
+                vertices[i].x = vertices[i].x - (int) min.x + 2d;
+                vertices[i].y = vertices[i].y - (int) min.y + 2d;
             }
             calculateMinMaxes();
             if (vertices.Count >= 3) calculateEdges();
+        }
+
+        public void rotate(double rotation)
+        {
+            double cr = Math.Cos(2 * Math.PI * rotation / 360);
+            double sr = Math.Sin(2 * Math.PI * rotation / 360);
+
+            for (int i = 0; i < vertices.Count; ++i)
+            {
+                double x = vertices[i].x * cr - vertices[i].y * sr;
+                double y = vertices[i].x * sr + vertices[i].y * cr;
+                vertices[i].x = x;
+                vertices[i].y = y;
+            }
+        }
+
+        public void mirrorX()
+        {
+            for (int i = 0; i < vertices.Count; ++i)
+                vertices[i].x = -vertices[i].x;
+        }
+
+        public void mirrorY()
+        {
+            for (int i = 0; i < vertices.Count; ++i)
+                vertices[i].y = -vertices[i].y;
         }
 
         public void close()
@@ -115,17 +142,17 @@ namespace ASP
 
         private void calculateMinMaxes()
         {
-            minX = vertices[0].x;
-            maxX = minX;
-            minY = vertices[0].y;
-            maxY = minY;
+            min.x = vertices[0].x;
+            max.x = min.x;
+            min.y = vertices[0].y;
+            max.y = min.y;
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                if (vertices[i].x < minX) minX = vertices[i].x;
-                if (vertices[i].x > maxX) maxX = vertices[i].x;
-                if (vertices[i].y < minY) minY = vertices[i].y;
-                if (vertices[i].y > maxY) maxY = vertices[i].y;
+                if (vertices[i].x < min.x) min.y = vertices[i].x;
+                if (vertices[i].x > max.x) max.y = vertices[i].x;
+                if (vertices[i].y < min.y) min.y = vertices[i].y;
+                if (vertices[i].y > max.y) max.y = vertices[i].y;
             }
         }
     }

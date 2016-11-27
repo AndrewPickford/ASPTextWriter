@@ -268,9 +268,12 @@ namespace ASP
 
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
 
-            GUI.contentColor = _color;
-            GUILayout.Label(_label);
-            GUI.contentColor = contentColor;
+            if (_label != "")
+            {
+                GUI.contentColor = _color;
+                GUILayout.Label(_label);
+                GUI.contentColor = contentColor;
+            }
 
             GUILayout.BeginHorizontal();
 

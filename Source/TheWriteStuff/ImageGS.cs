@@ -216,8 +216,8 @@ namespace ASP
         {
             int subPixels = 16;
             int[] subPixelMap = new int[width];
-            int minY = (int)polygon.minY;
-            int maxY = (int)polygon.maxY;
+            int minY = (int)polygon.min.y;
+            int maxY = (int)polygon.max.y;
             if (minY < 0) minY = 0;
             if (maxY > height - 1) maxY = height - 1;
 
@@ -260,6 +260,69 @@ namespace ASP
                 }
             }
 
+        }
+
+        public void overlay(ImageGS overlay, IntVector2 position)
+        {
+            for (int i = 0; i < overlay.width; ++i)
+            {
+                for (int j = 0; j < overlay.height; ++j)
+                {
+                    int px = position.x + i;
+                    int py = position.y + j;
+                    if (px < 0 || px >= width || py < 0 || py >= height) continue;
+                    if (overlay.getPixel(i, j) > 0) setPixel(px, py, overlay.getPixel(i, j));
+                }
+            }
+        }
+
+        public void drawCharacter(char c, BitmapFont font, ref IntVector2 position)
+        {
+            if (Global.Debug4) Utils.Log("char {0}, x {1}, y {2}", c, position.x, position.y);
+
+            ASP.BitmapChar charMap;
+            IntVector2 cPos = new IntVector2();
+
+            if (font.characterMap.TryGetValue(c, out charMap) == false)
+            {
+                c = '?';
+                if (font.characterMap.TryGetValue(c, out charMap) == false) return;
+            }
+
+            ImageGS charImage = new ImageGS(charMap.gsImage);
+
+            cPos.x = position.x + (int)charMap.vx;
+            cPos.y = position.y + (font.size + (int)charMap.vy + (int)charMap.vh);
+            position.x += (int)charMap.cw;
+
+            overlay(charImage, cPos);
+        }
+
+        public void drawText(string text, BitmapFont font, IntVector2 position)
+        {
+            if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);
+
+            IntVector2 charPos = new IntVector2(position);
+            bool escapeMode = false;
+
+            foreach (char c in text)
+            {
+                if (c == '\\')
+                {
+                    escapeMode = !escapeMode;
+                }
+
+                if (escapeMode)
+                {
+                    if (c == 'n')
+                    {
+                        charPos.y -= font.size;
+                        charPos.x = position.x;
+                    }
+                    if (c != '\\') escapeMode = false;
+                }
+                else drawCharacter(c, font, ref charPos);
+            }
         }
     }
 }

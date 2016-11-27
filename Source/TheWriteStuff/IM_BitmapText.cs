@@ -33,39 +33,23 @@ namespace ASP
                 base.save(node);
             }
 
-            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            public override void drawImageGS()
             {
-                image.drawText(_text, _fontName, _fontSize, _position, _rotation, _color, _mirror, _alphaOption, _textureAlpha, _blendMethod, boundingBox);
-            }
+                BitmapFont font = BitmapFontCache.Instance.getFontByNameSize(_fontName, _fontSize);
+                if (font == null) font = BitmapFontCache.Instance.fonts.First();
 
-            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
-            {
-                drawOnImage(ref image, boundingBox);
+                if (Global.Debug3) Utils.Log("font: {0}, size: {1}, text: {2}", font.name, font.size, _text);
 
-                if (_normalOption == NormalOption.USE_BACKGROUND) return;
-               
-                Image textImage = new Image(image.width, image.height);
-                Color32 backgroudColor = new Color32(127, 127, 127, 0);
-                textImage.fill(backgroudColor);
+                IntVector2 s = font.textExtent(_text);
+                s.x += 4;
+                s.y += 4;
+                _gsImage = new ImageGS(s.x, s.y);
 
-                Color32 color = Global.Gray32;
-                if (_normalOption == NormalOption.RAISE) color = Global.White32;
-                if (_normalOption == NormalOption.LOWER) color = Global.Black32;
+                _origin.x = 2;
+                _origin.y = s.y - 2 - font.size;
 
-                textImage.drawText(_text, _fontName, _fontSize, _position, _rotation, color, _mirror, AlphaOption.OVERWRITE, 255, BlendMethod.PIXEL);
-
-                BoundingBox bBox = new BoundingBox(boundingBox);
-                if (image.width != normalMap.width || image.height != normalMap.height)
-                {
-                    textImage.rescale(normalMap.width, normalMap.height);
-                    bBox.x = (int)((double)bBox.x * (double)normalMap.width / (double)image.width);
-                    bBox.w = (int)((double)bBox.w * (double)normalMap.width / (double)image.width);
-                    bBox.y = (int)((double)bBox.y * (double)normalMap.height / (double)image.height);
-                    bBox.h = (int)((double)bBox.h * (double)normalMap.height / (double)image.height);
-                }
-
-                Image normalMapImage = textImage.createNormalMap(_normalScale);
-                normalMap.overlay(normalMapImage, textImage, 128, bBox);
+                if (Global.Debug3) Utils.Log("image ({0}, {1}), pos ({2}, {3})", s.x, s.y, _origin.x, _origin.y);
+                _gsImage.drawText(_text, font, _origin);
             }
 
             public override ImageModifier clone()

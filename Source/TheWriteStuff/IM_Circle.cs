@@ -20,6 +20,7 @@ namespace ASP
             {
                 _type = Type.CIRCLE;
                 _radius = 10f;
+                _overlayRotates = false;
             }
 
             public void setRadius(double radius)
@@ -49,8 +50,8 @@ namespace ASP
                 _gsImage = new ImageGS(size, size);
                 _gsImage.clear();
                 _gsImage.drawCircleCentered(_radius);
-                _offset.x = (int)(_radius + 1);
-                _offset.y = (int)(_radius + 1);
+                _origin.x = (int)(_radius + 1);
+                _origin.y = (int)(_radius + 1);
             }
 
             public override ImageModifier clone()

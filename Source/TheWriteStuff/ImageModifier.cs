@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ASP
 {
-    public enum Rotation { R0, R90, R180, R270 };
+    //public enum Rotation { R0, R90, R180, R270 };
     public enum BlendMethod { PIXEL, RGB, HSV, SSR };
     public enum TransformOption { USE_FIRST, USE_ALL };
     public enum NormalOption { FLAT, RAISE, LOWER, USE_BACKGROUND };
@@ -287,27 +287,43 @@ namespace ASP
             }
         }
 
-        public void rotationSelector(TextureEditGUI gui, ref Rotation rotation, ref bool mirror)
+        public void rotationSelector(TextureEditGUI gui, ref ValueSelector<int, IntField> rotation, ref bool mirrorX, ref bool mirrorY)
         {
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
+            GUILayout.BeginHorizontal(GUI.skin.box, GUILayout.ExpandHeight(true));
 
-            GUILayout.Label("Direction");
+            GUILayout.BeginVertical();
+            GUILayout.Label("              Rotation");
+            GUILayout.BeginHorizontal();
 
-            int selection = (int) rotation;
-            int oldSelection = selection;
-            selection = GUILayout.SelectionGrid(selection, _rotationGrid, 2);
-
-            bool oldMirror = mirror;
-            mirror = GUILayout.Toggle(mirror, "Mirror");
-            if (oldMirror != mirror) gui.setRemakePreview();
-
-            if (oldSelection != selection)
-            {
-                rotation = (Rotation)selection;
-                gui.setRemakePreview();
-            }
-
+            GUILayout.BeginVertical();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("0", GUILayout.Width(35))) rotation.set(0);
+            if (GUILayout.Button("90", GUILayout.Width(35))) rotation.set(90);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("180", GUILayout.Width(35))) rotation.set(180);
+            if (GUILayout.Button("270", GUILayout.Width(35))) rotation.set(270);
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
+
+            GUILayout.Space(3);
+            rotation.draw();
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+
+            GUILayout.Space(5);
+
+            GUILayout.BeginVertical();
+            GUILayout.Label("Mirror");
+            bool oldMirror = mirrorX;
+            mirrorX = GUILayout.Toggle(mirrorX, "X");
+            if (oldMirror != mirrorX) gui.setRemakePreview();
+            oldMirror = mirrorY;
+            mirrorY = GUILayout.Toggle(mirrorY, "Y");
+            if (oldMirror != mirrorY) gui.setRemakePreview();
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
         }
 
         public void blendMethodSelector(TextureEditGUI gui, ref BlendMethod blendMethod)

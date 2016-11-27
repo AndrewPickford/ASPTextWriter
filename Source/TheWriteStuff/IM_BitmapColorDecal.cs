@@ -37,22 +37,15 @@ namespace ASP
                 node.AddValue("url", _url);
             }
 
-            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
+            public override void drawImage()
             {
                 BitmapDecal decal;
-                if (!BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) return;
+                if (BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) _image = new Image(decal.image);
+                else _image = new Image(2, 2);
 
-                Image decalImage = new Image(decal.image);
-                decalImage.scaleAlpha(_alpha);
-                decalImage.rotateImage(_rotation);
-                if (_mirror) decalImage.flipHorizontally();
-
-                image.blendImage(decalImage, _blendMethod, _position, _alphaOption, _textureAlpha, boundingBox);
-            }
-
-            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
-            {
-                drawDecalOnImage(ref image, ref normalMap, _url, boundingBox);
+                _image.scaleAlpha(_alpha);
+                _origin.x = _image.width / 2;
+                _origin.y = _image.height / 2;
             }
 
             public override ImageModifier clone()

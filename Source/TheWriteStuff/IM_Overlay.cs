@@ -11,14 +11,20 @@ namespace ASP
         public abstract class Overlay : ImageModifier
         {
             protected IntVector2 _position;
-            protected IntVector2 _offset;
-            protected bool _mirror = false;
+            protected IntVector2 _origin;
+            protected bool _mirrorX = false;
+            protected bool _mirrorY = false;
             protected byte _textureAlpha = 0;
             protected AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
             protected double _normalScale = 2.0d;
             protected NormalOption _normalOption = NormalOption.USE_BACKGROUND;
             protected BlendMethod _blendMethod = BlendMethod.SSR;
-            protected Rotation _rotation = Rotation.R0;
+            protected int _rotation = 0;
+            protected Image _image;
+            protected bool _overlayRotates = true;
+            private IntVector2 _overlayPosition;
+
+            public abstract void drawImage();
 
             public Overlay() :
                 base()
@@ -27,9 +33,11 @@ namespace ASP
                 _position.x = 0;
                 _position.y = 0;
 
-                _offset = new IntVector2();
-                _offset.x = 0;
-                _offset.y = 0;
+                _origin = new IntVector2();
+                _origin.x = 0;
+                _origin.y = 0;
+
+                _overlayPosition = new IntVector2(0, 0);
             }
 
             public void setPosition(IntVector2 position)
@@ -41,23 +49,25 @@ namespace ASP
             public override void load(ConfigNode node)
             {
                 _position = new IntVector2();
-                _mirror = false;
+                _mirrorX = false;
+                _mirrorY = false;
                 _textureAlpha = 0;
                 _alphaOption = AlphaOption.USE_TEXTURE;
                 _normalScale = 2.0f;
                 _normalOption = NormalOption.USE_BACKGROUND;
                 _blendMethod = BlendMethod.RGB;
-                _rotation = Rotation.R0;
+                _rotation = 0;
 
                 if (node.HasValue("x")) _position.x = int.Parse(node.GetValue("x"));
                 if (node.HasValue("y")) _position.y = int.Parse(node.GetValue("y"));
-                if (node.HasValue("mirror")) _mirror = bool.Parse(node.GetValue("mirror"));
+                if (node.HasValue("mirrorX")) _mirrorX = bool.Parse(node.GetValue("mirrorX"));
+                if (node.HasValue("mirrorY")) _mirrorX = bool.Parse(node.GetValue("mirrorY"));
                 if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
                 if (node.HasValue("normalScale")) _normalScale = double.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
                 if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
-                if (node.HasValue("rotation")) _rotation = (Rotation)ConfigNode.ParseEnum(typeof(Rotation), node.GetValue("rotation"));
+                if (node.HasValue("rotation")) _rotation = int.Parse(node.GetValue("rotation"));
             }
 
             public override void save(ConfigNode node)
@@ -65,20 +75,22 @@ namespace ASP
                 base.save(node);
                 node.AddValue("x", _position.x);
                 node.AddValue("y", _position.y);
-                node.AddValue("mirror", _mirror);
+                node.AddValue("mirrorX", _mirrorX);
+                node.AddValue("mirrorY", _mirrorY);
                 node.AddValue("textureAlpha", _textureAlpha);
                 node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
                 node.AddValue("normalScale", _normalScale.ToString("F1"));
                 node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
                 node.AddValue("blendMethod", ConfigNode.WriteEnum(_blendMethod));
-                node.AddValue("rotation", ConfigNode.WriteEnum(_rotation));
+                node.AddValue("rotation", _rotation);
             }
 
             protected void copyFrom(Overlay overlay)
             {
                 base.copyFrom(overlay);
                 _position = new IntVector2(overlay._position);
-                _mirror = overlay._mirror;
+                _mirrorX = overlay._mirrorX;
+                _mirrorY = overlay._mirrorY;
                 _textureAlpha = overlay._textureAlpha;
                 _alphaOption = overlay._alphaOption;
                 _normalScale = overlay._normalScale;
@@ -87,34 +99,54 @@ namespace ASP
                 _rotation = overlay._rotation;
             }
 
-            protected void drawDecalOnImage(ref Image image, ref Image normalMap, string _url, BoundingBox boundingBox)
+            public override void drawOnImage(ref Image image, BoundingBox boundingBox)
             {
-                BitmapDecal decal;
-                if (!BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) return;
+                if (Global.Debug3) Utils.Log("start");
+
+                drawImage();
+
+                if (_overlayRotates)
+                {
+                    _image.rotate(_rotation, ref _origin);
+                    if (_mirrorX) _image.flipHorizontally();
+                    if (_mirrorY) _image.flipVertically();
+                }
+
+                _overlayPosition = new IntVector2(_position.x - _origin.x, _position.y - _origin.y);
+
+                image.blendImage(_image, _blendMethod, _overlayPosition, _alphaOption, _textureAlpha, boundingBox);
+            }
+
+            public override void drawOnImage(ref Image image, ref Image normalMap, BoundingBox boundingBox)
+            {
+                if (Global.Debug3) Utils.Log("start");
 
                 drawOnImage(ref image, boundingBox);
 
                 if (_normalOption == NormalOption.USE_BACKGROUND) return;
 
-                Image backgroundImage = new Image(normalMap.width, normalMap.height);
+                Image overlayNormalMap = new Image(image.width, image.height);
                 Color32 backgroudColor = new Color32(127, 127, 127, 0);
-                backgroundImage.fill(backgroudColor);
+                overlayNormalMap.fill(backgroudColor);
 
                 Color32 color = Global.Gray32;
                 if (_normalOption == NormalOption.RAISE) color = Global.White32;
                 if (_normalOption == NormalOption.LOWER) color = Global.Black32;
 
-                Image decalImage = new Image(decal.image);
-                decalImage.recolor(Global.Black32, color, false, true);
-                decalImage.rotateImage(_rotation);
-                if (_mirror) decalImage.flipHorizontally();
+                overlayNormalMap.blendImage(_image, BlendMethod.PIXEL, _overlayPosition, AlphaOption.OVERWRITE, 255, boundingBox);
 
-                backgroundImage.blendImage(decalImage, BlendMethod.PIXEL, _position, AlphaOption.OVERWRITE, 255, boundingBox);
+                BoundingBox bBox = new BoundingBox(boundingBox);
+                if (image.width != normalMap.width || image.height != normalMap.height)
+                {
+                    overlayNormalMap.rescale(normalMap.width, normalMap.height);
+                    bBox.x = (int)((double)bBox.x * (double)normalMap.width / (double)image.width);
+                    bBox.w = (int)((double)bBox.w * (double)normalMap.width / (double)image.width);
+                    bBox.y = (int)((double)bBox.y * (double)normalMap.height / (double)image.height);
+                    bBox.h = (int)((double)bBox.h * (double)normalMap.height / (double)image.height);
+                }
 
-                Image normalMapImage = backgroundImage.createNormalMap(_normalScale);
-
-                if (image.width == normalMap.width && image.height == normalMap.height) normalMap.rescale(image.width, image.height);
-                normalMap.overlay(normalMapImage, backgroundImage, 128, boundingBox);
+                Image normalMapImage = overlayNormalMap.createNormalMap(_normalScale);
+                normalMap.overlay(normalMapImage, overlayNormalMap, 128, bBox);
             }
 
 
@@ -127,6 +159,7 @@ namespace ASP
                 protected ValueSelector<byte, ByteField> _textureAlphaSelector;
                 protected ValueSelector<int, IntField> _xPositionSelector;
                 protected ValueSelector<int, IntField> _yPositionSelector;
+                protected ValueSelector<int, IntField> _rotationSelector;
 
                 public OverlayGui(IM.Overlay overlay)
                 {
@@ -148,7 +181,7 @@ namespace ASP
 
                     GUILayout.BeginHorizontal();
                     drawExtras2(gui);
-                    rotationSelector(gui, ref _overlay._rotation, ref _overlay._mirror);
+                    rotationSelector(gui, ref _rotationSelector, ref _overlay._mirrorX, ref _overlay._mirrorY);
                     GUILayout.Space(10f);
                     blendMethodSelector(gui, ref _overlay._blendMethod);
                     GUILayout.FlexibleSpace();
@@ -182,6 +215,7 @@ namespace ASP
 
                     checkChanged(ref _overlay._position.x, _xPositionSelector.value(), gui);
                     checkChanged(ref _overlay._position.y, _yPositionSelector.value(), gui);
+                    checkChanged(ref _overlay._rotation, _rotationSelector.value(), gui);
                     if (_overlay._normalScale != _normalScaleSelector.value()) _overlay._normalScale = _normalScaleSelector.value();
                     if (_overlay._textureAlpha != _textureAlphaSelector.value()) _overlay._textureAlpha = _textureAlphaSelector.value();
                 }
@@ -201,6 +235,8 @@ namespace ASP
 
                     _textureAlphaSelector = new ValueSelector<byte, ByteField>(_overlay._textureAlpha, 0, 255, 1, "Texture Alpha", Color.white);
                     _normalScaleSelector = new ValueSelector<double, DoubleField>(_overlay._normalScale, 0, 5.0, 0.1, "Normal Scale", Color.white);
+
+                    _rotationSelector = new ValueSelector<int, IntField>(_overlay._rotation, 0, 359, 1, "", Color.white);
 
                     if (gui.kspTextureInfo().isSpecular) _textureAlphaSelector.setLabel("Specularity");
                     else if (gui.kspTextureInfo().isTransparent) _textureAlphaSelector.setLabel("Transparency");

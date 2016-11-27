@@ -39,5 +39,44 @@ namespace ASP
 
             UnityEngine.Object.Destroy(texture);
         }
+
+        public IntVector2 textExtent(string text)
+        {
+            IntVector2 extent = new IntVector2(0, size);
+            int x = 0;
+            bool escapeMode = false;
+
+            foreach (char c in text)
+            {
+                if (c == '\\')
+                {
+                    escapeMode = !escapeMode;
+                }
+
+                if (escapeMode)
+                {
+                    if (c == 'n')
+                    {
+                        if (extent.x < x) extent.x = x;
+                        extent.y += size;
+                        x = 0;
+                        break;
+                    }
+                    if (c != '\\') escapeMode = false;
+                }
+                else
+                {
+                    ASP.BitmapChar charMap;
+                    if (characterMap.TryGetValue(c, out charMap) == false)
+                    {
+                        if (characterMap.TryGetValue('?', out charMap) == false) continue;
+                    }
+                    x += (int)charMap.cw;
+                }
+            }
+            if (extent.x < x) extent.x = x;
+
+            return extent;
+        }
     }
 }

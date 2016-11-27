@@ -60,8 +60,6 @@ namespace ASP
 
             public override void drawImageGS()
             {
-                if (Global.Debug3) Utils.Log("drawing grayscale");
-
                 List<Vertex> vertices = new List<Vertex>(4);
                 double dx = 0;
                 double dy = 0;
@@ -84,12 +82,14 @@ namespace ASP
                 polygon.scale(_scale);
                 polygon.close();
 
-                _offset.x = -(int)polygon.minX + 2;
-                _offset.y = -(int)polygon.minY + 2;
+                if (Global.Debug3) Utils.Log("drawing rectangle ({0}, {1}), ({2}, {3})", polygon.vertices[0].x, polygon.vertices[0].y, polygon.vertices[2].x, polygon.vertices[2].y);
+
+                _origin.x = -(int)polygon.min.x + 2;
+                _origin.y = -(int)polygon.min.y + 2;
 
                 polygon.align();
-                int w = (int)polygon.maxX + 2;
-                int h = (int)polygon.maxY + 2;
+                int w = (int)polygon.max.x + 2;
+                int h = (int)polygon.max.y + 2;
 
                 _gsImage = new ImageGS(w, h);
                 _gsImage.clear();

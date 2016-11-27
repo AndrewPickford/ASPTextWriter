@@ -17,6 +17,7 @@ namespace ASP
         public double vh { get; private set; }
         public double cw { get; private set; }
         public Image image { get; private set; }
+        public ImageGS gsImage { get; private set; }
 
         public BitmapChar(ConfigNode node, UnityEngine.Texture2D texture)
         {
@@ -41,15 +42,18 @@ namespace ASP
             if (node.HasValue("orientation")) orientation = (Orientation)ConfigNode.ParseEnum(typeof(Orientation), node.GetValue("orientation"));
 
             image = texture.GetImage(rect);
+            gsImage = texture.GetImageMono(rect);
 
             switch (orientation)
             {
                 case Orientation.FLIPPED_XY:
                     image.flipXY(false);
+                    gsImage.flipXY(false);
                     break;
 
                 case Orientation.INVERTED:
                     image.flipVertically();
+                    gsImage.flipVertically();
                     break;
 
                 case Orientation.UPRIGHT:

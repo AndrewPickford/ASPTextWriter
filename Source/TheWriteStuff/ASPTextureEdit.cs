@@ -357,6 +357,7 @@ namespace ASP
         {
             if (Global.Debug3) Utils.Log("start");
 
+            bool loadedOk = true;
             _ok = false;
             _transformNames = null;
             _transforms = null;
@@ -370,27 +371,60 @@ namespace ASP
             if (_imageModifiers != null) _imageModifiers.cleanUp();
             _imageModifiers = null;
 
-            if (node.HasNode("ASP_BOUNDINGBOX"))
+            try
             {
-                if (_boundingBox == null) _boundingBox = new BoundingBox();
-                ConfigNode n = node.GetNode("ASP_BOUNDINGBOX");
-                _boundingBox.load(n);
+                if (node.HasNode("ASP_BOUNDINGBOX"))
+                {
+                    if (_boundingBox == null) _boundingBox = new BoundingBox();
+                    ConfigNode n = node.GetNode("ASP_BOUNDINGBOX");
+                    _boundingBox.load(n);
+                }
+            }
+            catch
+            {
+                Utils.LogError("Failled to parse bounding box");
+                loadedOk = false;
             }
 
-            if (node.HasValue("transformsOption")) _transformsOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformsOption"));
-
-            if (node.HasNode("ASP_BASETEXTURE"))
+            try
             {
-                ConfigNode n = node.GetNode("ASP_BASETEXTURE");
-                _baseTexture = IM.BaseTexture.CreateBaseTexture(n);
-                _baseTexture.load(n);
+                if (node.HasValue("transformsOption")) _transformsOption = (TransformOption)ConfigNode.ParseEnum(typeof(TransformOption), node.GetValue("transformsOption"));
+            }
+            catch
+            {
+                Utils.LogError("Failled to parse bounding box");
+                loadedOk = false;
             }
 
-            if (node.HasNode("ASP_IMAGEMODIFIERS"))
+            try
             {
-                _imageModifiers = new ImageModifiers();
-                ConfigNode n = node.GetNode("ASP_IMAGEMODIFIERS");
-                _imageModifiers.load(n);
+                if (node.HasNode("ASP_BASETEXTURE"))
+                {
+                    ConfigNode n = node.GetNode("ASP_BASETEXTURE");
+                    _baseTexture = IM.BaseTexture.CreateBaseTexture(n);
+                    _baseTexture.load(n);
+                }
+            }
+            catch
+            {
+                Utils.LogError("Failled to parse basetexture");
+                loadedOk = false;
+            }
+
+            try
+            {
+                if (node.HasNode("ASP_IMAGEMODIFIERS"))
+                {
+                    _imageModifiers = new ImageModifiers();
+                    ConfigNode n = node.GetNode("ASP_IMAGEMODIFIERS");
+                    bool ok = _imageModifiers.load(n);
+                    if (ok != true) loadedOk = false;
+                }
+            }
+            catch
+            {
+                Utils.LogError("Failled to parse imagemodifiers");
+                loadedOk = false;
             }
 
             if (label != string.Empty) Events["editTextureEvent"].guiName = label;

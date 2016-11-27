@@ -18,6 +18,7 @@ namespace ASP
                 base()
             {
                 _scale = 1d;
+                _overlayRotates = false;
             }
 
             public override void load(ConfigNode node)
@@ -71,14 +72,17 @@ namespace ASP
                 Polygon polygon = new Polygon();
                 polygon.addVertices(_vertices);
                 polygon.scale(_scale);
+                polygon.rotate(_rotation);
+                if (_mirrorX) polygon.mirrorX();
+                if (_mirrorY) polygon.mirrorY();
                 polygon.close();
 
-                _offset.x = -(int) polygon.minX + 2;
-                _offset.y = -(int) polygon.minY + 2;
-
                 polygon.align();
-                int w = (int)polygon.maxX + 2;
-                int h = (int)polygon.maxY + 2;
+                int w = (int)polygon.max.x + 2;
+                int h = (int)polygon.max.y + 2;
+
+                _origin.x = -(int)polygon.centre.x;
+                _origin.y = -(int)polygon.centre.y;
 
                 _gsImage = new ImageGS(w, h);
                 _gsImage.clear();
