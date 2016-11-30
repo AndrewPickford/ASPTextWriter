@@ -12,7 +12,6 @@ namespace ASP
         public List<Spline> splines { get; private set; }
         public DoubleVector2 min { get; private set; }
         public DoubleVector2 max { get; private set; }
-        public DoubleVector2 centre { get; private set; }
 
         public Polygon()
         {
@@ -21,7 +20,6 @@ namespace ASP
             splines = new List<Spline>();
             min = new DoubleVector2(0, 0);
             max = new DoubleVector2(0, 0);
-            centre = new DoubleVector2(0, 0);
         }
 
         public void addVertex(double x, double y, int rounding)
@@ -60,8 +58,8 @@ namespace ASP
             calculateMinMaxes();
             for (int i = 0; i < vertices.Count; ++i)
             {
-                vertices[i].x = vertices[i].x - (int) min.x + 2d;
-                vertices[i].y = vertices[i].y - (int) min.y + 2d;
+                vertices[i].x = vertices[i].x - (int) Math.Floor(min.x) + 2d;
+                vertices[i].y = vertices[i].y - (int) Math.Floor(min.y) + 2d;
             }
             calculateMinMaxes();
             if (vertices.Count >= 3) calculateEdges();
@@ -149,8 +147,8 @@ namespace ASP
 
             for (int i = 0; i < vertices.Count; ++i)
             {
-                if (vertices[i].x < min.x) min.y = vertices[i].x;
-                if (vertices[i].x > max.x) max.y = vertices[i].x;
+                if (vertices[i].x < min.x) min.x = vertices[i].x;
+                if (vertices[i].x > max.x) max.x = vertices[i].x;
                 if (vertices[i].y < min.y) min.y = vertices[i].y;
                 if (vertices[i].y > max.y) max.y = vertices[i].y;
             }
