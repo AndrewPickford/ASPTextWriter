@@ -77,12 +77,12 @@ namespace ASP
                 if (_mirrorY) polygon.mirrorY();
                 polygon.close();
 
+                _origin.x = (int)(2 - Math.Floor(polygon.min.x));
+                _origin.y = (int)(2 - Math.Floor(polygon.min.y));
+
                 polygon.align();
                 int w = (int)polygon.max.x + 2;
                 int h = (int)polygon.max.y + 2;
-
-                _origin.x = -(int)polygon.centre.x;
-                _origin.y = -(int)polygon.centre.y;
 
                 _gsImage = new ImageGS(w, h);
                 _gsImage.clear();

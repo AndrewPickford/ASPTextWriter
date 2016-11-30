@@ -84,8 +84,8 @@ namespace ASP
 
                 if (Global.Debug3) Utils.Log("drawing rectangle ({0}, {1}), ({2}, {3})", polygon.vertices[0].x, polygon.vertices[0].y, polygon.vertices[2].x, polygon.vertices[2].y);
 
-                _origin.x = -(int)polygon.min.x + 2;
-                _origin.y = -(int)polygon.min.y + 2;
+                _origin.x = (int)(2 - Math.Floor(polygon.min.x));
+                _origin.y = (int)(2 - Math.Floor(polygon.min.y));
 
                 polygon.align();
                 int w = (int)polygon.max.x + 2;
