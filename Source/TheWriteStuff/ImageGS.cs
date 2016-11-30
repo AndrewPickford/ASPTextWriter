@@ -289,13 +289,11 @@ namespace ASP
                 if (font.characterMap.TryGetValue(c, out charMap) == false) return;
             }
 
-            ImageGS charImage = new ImageGS(charMap.gsImage);
-
             cPos.x = position.x + (int)charMap.vx;
             cPos.y = position.y + (font.size + (int)charMap.vy + (int)charMap.vh);
             position.x += (int)charMap.cw;
 
-            overlay(charImage, cPos);
+            overlay(charMap.gsImage, cPos);
         }
 
         public void drawText(string text, BitmapFont font, IntVector2 position)

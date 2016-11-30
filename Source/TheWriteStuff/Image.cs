@@ -104,14 +104,14 @@ namespace ASP
             }
         }
 
-        public void fill(Color32 color)
+        public void fill(Color32 color, bool fillAlpha = true)
         {
             for (int i = 0; i < length; ++i)
             {
                 pixels[i].r = color.r;
                 pixels[i].g = color.g;
                 pixels[i].b = color.b;
-                pixels[i].a = color.a;
+                if (fillAlpha) pixels[i].a = color.a;
             }
         }
 
@@ -158,6 +158,102 @@ namespace ASP
                     }
                 }
             }
+        }
+
+        public void recolorScaledByAlpha(Color32 low, Color32 high)
+        {
+            int dr = high.r - low.r;
+            int dg = high.g - low.g;
+            int db = high.b - low.b;
+            int da = high.a - low.a;
+            for (int i = 0; i < length; ++i)
+            {
+                if (pixels[i].a > 0)
+                {
+                    int v = pixels[i].a;
+                    pixels[i].r = (byte)(dr * v / 255 + low.r);
+                    pixels[i].g = (byte)(dg * v / 255 + low.g);
+                    pixels[i].b = (byte)(db * v / 255 + low.b);
+                    pixels[i].a = (byte)(da * v / 255 + low.a);
+                }
+            }
+        }
+
+        public void recolorScaledByGray(Color32 low, Color32 high)
+        {
+            int dr = high.r - low.r;
+            int dg = high.g - low.g;
+            int db = high.b - low.b;
+            int da = high.a - low.a;
+            for (int i = 0; i < length; ++i)
+            {
+                if (pixels[i].a > 0)
+                {
+                    int r = pixels[i].r;
+                    int b = pixels[i].b;
+                    int g = pixels[i].g;
+                    int a = pixels[i].a;
+                    int v = (int) Math.Sqrt((r*r + g*g + b*b) * a / (3*255));
+                    pixels[i].r = (byte)(dr * v / (3 * 255) + low.r);
+                    pixels[i].g = (byte)(dg * v / (3 * 255) + low.g);
+                    pixels[i].b = (byte)(db * v / (3 * 255) + low.b);
+                    pixels[i].a = (byte)(da * v / (3 * 255) + low.a);
+                }
+            }
+        }
+
+        public void edges(int scale = 1)
+        {
+            Color32[] newPixels = new Color32[length];
+
+            int topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight;
+            for (int i = 0; i < width; ++i)
+            {
+                for (int j = 0; j < height; ++j)
+                {
+                    int g = getGrayscale(i, j);
+                    if (i == 0 || j == (height - 1)) topLeft = 127;
+                    else topLeft = getGrayscale(i - 1, j + 1);
+
+                    if (j == (height - 1)) top = 127;
+                    else top = getGrayscale(i, j + 1);
+
+                    if (i == (width - 1) || j == (height - 1)) topRight = 127;
+                    else topRight = getGrayscale(i + 1, j + 1);
+
+                    if (i == 0) left = 127;
+                    else left = getGrayscale(i - 1, j);
+
+                    if (i == (width - 1)) right = 127;
+                    else right = getGrayscale(i + 1, j);
+
+                    if (i == 0 || j == 0) bottomLeft = 127;
+                    else bottomLeft = getGrayscale(i - 1, j - 1);
+
+                    if (j == 0) bottom = 127;
+                    else bottom = getGrayscale(i, j - 1);
+
+                    if (i == (width - 1) || j == 0) bottomRight = 127;
+                    else bottomRight = getGrayscale(i + 1, j - 1);
+
+                    topLeft -= g;
+                    top -= g;
+                    topRight -= g;
+                    left -= g;
+                    right -= g;
+                    bottomLeft -= g;
+                    bottom -= g;
+                    bottomRight -= g;
+
+                    int d = topLeft * topLeft + top * top + topRight * topRight + left * left + right * right + bottomLeft * bottomLeft + bottom * bottom + bottomRight * bottomRight;
+                    d = Math.Min(255, (int) ((Math.Sqrt(d / 8) * scale / 2) + 127));
+                    newPixels[i + j * width].r = (byte)d;
+                    newPixels[i + j * width].g = (byte)d;
+                    newPixels[i + j * width].b = (byte)d;
+                    newPixels[i + j * width].a = pixels[i + j * width].a;
+                }
+            }
+            pixels = newPixels;
         }
 
         public void setPixel(int x, int y, Color color)

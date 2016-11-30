@@ -54,6 +54,13 @@ namespace ASP
                 _image.fillFromGrayScale(_gsImage, _color);
             }
 
+            public override void drawImageSolid()
+            {
+                drawImageGS();
+                _image = new Image(_gsImage.width, _gsImage.height);
+                _image.fillFromGrayScale(_gsImage, Global.White32);
+            }
+
 
 
 

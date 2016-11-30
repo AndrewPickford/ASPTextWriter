@@ -364,21 +364,15 @@ namespace ASP
             GUILayout.EndVertical();
         }
 
-        public void normalMapOptionSelector(TextureEditGUI gui, ref NormalOption normalOption)
+        public void normalMapOptionSelector(TextureEditGUI gui, ref NormalOption normalOption, ref bool scaleNormalsByAlpha, ref bool normalsFromDerivatives)
         {
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Normal Option");
 
-            int selection = (int)normalOption;
-            int oldSelection = selection;
-            selection = GUILayout.SelectionGrid(selection, _normalOptionGrid, 2);
-
-            if (oldSelection != selection)
-            {
-                normalOption = (NormalOption)selection;
-                gui.setRemakePreview();
-            }
+            normalOption = (NormalOption)GUILayout.SelectionGrid((int)normalOption, _normalOptionGrid, 2);
+            scaleNormalsByAlpha = GUILayout.Toggle(scaleNormalsByAlpha, "Alpha Scaling");
+            normalsFromDerivatives = GUILayout.Toggle(normalsFromDerivatives, "Edges");
 
             GUILayout.EndVertical();
         }

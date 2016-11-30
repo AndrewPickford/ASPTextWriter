@@ -18,6 +18,8 @@ namespace ASP
             protected AlphaOption _alphaOption = AlphaOption.USE_TEXTURE;
             protected double _normalScale = 2.0d;
             protected NormalOption _normalOption = NormalOption.USE_BACKGROUND;
+            protected bool _scaleNormalsByAlpha = false;
+            protected bool _normalsFromDerivatives = false;
             protected BlendMethod _blendMethod = BlendMethod.SSR;
             protected int _rotation = 0;
             protected Image _image;
@@ -25,6 +27,7 @@ namespace ASP
             private IntVector2 _overlayPosition;
 
             public abstract void drawImage();
+            public abstract void drawImageSolid(); 
 
             public Overlay() :
                 base()
@@ -55,6 +58,8 @@ namespace ASP
                 _alphaOption = AlphaOption.USE_TEXTURE;
                 _normalScale = 2.0f;
                 _normalOption = NormalOption.USE_BACKGROUND;
+                _scaleNormalsByAlpha = false;
+                _normalsFromDerivatives = false;
                 _blendMethod = BlendMethod.RGB;
                 _rotation = 0;
 
@@ -66,6 +71,8 @@ namespace ASP
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
                 if (node.HasValue("normalScale")) _normalScale = double.Parse(node.GetValue("normalScale"));
                 if (node.HasValue("normalOption")) _normalOption = (NormalOption)ConfigNode.ParseEnum(typeof(NormalOption), node.GetValue("normalOption"));
+                if (node.HasValue("scaleNormalsByAlpha")) _scaleNormalsByAlpha = bool.Parse(node.GetValue("scaleNormalsByAlpha"));
+                if (node.HasValue("normalsFromDerivatives")) _normalsFromDerivatives = bool.Parse(node.GetValue("normalsFromDerivatives"));
                 if (node.HasValue("blendMethod")) _blendMethod = (BlendMethod)ConfigNode.ParseEnum(typeof(BlendMethod), node.GetValue("blendMethod"));
                 if (node.HasValue("rotation")) _rotation = int.Parse(node.GetValue("rotation"));
             }
@@ -81,6 +88,8 @@ namespace ASP
                 node.AddValue("alphaOption", ConfigNode.WriteEnum(_alphaOption));
                 node.AddValue("normalScale", _normalScale.ToString("F1"));
                 node.AddValue("normalOption", ConfigNode.WriteEnum(_normalOption));
+                node.AddValue("scaleNormalsByAlpha", _scaleNormalsByAlpha);
+                node.AddValue("normalsFromDerivatives", _normalsFromDerivatives);
                 node.AddValue("blendMethod", ConfigNode.WriteEnum(_blendMethod));
                 node.AddValue("rotation", _rotation);
             }
@@ -95,6 +104,8 @@ namespace ASP
                 _alphaOption = overlay._alphaOption;
                 _normalScale = overlay._normalScale;
                 _normalOption = overlay._normalOption;
+                _scaleNormalsByAlpha = overlay._scaleNormalsByAlpha;
+                _normalsFromDerivatives = overlay._normalsFromDerivatives;
                 _blendMethod = overlay._blendMethod;
                 _rotation = overlay._rotation;
             }
@@ -129,11 +140,45 @@ namespace ASP
                 Color32 backgroudColor = new Color32(127, 127, 127, 0);
                 overlayNormalMap.fill(backgroudColor);
 
-                Color32 color = Global.Gray32;
-                if (_normalOption == NormalOption.RAISE) color = Global.White32;
-                if (_normalOption == NormalOption.LOWER) color = Global.Black32;
+                drawImageSolid();
+                if (_overlayRotates)
+                {
+                    _image.rotate(_rotation, ref _origin);
+                    if (_mirrorX) _image.flipHorizontally();
+                    if (_mirrorY) _image.flipVertically();
+                }
+                switch (_normalOption)
+                {
+                    case NormalOption.FLAT:
+                        _image.fill(Global.Gray32, false);
+                        break;
 
-                overlayNormalMap.blendImage(_image, BlendMethod.PIXEL, _overlayPosition, AlphaOption.OVERWRITE, 255, boundingBox);
+                    case NormalOption.RAISE:
+                        if (_scaleNormalsByAlpha) _image.recolorScaledByAlpha(Global.Gray32, Global.White32);
+                        else _image.recolorScaledByGray(Global.Gray32, Global.White32);
+                        if (_normalsFromDerivatives)
+                        {
+                            _image.edges(2);
+                            _image.recolorScaledByGray(Global.Gray32, Global.White32);
+                        }
+                        break;
+
+                    case NormalOption.LOWER:
+                        if (_scaleNormalsByAlpha) _image.recolorScaledByAlpha(Global.Gray32, Global.Black32);
+                        else _image.recolorScaledByGray(Global.Gray32, Global.Black32);
+                        if (_normalsFromDerivatives)
+                        {
+                            _image.edges(2);
+                            _image.recolorScaledByGray(Global.Gray32, Global.Black32);
+                        }
+                        break;
+
+                    case NormalOption.USE_BACKGROUND:
+                    default:
+                        break;
+                }
+
+                overlayNormalMap.blendImage(_image, BlendMethod.RGB, _overlayPosition, AlphaOption.OVERWRITE, 255, boundingBox);
 
                 BoundingBox bBox = new BoundingBox(boundingBox);
                 if (image.width != normalMap.width || image.height != normalMap.height)
@@ -198,7 +243,7 @@ namespace ASP
 
                     if (gui.kspTextureInfo().hasNormalMap)
                     {
-                        normalMapOptionSelector(gui, ref _overlay._normalOption);
+                        normalMapOptionSelector(gui, ref _overlay._normalOption, ref _overlay._scaleNormalsByAlpha, ref _overlay._normalsFromDerivatives);
                         GUILayout.Space(10f);
                         _normalScaleSelector.draw();
                     }

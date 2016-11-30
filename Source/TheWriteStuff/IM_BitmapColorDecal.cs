@@ -37,15 +37,19 @@ namespace ASP
                 node.AddValue("url", _url);
             }
 
-            public override void drawImage()
+            public override void drawImageSolid()
             {
                 BitmapDecal decal;
                 if (BitmapDecalCache.Instance.decals.TryGetValue(_url, out decal)) _image = new Image(decal.image);
                 else _image = new Image(2, 2);
-
-                _image.scaleAlpha(_alpha);
                 _origin.x = _image.width / 2;
                 _origin.y = _image.height / 2;
+            }
+
+            public override void drawImage()
+            {
+                drawImageSolid();
+                _image.scaleAlpha(_alpha);
             }
 
             public override ImageModifier clone()
