@@ -8,6 +8,8 @@ GameData/ASP/TheWriteStuff/Plugins/TWSPainter.dll
 
 Ignore
 
+Source/TheWriteStuff.userprefs
+
 Unity/ksp/**/*.csproj
 Unity/ksp/Assets/Fonts
 Unity/ksp/Assets/PartTools
