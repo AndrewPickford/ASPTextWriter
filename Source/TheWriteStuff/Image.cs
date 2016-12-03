@@ -591,7 +591,9 @@ namespace ASP
 
         public void rotateExact(double rotation, ref IntVector2 origin)
         {
-            int subPixels = 8;
+            const int subPixels = 8;
+            const int subPixelThreshold = 56;
+
             int size = width;
             if (height > size) size = height;
             size = (int)(size * 2.5d);
@@ -632,8 +634,10 @@ namespace ASP
                             for (int l = 0; l < subPixels; ++l)
                             {
                                 double y0 = j - origin.y + ((l + 0.5d) / (double)subPixels);
-                                rpos.x = (int)(x0 * cr - y0 * sr + originNew.x);
-                                rpos.y = (int)(x0 * sr + y0 * cr + originNew.y);
+                                double x1 = x0 * cr - y0 * sr + originNew.x;
+                                double y1 = x0 * sr + y0 * cr + originNew.y;
+                                rpos.x = (int)(x1);
+                                rpos.y = (int)(y1);
 
                                 map[rpos.x, rpos.y, 0] += r * r * a;
                                 map[rpos.x, rpos.y, 1] += g * g * a;
@@ -665,9 +669,15 @@ namespace ASP
                         byte r = (byte)Math.Sqrt(map[x, y, 0] / map[x, y, 3]);
                         byte g = (byte)Math.Sqrt(map[x, y, 1] / map[x, y, 3]);
                         byte b = (byte)Math.Sqrt(map[x, y, 2] / map[x, y, 3]);
-                        byte a = (byte)Math.Min(255, (map[x, y, 3] / (subPixels*subPixels)));
 
-                        pixels[i + j * width] = new Color32(r, g, b, a);
+                        byte a = 0;
+                        if (map[x, y, 4] >= subPixelThreshold) a = (byte)Math.Min(255, (map[x, y, 3] / map[x, y, 4]));
+                        else a = (byte)Math.Min(255, (map[x, y, 3] / subPixelThreshold));
+
+                        pixels[i + j * width].r = r;
+                        pixels[i + j * width].g = g;
+                        pixels[i + j * width].b = b;
+                        pixels[i + j * width].a = a;
                     }
                 }
             }
