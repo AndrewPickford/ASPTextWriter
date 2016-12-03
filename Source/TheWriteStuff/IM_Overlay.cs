@@ -123,7 +123,8 @@ namespace ASP
                     if (_mirrorY) _image.flipVertically();
                 }
 
-                _overlayPosition = new IntVector2(_position.x - _origin.x, _position.y - _origin.y);
+                _overlayPosition.x = _position.x - _origin.x;
+                _overlayPosition.y = _position.y - _origin.y;
 
                 image.blendImage(_image, _blendMethod, _overlayPosition, _alphaOption, _textureAlpha, boundingBox);
             }
@@ -147,6 +148,7 @@ namespace ASP
                     if (_mirrorX) _image.flipHorizontally();
                     if (_mirrorY) _image.flipVertically();
                 }
+
                 switch (_normalOption)
                 {
                     case NormalOption.FLAT:
@@ -178,6 +180,8 @@ namespace ASP
                         break;
                 }
 
+                _overlayPosition.x = _position.x - _origin.x;
+                _overlayPosition.y = _position.y - _origin.y;
                 overlayNormalMap.blendImage(_image, BlendMethod.RGB, _overlayPosition, AlphaOption.OVERWRITE, 255, boundingBox);
 
                 BoundingBox bBox = new BoundingBox(boundingBox);
