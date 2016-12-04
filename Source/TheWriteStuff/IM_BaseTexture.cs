@@ -16,8 +16,8 @@ namespace ASP
             static string _headerName = "BASE TEXTURE";
 
             public bool valid { get; protected set; }
-            protected Method _method = Method.AUTO;
-            protected bool _hasNormalMap = false;
+            protected Method _method;
+            protected bool _hasNormalMap;
 
             public abstract IM.BaseTexture cloneBaseTexture();
             public abstract int width();
@@ -27,6 +27,14 @@ namespace ASP
             public abstract void set(KSPTextureInfo info);
             public abstract void drawOnImage(ref Image image);
             public abstract void drawOnImage(ref Image image, ref Image normalMap);
+
+            protected BaseTexture() :
+                base()
+            {
+                valid = false;
+                _method = Method.AUTO;
+                _hasNormalMap = false;
+            }
 
             public static IM.BaseTexture CreateBaseTexture(ConfigNode node)
             {

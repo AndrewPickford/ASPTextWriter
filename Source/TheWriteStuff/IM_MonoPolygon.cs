@@ -14,7 +14,7 @@ namespace ASP
             protected List<Vertex> _vertices;
             protected double _scale;
 
-            public MonoPolygon() :
+            protected MonoPolygon() :
                 base()
             {
                 _scale = 1d;

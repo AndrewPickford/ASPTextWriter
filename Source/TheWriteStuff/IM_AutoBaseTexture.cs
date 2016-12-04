@@ -10,7 +10,8 @@ namespace ASP
     {
         public class AutoBaseTexture : SingleBaseTexture
         {
-            public AutoBaseTexture()
+            public AutoBaseTexture() :
+                base()
             {
                 _type = Type.BASE_TEXTURE;
                 _method = Method.AUTO;

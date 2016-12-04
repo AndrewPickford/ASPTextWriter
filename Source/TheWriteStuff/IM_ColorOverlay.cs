@@ -12,7 +12,7 @@ namespace ASP
         {
             protected byte _alpha;
 
-            public ColorOverlay() :
+            protected ColorOverlay() :
                 base()
             {
                 _alpha = 255;

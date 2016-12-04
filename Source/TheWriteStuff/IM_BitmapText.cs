@@ -15,7 +15,8 @@ namespace ASP
 
             private BitmapTextGui _gui;
 
-            public BitmapText()
+            public BitmapText() :
+                base()
             {
                 _type = Type.BITMAP_TEXT;
                 _fontName = "CAPSMALL_CLEAN";

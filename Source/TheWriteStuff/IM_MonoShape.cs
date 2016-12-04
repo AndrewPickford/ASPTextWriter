@@ -13,7 +13,7 @@ namespace ASP
             protected bool _fillShape;
             protected double _edgeWidth;
 
-            public MonoShape() :
+            protected MonoShape() :
                 base()
             {
                 _fillShape = true;

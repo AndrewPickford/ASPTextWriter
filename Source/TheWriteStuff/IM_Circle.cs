@@ -16,7 +16,8 @@ namespace ASP
             private double _radius;
             private CircleGui _gui;
 
-            public Circle()
+            public Circle() :
+                base()
             {
                 _type = Type.CIRCLE;
                 _radius = 10f;

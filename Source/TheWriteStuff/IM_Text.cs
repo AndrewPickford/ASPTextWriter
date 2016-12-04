@@ -10,15 +10,23 @@ namespace ASP
     {
         public abstract class Text : MonoOverlay
         {
-            protected string _text = string.Empty;
-            protected string _fontName = string.Empty;
-            protected int _fontSize = 0;
+            protected string _text;
+            protected string _fontName;
+            protected int _fontSize;
+
+            protected Text() :
+                base()
+            {
+                _text = string.Empty;
+                _fontName = "";
+                _fontSize = 0;
+            }
 
             public override void load(ConfigNode node)
             {
                 _text = string.Empty;
-                _fontName = "CAPSMALL_CLEAN";
-                _fontSize = 32;
+                _fontName = "";
+                _fontSize = 0;
 
                 base.load(node);
 

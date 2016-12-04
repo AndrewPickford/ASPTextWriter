@@ -29,7 +29,7 @@ namespace ASP
             public abstract void drawImage();
             public abstract void drawImageSolid(); 
 
-            public Overlay() :
+            protected Overlay() :
                 base()
             {
                 _position = new IntVector2();

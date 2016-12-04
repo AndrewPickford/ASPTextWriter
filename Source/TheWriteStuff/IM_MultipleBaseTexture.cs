@@ -18,7 +18,8 @@ namespace ASP
             private int _selectedTexture = 0;
             private MultipleBaseTextureGui _gui;
 
-            public MultipleBaseTexture()
+            public MultipleBaseTexture() :
+                base()
             {
                 _type = Type.BASE_TEXTURE;
                 _method = Method.MULTIPLE;

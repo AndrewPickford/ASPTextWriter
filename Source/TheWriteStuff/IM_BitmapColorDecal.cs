@@ -13,12 +13,14 @@ namespace ASP
             static string _displayName = "Color Decal";
             static string _headerName = "COLOR DECAL";
 
-            private string _url = string.Empty;
+            private string _url;
             private BitmapColorDecalGui _gui;
 
-            public BitmapColorDecal()
+            public BitmapColorDecal() :
+                base()
             {
                 _type = Type.BITMAP_COLOR_DECAL;
+                _url = string.Empty;
             }
 
             public override void load(ConfigNode node)

@@ -10,7 +10,8 @@ namespace ASP
     {
         public class CurrentBaseTexture : SingleBaseTexture
         {
-            public CurrentBaseTexture()
+            public CurrentBaseTexture() :
+                base()
             {
                 _type = Type.BASE_TEXTURE;
                 _method = Method.CURRENT;

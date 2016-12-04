@@ -15,7 +15,7 @@ namespace ASP
 
             public abstract void drawImageGS();
 
-            public MonoOverlay() :
+            protected MonoOverlay() :
                 base()
             {
                 _color = new Color32(0, 0, 0, 255);

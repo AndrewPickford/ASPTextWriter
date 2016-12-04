@@ -28,7 +28,7 @@ namespace ASP
         public bool longRight { get; protected set; }
         protected Type _type = Type.INVALID;
 
-        public ImageModifier()
+        protected ImageModifier()
         {
             longRight = true;
             _type = Type.INVALID;

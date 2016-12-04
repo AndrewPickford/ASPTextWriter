@@ -10,11 +10,18 @@ namespace ASP
     {
         public abstract class SingleBaseTexture : BaseTexture
         {
-            protected TextureInfo _main = null;
-            protected TextureInfo _normalMap = null;
+            protected TextureInfo _main;
+            protected TextureInfo _normalMap;
             protected SingleBaseTextureGui _gui;
 
             protected abstract void setupImages();
+
+            protected SingleBaseTexture() :
+                base()
+            {
+                _main = null;
+                _normalMap = null;
+            }
 
             protected void copyFrom(SingleBaseTexture baseTexture)
             {
