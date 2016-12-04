@@ -5,7 +5,7 @@
      "GITHUB":{
          "USERNAME":"AndrewPickford",
          "REPOSITORY":"TheWriteStuff",
-         "ALLOW_PRE_RELEASE":false
+         "ALLOW_PRE_RELEASE":true
      },
     "VERSION":
     {
