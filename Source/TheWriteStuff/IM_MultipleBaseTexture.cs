@@ -328,6 +328,10 @@ namespace ASP
                 {
                     Color contentColor = GUI.contentColor;
 
+                    GUILayout.BeginVertical();
+                    header(gui, _multipleBaseTexture.headerName());
+                    GUILayout.Space(5f);
+
                     _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(200), GUILayout.ExpandHeight(true));
 
                     int oldSelectedTexture = _multipleBaseTexture._selectedTexture;
@@ -349,6 +353,7 @@ namespace ASP
                     }
 
                     GUILayout.EndScrollView();
+                    GUILayout.EndVertical();
 
                     GUI.contentColor = contentColor;
                 }
