@@ -27,8 +27,8 @@ public class MakeASPFontConfig :  MonoBehaviour
 
 		if (!System.IO.Directory.Exists(outputFolder))
 		{
-		System.IO.Directory.CreateDirectory(outputFolder);
-        	}
+		    System.IO.Directory.CreateDirectory(outputFolder);
+        }
 
 		TrueTypeFontImporter fontImporter = AssetImporter.GetAtPath (path) as TrueTypeFontImporter;
 		

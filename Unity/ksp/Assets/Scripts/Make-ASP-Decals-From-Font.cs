@@ -24,11 +24,12 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 		UnityEngine.Object obj = AssetDatabase.LoadMainAssetAtPath (assetFilePath);
 		string path = AssetDatabase.GetAssetPath (obj);
 		string outputFolder = Path.GetDirectoryName(path) + "/" + assetFileName;
+        string configFileName = Path.GetDirectoryName(path) + "/" + assetFileName + ".chars";
 
-        	if (!System.IO.Directory.Exists(outputFolder))
-        	{
-          		System.IO.Directory.CreateDirectory(outputFolder);
-        	}
+        if (!System.IO.Directory.Exists(outputFolder))
+       	{
+          	System.IO.Directory.CreateDirectory(outputFolder);
+        }
 		
 		TrueTypeFontImporter fontImporter = AssetImporter.GetAtPath (path) as TrueTypeFontImporter;
 		
@@ -42,8 +43,9 @@ public class MakeASPDecalsFromFont :  MonoBehaviour
 		FileUtil.ReplaceFile(texturePath, texturePathPngMap);
 		
 		Debug.Log ("KSP Font Texture created at: " + texturePathPngMap);
-		
-		string chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";		
+
+        string chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+        if (System.IO.File.Exists(configFileName)) chars = System.IO.File.ReadAllText(configFileName);
 		font.RequestCharactersInTexture(chars, 0);
 
 		Texture2D texture = new Texture2D (1, 1);
