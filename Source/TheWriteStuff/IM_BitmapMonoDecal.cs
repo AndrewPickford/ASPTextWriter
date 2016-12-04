@@ -92,6 +92,7 @@ namespace ASP
                 private int _selectedDecal = 0;
                 private Vector2 _scrollPos;
                 private List<Texture2D> _textures = null;
+                int _width = 250;
 
                 public BitmapMonoDecalGui(IM.BitmapMonoDecal bitmapMonoDecal)
                     : base(bitmapMonoDecal)
@@ -123,7 +124,7 @@ namespace ASP
 
                     Color contentColor = GUI.contentColor;
 
-                    _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(250), GUILayout.ExpandHeight(true));
+                    _scrollPos = GUILayout.BeginScrollView(_scrollPos, GUI.skin.box, GUILayout.MinWidth(_width + 50), GUILayout.ExpandHeight(true));
 
                     header(gui, "MONO DECAL");
                     GUILayout.Space(5);
@@ -161,6 +162,7 @@ namespace ASP
 
                     if (_textures == null)
                     {
+                        _width = 250;
                         _textures = new List<Texture2D>();
                         for (int i = 0; i < BitmapDecalCache.Instance.monoSheets[_selectedSheet].decals.Count; ++i)
                         {
@@ -171,8 +173,10 @@ namespace ASP
                             texture.Apply();
 
                             _textures.Add(texture);
+                            if (texture.width > _width) _width = texture.width;
                         }
                     }
+
 
                     int oldSelectedDecal = _selectedDecal;
                     int x = 0;
@@ -193,7 +197,7 @@ namespace ASP
                         x += _textures[i].width + 5;
                         if (i < (_textures.Count - 1))
                         {
-                            if (x > 0 && (x + _textures[i+1].width) > 200)
+                            if (x > 0 && (x + _textures[i+1].width) > _width)
                             {
                                 GUILayout.EndHorizontal();
                                 GUILayout.BeginHorizontal();

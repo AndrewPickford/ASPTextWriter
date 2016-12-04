@@ -314,7 +314,7 @@ namespace ASP
             GUILayout.Space(5);
 
             GUILayout.BeginVertical();
-            GUILayout.Label("Mirror");
+            GUILayout.Label("Mirror", GUILayout.MinWidth(35));
             bool oldMirror = mirrorX;
             mirrorX = GUILayout.Toggle(mirrorX, "X");
             if (oldMirror != mirrorX) gui.setRemakePreview();
