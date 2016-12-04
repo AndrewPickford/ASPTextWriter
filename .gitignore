@@ -3,9 +3,6 @@
 bin/
 obj/
 
-GameData/ASP/TheWriteStuff/Plugins/TheWriteStuff.dll
-GameData/ASP/TheWriteStuff/Plugins/TWSPainter.dll
-
 Ignore
 
 Source/TheWriteStuff.userprefs
