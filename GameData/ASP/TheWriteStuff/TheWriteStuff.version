@@ -1,0 +1,35 @@
+{
+    "NAME":"TheWriteStuff",
+    "URL": "https://raw.githubusercontent.com/AndrewPickford/TheWriteStuff/master/GameData/ASP/TheWriteStuff/TheWriteStuff.version",
+    "DOWNLOAD":"https://github.com/AndrewPickford/TheWriteStuff/releases",
+     "GITHUB":{
+         "USERNAME":"AndrewPickford",
+         "REPOSITORY":"TheWriteStuff",
+         "ALLOW_PRE_RELEASE":false
+     },
+    "VERSION":
+    {
+        "MAJOR":0,
+        "MINOR":9,
+        "PATCH":0,
+        "BUILD":0
+    },
+    "KSP_VERSION":
+    {
+        "MAJOR":1,
+        "MINOR":2,
+        "PATCH":1
+    },
+    "KSP_VERSION_MIN":
+    {
+        "MAJOR":1,
+        "MINOR":2,
+        "PATCH":0
+    },
+    "KSP_VERSION_MAX":
+    {
+        "MAJOR":1,
+        "MINOR":2,
+        "PATCH":99
+    }
+} 
