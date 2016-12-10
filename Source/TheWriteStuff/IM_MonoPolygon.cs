@@ -17,27 +17,31 @@ namespace ASP
             protected MonoPolygon() :
                 base()
             {
-                _scale = 1d;
+                _scale = 1.0;
                 _overlayRotates = false;
             }
 
             public override void load(ConfigNode node)
             {
                 _scale = 1d;
-                _vertices = new List<Vertex>(_vertices.Count);
-                for (int i = 0; i < _vertices.Count; ++i)
-                {
-                    _vertices.Add(new Vertex(0, 0, 0));
-                }
 
                 base.load(node);
 
                 if (node.HasValue("scale")) _scale = double.Parse(node.GetValue("scale"));
-                for (int i = 0; i < _vertices.Count; ++i)
+                if (node.HasValue("vertices"))
                 {
-                    if (node.HasValue("vertex_" + i.ToString() + "_x")) _vertices[i].x = double.Parse(node.GetValue("vertex_" + i.ToString() + "_x"));
-                    if (node.HasValue("vertex_" + i.ToString() + "_y")) _vertices[i].y = double.Parse(node.GetValue("vertex_" + i.ToString() + "_y"));
-                    if (node.HasValue("vertex_" + i.ToString() + "_rounding")) _vertices[i].rounding = int.Parse(node.GetValue("vertex_" + i.ToString() + "_rounding"));
+                    int verts = int.Parse(node.GetValue("vertices"));
+
+                    _vertices = new List<Vertex>(verts);
+                    for (int i = 0; i < verts; ++i)
+                        _vertices.Add(new Vertex(0, 0, 0));
+
+                    for (int i = 0; i < verts; ++i)
+                    {
+                        if (node.HasValue("vertex_" + i.ToString() + "_x")) _vertices[i].x = double.Parse(node.GetValue("vertex_" + i.ToString() + "_x"));
+                        if (node.HasValue("vertex_" + i.ToString() + "_y")) _vertices[i].y = double.Parse(node.GetValue("vertex_" + i.ToString() + "_y"));
+                        if (node.HasValue("vertex_" + i.ToString() + "_rounding")) _vertices[i].rounding = int.Parse(node.GetValue("vertex_" + i.ToString() + "_rounding"));
+                    }
                 }
             }
 
@@ -46,11 +50,16 @@ namespace ASP
                 base.save(node);
 
                 node.AddValue("scale", _scale);
-                for (int i = 0; i < _vertices.Count; ++i)
+
+                if (_vertices.Count > 0)
                 {
-                    node.AddValue("vertex_" + i.ToString() + "_x", _vertices[i].x);
-                    node.AddValue("vertex_" + i.ToString() + "_y", _vertices[i].y);
-                    node.AddValue("vertex_" + i.ToString() + "_rounding", _vertices[i].rounding);
+                    node.AddValue("vertices", _vertices.Count);
+                    for (int i = 0; i < _vertices.Count; ++i)
+                    {
+                        node.AddValue("vertex_" + i.ToString() + "_x", _vertices[i].x);
+                        node.AddValue("vertex_" + i.ToString() + "_y", _vertices[i].y);
+                        node.AddValue("vertex_" + i.ToString() + "_rounding", _vertices[i].rounding);
+                    }
                 }
             }
 
