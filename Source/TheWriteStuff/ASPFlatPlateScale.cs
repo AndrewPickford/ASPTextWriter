@@ -9,78 +9,85 @@ namespace ASP
     public class ASPFlatPlateScale : PartModule
     {
         [KSPField(isPersistant = true)]
-        public string transformName = "";
-
-        [KSPField(isPersistant = true)]
-        public float size = 1f;
-
-        [KSPField(isPersistant = true)]
-        public float sizeMin = 0.1f;
-
-        [KSPField(isPersistant = true)]
-        public float sizeMax = 8f;
-
-        [KSPField(isPersistant = true)]
-        public float sizeStep = 0.1f;
-
-        [KSPField(isPersistant = true)]
-        public float thickness = 1f;
-
-        [KSPField(isPersistant = true)]
-        public float thicknessMin = 0.1f;
-
-        [KSPField(isPersistant = true)]
-        public float thicknessMax = 5f;
-
-        [KSPField(isPersistant = true)]
-        public float thicknessStep = 0.1f;
-
-        [KSPField(isPersistant = true)]
         public float baseMass = -1f;
 
-        private Vector3 _originalScale;
-        private Transform _transform;
+        [KSPField(isPersistant = true)]
+        public string thicknessAxis = "z";
 
-        [KSPEvent(name = "Increase Size Event", guiName = "Increase Size", guiActive = false, guiActiveEditor = true)]
-        public void increaseSizeEvent()
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Size", guiFormat = "0.000")]
+        [UI_ScaleEdit(scene = UI_Scene.Editor)]
+        public float size = 1f;
+
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Thickness", guiFormat = "0.000")]
+        [UI_ScaleEdit(scene = UI_Scene.Editor)]
+        public float thickness = 1f;
+
+        private List<Vector3> _originalScales;
+        private List<string> _transformNames;
+        private List<Transform> _transforms;
+
+        private static float[] _SizeIntervals = { 0.1f, 1f, 2f, 4f, 8f };
+        private static float[] _SizeIncrements = { 0.01f, 0.01f, 0.02f, 0.04f, 0.08f };
+        private static float[] _ThicknessIntervals = { 0.1f, 1f, 2f, 4f, 8f };
+        private static float[] _ThicknessIncrements = { 0.01f, 0.01f, 0.02f, 0.04f, 0.08f };
+
+        private void OnScaleChanged(BaseField field, object obj)
         {
-            size += sizeStep;
-            if (size > sizeMax) size = sizeMax;
-            rescale();
+            if (_transforms == null) return;
+
+            if (Global.Debug3) Utils.Log("size {0}, thickness {1}", size, thickness);
+
+            for (int i = 0; i < _transforms.Count; ++i)
+            {
+                if (Global.Debug3) Utils.Log("rescaling transform {0}", _transformNames[i]);
+
+                Vector3 scale = new Vector3(_originalScales[i].x, _originalScales[i].y, _originalScales[i].z);
+                if (thicknessAxis == "x") scale.x *= thickness;
+                else scale.x *= size;
+                if (thicknessAxis == "y") scale.y *= thickness;
+                else scale.y *= size;
+                if (thicknessAxis == "z") scale.z *= thickness;
+                else scale.z *= size;
+
+                if (Global.Debug3) Utils.Log("new scale {0}, {1}, {2}", scale.x, scale.y, scale.z);
+
+                _transforms[i].localScale = scale;
+                _transforms[i].hasChanged = true;
+            }
+            part.mass = baseMass * size * size * thickness;
         }
 
-        [KSPEvent(name = "Decrease Size Event", guiName = "Decrease Size", guiActive = false, guiActiveEditor = true)]
-        public void decreaseSizeEvent()
+        public override void OnSave(ConfigNode node)
         {
-            size -= sizeStep;
-            if (size < sizeMin) size = sizeMin;
-            rescale();
+            saveConfig(node);
         }
 
-        [KSPEvent(name = "Increase Thickness Event", guiName = "Increase Thickness", guiActive = false, guiActiveEditor = true)]
-        public void increaseThicknessEvent()
+        private void saveConfig(ConfigNode node)
         {
-            thickness += thicknessStep;
-            if (thickness > thicknessMax) thickness = thicknessMax;
-            rescale();
+            if (_transformNames != null)
+            {
+                node.AddValue("transforms", _transformNames.Count);
+                for (int i = 0; i < _transformNames.Count; ++i)
+                    node.AddValue("transform" + i.ToString(), _transformNames[i]);
+            }
         }
 
-        [KSPEvent(name = "Decrease Thickness Event", guiName = "Decrease Thickness", guiActive = false, guiActiveEditor = true)]
-        public void decreaseThicknessEvent()
+        public override void OnLoad(ConfigNode node)
         {
-            thickness -= thicknessStep;
-            if (thickness < thicknessMin) thickness = thicknessMin;
-            rescale();
+            base.OnLoad(node);
+            loadConfig(node);
         }
 
-        private void rescale()
+        private void loadConfig(ConfigNode node)
         {
-            if (_transform == null) return;
+            if (node.HasValue("transforms"))
+            {
+                int trans = int.Parse(node.GetValue("transforms"));
+                _transformNames = new List<string>(trans);
 
-            Vector3 scale = new Vector3(size * _originalScale.x, size * _originalScale.y, size * thickness * _originalScale.z);
-            _transform.localScale = scale;
-            _transform.hasChanged = true;
-            part.mass = baseMass * scale.x * scale.y * scale.z;
+                for (int i = 0; i < trans; ++i)
+                    if (node.HasValue("transform" + i.ToString())) _transformNames.Add(node.GetValue("transform" + i.ToString()));
+            }
         }
 
         public override void OnStart(StartState state)
@@ -92,13 +99,45 @@ namespace ASP
                 baseMass = part.mass;
             }
 
-            AvailablePart a = PartLoader.getPartInfoByName(this.part.partInfo.name);
-            Transform t = a.partPrefab.FindModelTransform(transformName);
-            _originalScale = new Vector3(t.localScale.x, t.localScale.y, t.localScale.z);
+            if (_transformNames == null)
+            {
+                ConfigNode node = new ConfigNode();
+                (part.partInfo.partPrefab.Modules["ASPFlatPlateScale"] as ASPFlatPlateScale).saveConfig(node);
+                loadConfig(node);
+            }
 
-            _transform = this.part.FindModelTransform(transformName);
+            AvailablePart apart = PartLoader.getPartInfoByName(this.part.partInfo.name);
+            _transforms = new List<Transform>(_transformNames.Count);
+            _originalScales = new List<Vector3>(_transformNames.Count);
+            for (int i = 0; i < _transformNames.Count; ++i)
+            {
+                if (Global.Debug3) Utils.Log("Ädding transform {0}", _transformNames[i]);
 
-            rescale();
+                Transform t = apart.partPrefab.FindModelTransform(_transformNames[i]);
+                if (t == null)
+                {
+                    Utils.LogError("Failed to add transform {0}", _transformNames[i]);
+                    continue;
+                }
+
+                _transforms.Add(this.part.FindModelTransform(_transformNames[i]));
+                Vector3 s = new Vector3(t.localScale.x, t.localScale.y, t.localScale.z);
+                _originalScales.Add(s);
+            }
+
+            UI_ScaleEdit scaleEdit = (UI_ScaleEdit)Fields["size"].uiControlEditor;
+            scaleEdit.intervals = _SizeIntervals;
+            scaleEdit.incrementSlide = _SizeIncrements;
+            scaleEdit.sigFigs = 3;
+            scaleEdit.onFieldChanged = OnScaleChanged;
+
+            scaleEdit = (UI_ScaleEdit)Fields["thickness"].uiControlEditor;
+            scaleEdit.intervals = _ThicknessIntervals;
+            scaleEdit.incrementSlide = _ThicknessIncrements;
+            scaleEdit.sigFigs = 3;
+            scaleEdit.onFieldChanged = OnScaleChanged;
+
+            OnScaleChanged(null, null);
         }
     }
 }
