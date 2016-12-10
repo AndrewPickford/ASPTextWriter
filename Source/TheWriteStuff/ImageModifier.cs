@@ -34,6 +34,11 @@ namespace ASP
             _type = Type.INVALID;
         }
 
+        public Type type()
+        {
+            return _type;
+        }
+
         public static ImageModifier CreateFromConfig(ConfigNode node)
         {
             ImageModifier imageModifier = null;
@@ -81,11 +86,7 @@ namespace ASP
             }
 
             if (imageModifier == null)  Utils.LogError("unknown image modifier");
-            else
-            {
-                imageModifier._type = type;
-                imageModifier.load(node);
-            }
+            else imageModifier.load(node);
 
             return imageModifier;
         }
