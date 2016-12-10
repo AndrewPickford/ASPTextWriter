@@ -74,7 +74,7 @@ namespace ASP
                 }
                 catch
                 {
-                    Utils.LogError("Failled to parse imagemodifier: {0}", c);
+                    Utils.LogError("Failed to parse imagemodifier {0}", c);
                     ok = false;
                 }
                 ++c;
@@ -85,17 +85,31 @@ namespace ASP
 
         public void drawOnImage(ref Image image, BoundingBox boundingBox)
         {
-            foreach (ImageModifier im in modifiers)
+            for (int i = 0; i < modifiers.Count; ++i)
             {
-                im.drawOnImage(ref image, boundingBox);
+                try
+                {
+                    modifiers[i].drawOnImage(ref image, boundingBox);
+                }
+                catch
+                {
+                    Utils.LogError("Failed to draw image modifer {0}: {1}", i, modifiers[i].type());
+                }
             }
         }
 
         public void drawOnImage(ref Image image, ref Image normalMapImage, BoundingBox boundingBox)
         {
-            foreach (ImageModifier im in modifiers)
+            for (int i = 0; i < modifiers.Count; ++i)
             {
-                im.drawOnImage(ref image, ref normalMapImage, boundingBox);
+                try
+                {
+                    modifiers[i].drawOnImage(ref image, ref normalMapImage, boundingBox);
+                }
+                catch
+                {
+                    Utils.LogError("Failed to draw image modifer {0}: {1}", i, modifiers[i].type());
+                }
             }
         }
 
