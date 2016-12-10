@@ -44,6 +44,7 @@ namespace ASP
         {
             IntVector2 extent = new IntVector2(0, size);
             int x = 0;
+            int ly = 0;
             bool escapeMode = false;
 
             foreach (char c in text)
@@ -60,6 +61,7 @@ namespace ASP
                         if (extent.x < x) extent.x = x;
                         extent.y += size;
                         x = 0;
+                        ly = 0;
                         break;
                     }
                     if (c != '\\') escapeMode = false;
@@ -72,9 +74,12 @@ namespace ASP
                         if (characterMap.TryGetValue('?', out charMap) == false) continue;
                     }
                     x += (int)charMap.cw;
+                    int a = size + (int)charMap.vy + (int)charMap.vh;
+                    if (a < ly) ly = a;
                 }
             }
             if (extent.x < x) extent.x = x;
+            extent.y -= ly;
 
             return extent;
         }
