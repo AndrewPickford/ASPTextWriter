@@ -25,20 +25,20 @@ namespace ASP
                 _type = Type.RECTANGLE;
 
                 _end = new DoubleVector2();
-                _end.x = 30d;
-                _end.y = 0d;
-                _height = 10d;
+                _end.x = 30;
+                _end.y = 0;
+                _height = 10;
                 _rounding = 0;
-                _scale = 1d;
+                _scale = 1;
             }
 
             public override void load(ConfigNode node)
             {
-                _end.x = 0d;
-                _end.y = 0d;
-                _height = 0d;
+                _end.x = 0;
+                _end.y = 0;
+                _height = 0;
                 _rounding = 0;
-                _scale = 1d;
+                _scale = 1;
 
                 base.load(node);
                 if (node.HasValue("end_x")) _end.x = double.Parse(node.GetValue("end_x"));
@@ -73,8 +73,8 @@ namespace ASP
                 }
 
                 vertices.Add(new Vertex(0, 0, _rounding));
-                vertices.Add(new Vertex(-2 * dx, 2 * dy, _rounding));
-                vertices.Add(new Vertex(_end.x - 2 * dx, _end.y + 2 * dy, _rounding));
+                vertices.Add(new Vertex(-dx, dy, _rounding));
+                vertices.Add(new Vertex(_end.x - dx, _end.y + dy, _rounding));
                 vertices.Add(new Vertex(_end.x, _end.y, _rounding));
 
                 Polygon polygon = new Polygon();
