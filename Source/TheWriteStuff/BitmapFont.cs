@@ -62,7 +62,6 @@ namespace ASP
                         extent.y += size;
                         x = 0;
                         ly = 0;
-                        break;
                     }
                     if (c != '\\') escapeMode = false;
                 }
