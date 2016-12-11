@@ -33,15 +33,22 @@ namespace ASP
 
         public void addIntersectsAlongY(double y, ref List<double> intersects)
         {
-            double bottomPart = 2d * (_start.y + _end.y - 2 * _corner.y);
-            double sRoot = 2d * (_corner.y - _start.y);
+            double cy = _corner.y;
+            double bottomPart = 2d * (_start.y + _end.y - 2 * cy);
+            if (bottomPart == 0)
+            {
+                cy += 0.001;
+                bottomPart = 2d * (_start.y + _end.y - 2 * cy);
+            }
+
+            double sRoot = 2d * (cy - _start.y);
             sRoot *= sRoot;
             sRoot -= 2d * bottomPart * (_start.y - y);
 
             if (sRoot >= 0d)
             {
                 sRoot = Math.Sqrt(sRoot);
-                double topPart = 2d * (_start.y - _corner.y);
+                double topPart = 2d * (_start.y - cy);
                 for (int i = -1; i <= 1; i += 2)
                 {
                     double f = (topPart + (i * sRoot)) / bottomPart;
