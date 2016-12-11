@@ -40,7 +40,7 @@ namespace ASP
             UnityEngine.Object.Destroy(texture);
         }
 
-        public IntVector2 textExtent(string text)
+        public IntVector2 textExtent(string text, int extraLS)
         {
             IntVector2 extent = new IntVector2(0, size);
             int x = 0;
@@ -59,7 +59,7 @@ namespace ASP
                     if (c == 'n')
                     {
                         if (extent.x < x) extent.x = x;
-                        extent.y += size;
+                        extent.y += size + extraLS;
                         x = 0;
                         ly = 0;
                     }

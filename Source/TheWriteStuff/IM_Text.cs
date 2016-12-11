@@ -13,6 +13,7 @@ namespace ASP
             protected string _text;
             protected string _fontName;
             protected int _fontSize;
+            protected int _extraLineSpacing;
 
             protected Text() :
                 base()
@@ -20,6 +21,7 @@ namespace ASP
                 _text = string.Empty;
                 _fontName = "";
                 _fontSize = 0;
+                _extraLineSpacing = 0;
             }
 
             public override void load(ConfigNode node)
@@ -33,6 +35,7 @@ namespace ASP
                 if (node.HasValue("text")) _text = node.GetValue("text");
                 if (node.HasValue("fontName")) _fontName = node.GetValue("fontName");
                 if (node.HasValue("fontSize")) _fontSize = int.Parse(node.GetValue("fontSize"));
+                if (node.HasValue("extraLineSpacing")) _extraLineSpacing = int.Parse(node.GetValue("extraLineSpacing"));
             }
 
             public override void save(ConfigNode node)
@@ -41,6 +44,7 @@ namespace ASP
                 node.AddValue("text", _text);
                 node.AddValue("fontName", _fontName);
                 node.AddValue("fontSize", _fontSize);
+                node.AddValue("extraLineSpacing", _extraLineSpacing);
             }
 
             public void copyFrom(Text text)
@@ -49,6 +53,7 @@ namespace ASP
                 _text = text._text;
                 _fontName = text._fontName;
                 _fontSize = text._fontSize;
+                _extraLineSpacing = text._extraLineSpacing;
             }
 
 

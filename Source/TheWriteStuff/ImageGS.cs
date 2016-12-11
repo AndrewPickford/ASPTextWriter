@@ -296,7 +296,7 @@ namespace ASP
             overlay(charMap.gsImage, cPos);
         }
 
-        public void drawText(string text, BitmapFont font, IntVector2 position)
+        public void drawText(string text, BitmapFont font, IntVector2 position, int extraLS)
         {
             if (Global.Debug2) Utils.Log("text {0}, x {1}, y {2}", text, position.x, position.y);
 
@@ -314,7 +314,7 @@ namespace ASP
                 {
                     if (c == 'n')
                     {
-                        charPos.y -= font.size;
+                        charPos.y -= (font.size + extraLS);
                         charPos.x = position.x;
                     }
                     if (c != '\\') escapeMode = false;

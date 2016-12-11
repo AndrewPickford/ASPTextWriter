@@ -41,7 +41,7 @@ namespace ASP
 
                 if (Global.Debug3) Utils.Log("font: {0}, size: {1}, text: {2}", font.name, font.size, _text);
 
-                IntVector2 s = font.textExtent(_text);
+                IntVector2 s = font.textExtent(_text, _extraLineSpacing);
                 s.x += 4;
                 s.y += 4;
                 _gsImage = new ImageGS(s.x, s.y);
@@ -50,7 +50,7 @@ namespace ASP
                 _origin.y = s.y - 2 - font.size;
 
                 if (Global.Debug3) Utils.Log("image ({0}, {1}), pos ({2}, {3})", s.x, s.y, _origin.x, _origin.y);
-                _gsImage.drawText(_text, font, _origin);
+                _gsImage.drawText(_text, font, _origin, _extraLineSpacing);
             }
 
             public override ImageModifier clone()
@@ -91,6 +91,7 @@ namespace ASP
                 private string[] _fontSizeGrid = null;
                 private int _fontSizeSelection = 0;
                 private Vector2 _fontScrollPos;
+                private ValueSelector<int, IntField> _extraLineSpacingSelector;
 
                 public BitmapTextGui(IM.BitmapText bitmapText) :
                     base(bitmapText)
@@ -130,7 +131,6 @@ namespace ASP
                     if (oldFontSizeSelection != _fontSizeSelection) newFontSelection = true;
 
                     GUILayout.Space(5);
-
                     GUILayout.Label("Font", gui.smallHeader);
 
                     int oldSelectedFont = _selectedFont;
@@ -152,6 +152,11 @@ namespace ASP
                         }
                     }
 
+                    GUILayout.Space(5);
+                    GUILayout.Label("Options", gui.smallHeader);
+
+                    _extraLineSpacingSelector.draw();
+
                     GUILayout.EndScrollView();
 
                     GUI.contentColor = contentColor;
@@ -162,6 +167,8 @@ namespace ASP
                         _imBitmapText._fontName = BitmapFontCache.Instance.fontInfo[_selectedFont].name;
                         _imBitmapText._fontSize = BitmapFontCache.Instance.fontInfo[_selectedFont].sizes[_fontSizeSelection];
                     }
+
+                    checkChanged(ref _imBitmapText._extraLineSpacing, _extraLineSpacingSelector.value(), gui);
                 }
 
                 public override void initialise(TextureEditGUI gui)
@@ -173,6 +180,8 @@ namespace ASP
 
                     _fontSizeSelection = BitmapFontCache.Instance.getFontSizeIndex(_imBitmapText._fontName, _imBitmapText._fontSize);
                     if (_fontSizeSelection < 0) _fontSizeSelection = 0;
+
+                    _extraLineSpacingSelector = new ValueSelector<int, IntField>(_imBitmapText._extraLineSpacing, -99, 99, 1, "Extra Line Spacing", Color.white);
                 }
             }
         }
