@@ -30,6 +30,8 @@ namespace ASP
                 _height = 10;
                 _rounding = 0;
                 _scale = 1;
+                _overlayRotates = false;
+                _overlayMirrors = false;
             }
 
             public override void load(ConfigNode node)
@@ -80,6 +82,9 @@ namespace ASP
                 Polygon polygon = new Polygon();
                 polygon.addVertices(vertices);
                 polygon.scale(_scale);
+                polygon.rotate(_rotation);
+                if (_mirrorX) polygon.mirrorX();
+                if (_mirrorY) polygon.mirrorY();
                 polygon.close();
 
                 if (Global.Debug3) Utils.Log("drawing rectangle ({0}, {1}), ({2}, {3})", polygon.vertices[0].x, polygon.vertices[0].y, polygon.vertices[2].x, polygon.vertices[2].y);

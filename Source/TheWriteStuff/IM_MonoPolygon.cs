@@ -19,6 +19,7 @@ namespace ASP
             {
                 _scale = 1.0;
                 _overlayRotates = false;
+                _overlayMirrors = false;
             }
 
             public override void load(ConfigNode node)

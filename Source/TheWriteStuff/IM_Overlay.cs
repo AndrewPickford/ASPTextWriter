@@ -24,6 +24,7 @@ namespace ASP
             protected int _rotation = 0;
             protected Image _image;
             protected bool _overlayRotates = true;
+            protected bool _overlayMirrors = true;
             private IntVector2 _overlayPosition;
 
             public abstract void drawImage();
@@ -66,7 +67,7 @@ namespace ASP
                 if (node.HasValue("x")) _position.x = int.Parse(node.GetValue("x"));
                 if (node.HasValue("y")) _position.y = int.Parse(node.GetValue("y"));
                 if (node.HasValue("mirrorX")) _mirrorX = bool.Parse(node.GetValue("mirrorX"));
-                if (node.HasValue("mirrorY")) _mirrorX = bool.Parse(node.GetValue("mirrorY"));
+                if (node.HasValue("mirrorY")) _mirrorY = bool.Parse(node.GetValue("mirrorY"));
                 if (node.HasValue("textureAlpha")) _textureAlpha = byte.Parse(node.GetValue("textureAlpha"));
                 if (node.HasValue("alphaOption")) _alphaOption = (AlphaOption)ConfigNode.ParseEnum(typeof(AlphaOption), node.GetValue("alphaOption"));
                 if (node.HasValue("normalScale")) _normalScale = double.Parse(node.GetValue("normalScale"));
@@ -116,9 +117,9 @@ namespace ASP
 
                 drawImage();
 
-                if (_overlayRotates)
+                if (_overlayRotates) _image.rotate(_rotation, ref _origin);
+                if (_overlayMirrors)
                 {
-                    _image.rotate(_rotation, ref _origin);
                     if (_mirrorX) _image.flipHorizontally();
                     if (_mirrorY) _image.flipVertically();
                 }

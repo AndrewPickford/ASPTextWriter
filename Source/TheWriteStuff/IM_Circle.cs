@@ -22,6 +22,7 @@ namespace ASP
                 _type = Type.CIRCLE;
                 _radius = 10f;
                 _overlayRotates = false;
+                _overlayMirrors = false;
             }
 
             public void setRadius(double radius)
