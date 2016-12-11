@@ -335,9 +335,11 @@ namespace ASP
         {
             if (_remakePreview) remakePreview();
 
-            if (_previewTexture.width > 520 || _previewTexture.height > 520)
+            if (_previewTexture.width > 450 || _previewTexture.height > 400)
             {
-                _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(550), GUILayout.MinHeight(550));
+                int mw = (_previewTexture.width > 450 ? 450 : _previewTexture.width) + 30;
+                int mh = (_previewTexture.height > 400 ? 400 : _previewTexture.height) + 30;
+                _previewScrollPos = GUILayout.BeginScrollView(_previewScrollPos, GUI.skin.box, GUILayout.MinWidth(mw), GUILayout.MinHeight(mh));
                 GUILayout.Box(_previewTexture, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
                 GUILayout.EndScrollView();
             }
