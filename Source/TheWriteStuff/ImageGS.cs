@@ -215,6 +215,8 @@ namespace ASP
         public void drawPolygon(Polygon polygon)
         {
             int subPixels = 16;
+            int x0 = 0;
+            int x1 = 0;
             int[] subPixelMap = new int[width];
             int minY = (int)polygon.min.y;
             int maxY = (int)polygon.max.y;
@@ -238,15 +240,28 @@ namespace ASP
 
                     for (int i = 0; i < segments.Count; i += 2)
                     {
-                        int x0 = (int)(segments[i] * subPixels);
-                        int x1 = (int)(segments[i + 1] * subPixels);
+                        x0 = (int)(segments[i]) + 1;
+                        x1 = (int)(segments[i + 1]) - 1;
                         if (x0 < 0) x0 = 0;
-                        if (x1 > (width * subPixels - 1)) x1 = width * subPixels - 1;
-
-                        for (int k = x0; k < x1; ++k)
+                        if (x1 > (width - 1)) x1 = width - 1;
+                        if (x0 < x1)
                         {
-                            int a = k / subPixels;
-                            ++subPixelMap[a];
+                            for (int k = x0; k <= x1; ++k)
+                                subPixelMap[k] += subPixels;
+                        }
+
+                        x0 = (int)(segments[i]);
+                        if (x0 >= 0 && x0 < width)
+                        {
+                            int a = subPixels - (((int)(segments[i] * subPixels)) - x0 * subPixels);
+                            subPixelMap[x0] += a;
+                        }
+
+                        x1 = (int)(segments[i + 1]);
+                        if (x1 >= 0 && x1 < width)
+                        {
+                            int a = ((int)(segments[i + 1] * subPixels)) - x1 * subPixels;
+                            subPixelMap[x1] += a;
                         }
                     }
                     if (minX > (int)segments[0]) minX = (int)segments[0];
