@@ -131,7 +131,9 @@ namespace ASP
 
         public void OnDestroy()
         {
-            EditorLogic.fetch.Unlock(_lockText);
+            if (Global.Debug3) Utils.Log("start");
+
+            if (HighLogic.LoadedSceneIsEditor) EditorLogic.fetch.Unlock(_lockText);
 
             if (_textureEdit != null) _textureEdit.finalisePainting();
             if (_previewTexture != null) Destroy(_previewTexture);

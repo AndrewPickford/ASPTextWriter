@@ -113,6 +113,8 @@ namespace ASP
 
         public void finalisePainting()
         {
+            if (Global.Debug3) Utils.Log("start");
+
             if (_usedPaint == true && _startState != StartState.Editor)
             {
                 if (_painter != null)
@@ -127,7 +129,7 @@ namespace ASP
 
         public void writeTexture()
         {
-            if (Global.Debug2) Utils.Log("writeTexture start");
+            if (Global.Debug3) Utils.Log("start");
 
             Image textureImage = new Image();
             Image normalMapImage = new Image();
