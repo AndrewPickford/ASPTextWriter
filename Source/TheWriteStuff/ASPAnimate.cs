@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ASP
 {
-    public class TWSAnimate : ModuleAnimateGeneric
+    public class ASPAnimate : ModuleAnimateGeneric
     {
         [KSPEvent(name = "RaiseMaxHeightQuick", guiName = "Raise Max Height ++", active = true, guiActive = false, guiActiveEditor = false, guiActiveUnfocused = true, externalToEVAOnly = true)]
         public void RaiseMaxHeightQuick()

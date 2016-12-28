@@ -52,6 +52,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ASPAnimate.cs" />
+    <Compile Include="ASPEvaRename.cs" />
     <Compile Include="ASPFlatPlateScale.cs" />
     <Compile Include="ASPTextureEdit.cs" />
     <Compile Include="BitmapDecal.cs" />

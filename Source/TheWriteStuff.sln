@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheWriteStuff", "TheWriteSt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWSPainter", "TWSPainter\TWSPainter.csproj", "{BBA46433-C09B-4819-A207-2A4C2BEC8828}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWSAnimate", "TWSAnimate\TWSAnimate.csproj", "{40B9E43C-FE10-49B6-BA58-864A1E48028D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{BBA46433-C09B-4819-A207-2A4C2BEC8828}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBA46433-C09B-4819-A207-2A4C2BEC8828}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBA46433-C09B-4819-A207-2A4C2BEC8828}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40B9E43C-FE10-49B6-BA58-864A1E48028D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40B9E43C-FE10-49B6-BA58-864A1E48028D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40B9E43C-FE10-49B6-BA58-864A1E48028D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40B9E43C-FE10-49B6-BA58-864A1E48028D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
