@@ -1,3 +1,6 @@
+1.0.0
+ * first release version
+
 0.10.0
  * fix editor part duplication
  * add 128pt character fonts
