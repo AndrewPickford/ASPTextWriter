@@ -1,3 +1,7 @@
+1.0.1
+ * fix typo in plaque parts
+ * add workaround for node.getValue auto converting \n to newline
+
 1.0.0
  * first release version
 
