@@ -32,7 +32,7 @@ namespace ASP
 
                 base.load(node);
 
-                if (node.HasValue("text")) _text = node.GetValue("text");
+                if (node.HasValue("text")) _text = node.GetValue("text").Replace("\n", "\\n");
                 if (node.HasValue("fontName")) _fontName = node.GetValue("fontName");
                 if (node.HasValue("fontSize")) _fontSize = int.Parse(node.GetValue("fontSize"));
                 if (node.HasValue("extraLineSpacing")) _extraLineSpacing = int.Parse(node.GetValue("extraLineSpacing"));
