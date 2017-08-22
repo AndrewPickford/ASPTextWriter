@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Globalization;
 using System.Reflection;
 using UnityEngine;
 
@@ -26,6 +27,26 @@ namespace ASP
             }
 
             return splitText;
+        }
+
+        public static string EncodeStringHex(string text)
+        {
+            string result = string.Empty;
+            foreach (char c in text)
+            {
+                result += Convert.ToByte(c).ToString("x2");
+            }
+            return result;
+        }
+
+        public static string DecodeStringHex(string text)
+        {
+            string result = string.Empty;
+            for (int i = 0; i < text.Length; i += 2)
+            {
+                result += (char) int.Parse(text.Substring(i, 2), NumberStyles.HexNumber);
+            }
+            return result;
         }
 
         public static string CommaSeparatedList(List<string> list)

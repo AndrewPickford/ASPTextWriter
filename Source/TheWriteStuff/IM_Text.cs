@@ -10,6 +10,8 @@ namespace ASP
     {
         public abstract class Text : MonoOverlay
         {
+            public enum TextEncoding { ASCII, ASCII_HEX };
+
             protected string _text;
             protected string _fontName;
             protected int _fontSize;
@@ -29,10 +31,16 @@ namespace ASP
                 _text = string.Empty;
                 _fontName = "";
                 _fontSize = 0;
+                TextEncoding encoding = TextEncoding.ASCII;
 
                 base.load(node);
 
-                if (node.HasValue("text")) _text = node.GetValue("text").Replace("\n", "\\n");
+                if (node.HasValue("encoding")) encoding = (TextEncoding)ConfigNode.ParseEnum(typeof(TextEncoding), node.GetValue("encoding"));
+                if (node.HasValue("text"))
+                {
+                    if (encoding == TextEncoding.ASCII_HEX) _text = Utils.DecodeStringHex(node.GetValue("text"));
+                    else _text = node.GetValue("text");
+                }
                 if (node.HasValue("fontName")) _fontName = node.GetValue("fontName");
                 if (node.HasValue("fontSize")) _fontSize = int.Parse(node.GetValue("fontSize"));
                 if (node.HasValue("extraLineSpacing")) _extraLineSpacing = int.Parse(node.GetValue("extraLineSpacing"));
@@ -41,7 +49,17 @@ namespace ASP
             public override void save(ConfigNode node)
             {
                 base.save(node);
-                node.AddValue("text", _text);
+
+                if (_text.Contains('\\') || _text[0] == ' ')
+                {
+                    node.AddValue("encoding", ConfigNode.WriteEnum(TextEncoding.ASCII_HEX));
+                    node.AddValue("text", Utils.EncodeStringHex(_text));
+                }
+                else
+                {
+                    node.AddValue("encoding", ConfigNode.WriteEnum(TextEncoding.ASCII));
+                    node.AddValue("text", _text);
+                }
                 node.AddValue("fontName", _fontName);
                 node.AddValue("fontSize", _fontSize);
                 node.AddValue("extraLineSpacing", _extraLineSpacing);
